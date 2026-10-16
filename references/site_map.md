@@ -1,6 +1,6 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
+> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -8,7 +8,8 @@ Faz 3 state: design tokens, global styles, theme (inline script + `src/lib/theme
 `BaseLayout`, layout and UI components, `/404.html` and the monogram favicon exist (Faz 1);
 `/` is the profile page built from `src/data/profile.ts` with the profile components (Faz 2);
 the `projects` collection, `/projeler/`, `/projeler/{slug}/`, `ProjectLayout` and the project
-components exist (Faz 3). SEO is planned.
+components exist (Faz 3); `Seo` (meta, OG, Twitter, JSON-LD), sitemap, robots.txt, share image,
+touch icon, meta CSP and `scripts/check-dist.mjs` (Faz 4).
 
 ## Site Overview (`astro.config.mjs` ✅)
 
@@ -19,18 +20,21 @@ components exist (Faz 3). SEO is planned.
 | `base` | not set (user site served at root) |
 | `trailingSlash` | `'always'` |
 | `build.format` | `'directory'` |
-| Integrations | none yet — `@astrojs/sitemap` [PLANNED — Faz 4]; `i18n` [PLANNED — Faz 6] |
+| Integrations | `@astrojs/sitemap` ✅ (filter drops `/404`; ADR-012); `i18n` [PLANNED — Faz 6] |
+| `security.csp` | ✅ meta CSP: `default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'` + Astro-generated `script-src`/`style-src` sha256 hashes (ADR-011) |
+| `markdown.syntaxHighlight` | `false` — Shiki's inline styles break the CSP (`'prism'` if code blocks are needed) |
 | Language | `tr-TR`; `/en/` after v1 (S4) |
 
 ## Routes
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name) | `profile`, `profilePage` (`src/data/profile.ts`); `getCollection('projects')` filtered by `featured` + `isPublished`, `sortProjects`; `projectsPage` labels; `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 8 (`#projeler`: ProjectCard h3 grid + "Tüm projeler" link) → footnote ("Son güncelleme" `<time>`); hero actions: `href` → internal link, `kind` → URL from `profile.links` (external) |
+| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name, `jsonLd` = `profilePageJsonLd`) | `profile`, `profilePage` (`src/data/profile.ts`); `getCollection('projects')` filtered by `featured` + `isPublished`, `sortProjects`; `projectsPage` labels; `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 8 (`#projeler`: ProjectCard h3 grid + "Tüm projeler" link) → footnote ("Son güncelleme" `<time>`); hero actions: `href` → internal link, `kind` → URL from `profile.links` (external) |
 | `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout (title/description from `projectsPage.list`) | `getCollection('projects', isPublished)`, `sortProjects`, `groupByKind` | ✅ h1 + intro + auto-fit card grid (`minmax(min(100%, 18rem), 1fr)` — one card spans the width); with ≥ 2 kinds: Section per kind (`id` = kind, h2) and h3 cards, otherwise h2 cards |
-| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` (published, sorted; `adjacentProjects` → prev/next props) + `render()`; meta items built with `formatPeriod` + `statusLabels`; v1 slug: `lockbox-mobile` | ✅ |
+| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` (published, sorted; `adjacentProjects` → prev/next props) + `render()`; meta items built with `formatPeriod` + `statusLabels`; `projectJsonLd`; `ogImage` from the cover (`getImage`, 1200 px JPEG) or the site default; v1 slug: `lockbox-mobile` | ✅ |
 | `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at" |
-| `/sitemap-index.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | [PLANNED — faz-4 §2 task 4] |
+| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 3 URLs (`/`, `/projeler/`, `/projeler/lockbox-mobile/`) |
+| `/robots.txt` | `public/robots.txt` | — | static | ✅ `User-agent: *` `Allow: /` (AI crawlers included — lead decision) + `Sitemap:` line |
 | `/en/`, `/en/projects/`, `/en/projects/{slug}/` | i18n routes | — | `profile.en.ts`, English entries | [PLANNED — faz-6 §2.1] |
 
 Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
@@ -45,21 +49,24 @@ only on `/projeler/` itself) · GitHub · LinkedIn · theme toggle.
 
 ### BaseLayout.astro ✅ (`src/layouts/BaseLayout.astro`)
 - Props: `title?` (page name; omitted on `/` → title is just the site name),
-  `description?` (default `site.description`), `noindex?` (adds `robots: noindex`, drops canonical).
-- Head: charset, viewport, `<title>` `"{title} · Ulaşcan Ertürk"`, description, canonical
-  (`Astro.url.pathname` on `Astro.site`), favicon (`/favicon.svg`), `color-scheme: light dark`,
-  inline theme script (`themeScript` from `src/lib/theme.ts`, before the stylesheet → no FOUC).
-  `Seo` component replaces the meta block in Faz 4.
+  `description?` (default `site.description`), `noindex?` (adds `robots: noindex`, drops canonical
+  and `og:url`), `ogType?` (`website` default, `article` from ProjectLayout), `image?`
+  (`{ src, width, height, alt }`, default `site.ogImage`), `jsonLd?`.
+- Head: charset, viewport, `Seo` (title via `pageTitle`, absolute canonical/image URLs via
+  `absoluteUrl` on `Astro.site`), `color-scheme: light dark`, favicon (`/favicon.svg`),
+  `apple-touch-icon` (`/apple-touch-icon.png`), inline theme script (`themeScript`, before the
+  stylesheet → no FOUC). Astro appends the CSP `<meta>` and the styles at the end of `<head>`.
 - Body: SkipLink → SiteHeader → `<main id="icerik" tabindex="-1">` (slot) → SiteFooter.
 - Imports `src/styles/global.css`; main width `min(100% - 2rem, var(--container))`, `p` max `--measure`.
 
 ### ProjectLayout.astro ✅ (`src/layouts/ProjectLayout.astro`)
 - Props (structural — no `astro:content` import): `title`, `summary` (→ BaseLayout `description`),
   `meta: { term, value }[]`, `tech[]`, `cover?: { src: ImageMetadata; alt }`, `disclaimer?`,
-  `links: { label, url }[]`, `previous?` / `next?: { title, href }`; default slot = rendered Markdown.
+  `links: { label, url }[]`, `previous?` / `next?: { title, href }`, `ogImage?`, `jsonLd?`
+  (passed to BaseLayout with `ogType="article"`); default slot = rendered Markdown.
 - Reads labels from `projectsPage` (like BaseLayout reads `site`).
 - Structure: `<article>` → `<header>` (only `<h1>`, summary, ProjectMeta, tech Tag list with
-  `aria-label`) → cover (`astro:assets` `<Image>`, eager) → content (body `##` = h2) → disclaimer
+  `aria-label`) → cover (`astro:assets` `<Picture>` AVIF/WebP, widths 480/768/1536 capped at the source, `sizes` 48rem, eager + `fetchpriority=high`) → content (body `##` = h2) → disclaimer
   Callout → ProjectLinks; then `<nav aria-label="Proje gezinmesi">` with `rel="prev"` / `rel="next"`
   links (label + title, only when they exist) and "Tüm projeler" (`/projeler/`).
 
@@ -87,7 +94,7 @@ only on `/projeler/` itself) · GitHub · LinkedIn · theme toggle.
 | ProjectCard | `src/components/projects/ProjectCard.astro` | `title`, `href`, `summary`, `statusLabel`, `tech[]`, `techLabel`, `level?: 2 \| 3` (default 2) | `/projeler/` (h2, h3 when grouped), `/` `#projeler` (h3) | ✅ `<article>` surface card; only the title is a link (44 px); muted status; summary; tech Tag `<ul aria-label>` |
 | ProjectMeta | `src/components/projects/ProjectMeta.astro` | `items: { term, value }[]` | ProjectLayout | ✅ `<dl>` (`dt` muted, `dd` bold), wraps; Rol · Dönem (only with `period`) · Durum |
 | ProjectLinks | `src/components/projects/ProjectLinks.astro` | `title`, `links: { label, url }[]` | ProjectLayout | ✅ renders nothing when empty; `<section aria-labelledby>` + h2 + ExternalLink list (44 px) |
-| Seo | `src/components/Seo.astro` [REVIEW NEEDED — folder not fixed in plans] | title, description, canonical, OG, Twitter, JSON-LD | BaseLayout | [PLANNED — faz-4 task 1] |
+| Seo | `src/components/layout/Seo.astro` | `title` (full), `description`, `canonical?`, `noindex?`, `siteName`, `locale`, `type`, `image: { url, width, height, alt }`, `jsonLd?` | BaseLayout | ✅ `<title>`, description, canonical, robots; `og:type/site_name/locale/title/description/url/image(+width/height/alt)`; `twitter:card` `summary_large_image` + title/description/image/alt; JSON-LD via `serializeJsonLd` |
 
 ## Styles and Theme ✅ (faz-1 §2 tasks 1–3, plans/02-icerik-ve-tasarim.md §5)
 
@@ -134,6 +141,7 @@ Any token change → recompute this table.
 | Theme script (`themeScript`, `src/lib/theme.ts`; inline in `<head>` via `set:html`) | all | apply stored/system theme before paint; toggle via delegated click on `[data-theme-toggle]`; sync `aria-pressed`; persist choice; follow system changes while nothing is stored | 996 B raw / 480 B gzip (test asserts ≤ 1024 B raw) |
 
 Budget: ≤ 10 KB gzip per page (Değişmez Kural 4); Faz 1 target ≤ 1 KB (theme script only).
+Measured by `npm run check:dist` (Faz 4): max 478 B gzip on every page. JSON-LD is a data block, not counted.
 The script is a static string (no interpolation) so a CSP hash stays valid (Faz 4, ADR-011).
 
 ## src/lib
@@ -144,6 +152,7 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
 | `sortProjects`, `isPublished`, `formatPeriod`, `adjacentProjects`, `groupByKind`, `PROJECT_KINDS`, `PROJECT_STATUSES` (`src/lib/projects.ts`) | `sortProjects<T>(list): T[]` — `order` asc (missing last) → status (active → completed → archived) → title (`localeCompare` `tr`), non-mutating; `isPublished(data, production): boolean` — drops `draft: true` only in production (pages pass `import.meta.env.PROD`); `formatPeriod({ start, end? }, ongoing)` → `2019 – 2021` · `2020` · `2019 – {ongoing}`; `adjacentProjects(sorted, id)` → `{ previous?, next? }`; `groupByKind(list)` → `{ kind, items }[]` in kind order, empty groups omitted. Enums shared with `src/content.config.ts` | `src/lib/projects.test.ts` (13 tests) | ✅ |
 | `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (4 tests) | ✅ |
+| `absoluteUrl`, `pageTitle`, `personId`, `personJsonLd`, `profilePageJsonLd`, `projectJsonLd`, `findForbiddenKeys`, `serializeJsonLd`, `FORBIDDEN_JSON_LD_KEYS` (`src/lib/seo.ts`) | `absoluteUrl(path, site: string \| URL)`; `pageTitle(title?, siteName, separator)`; JSON-LD builders (ProfilePage → Person, CreativeWork with `author` → `{home}#person`); `findForbiddenKeys(value)` deep scan; `serializeJsonLd` escapes `<` | `src/lib/seo.test.ts` (9 tests) | ✅ |
 | profile structural tests (data in `src/data/profile.ts`) | — | `src/lib/profile.test.ts` (11 tests: no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn (hero `kind` actions exist in `links`, `href` actions are internal paths), one degree = Uluslararası İlişkiler, Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda` and `projeler`, description ≤ 160, ISO `lastUpdated`) | ✅ |
 
 ## Public Assets
@@ -151,23 +160,26 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | File | Purpose | Phase |
 |---|---|---|
 | `public/favicon.svg` ✅ | "UE" monogram (same paths as `Monogram.astro`); colors switch with `prefers-color-scheme` inside the SVG | Faz 1 |
-| `public/apple-touch-icon.png` | 180×180 icon | Faz 4 |
-| `public/og/default.png` | 1200×630 share image | Faz 4 |
-| `public/robots.txt` | allow all + sitemap (AI crawler policy [REVIEW NEEDED]) | Faz 4 |
+| `public/apple-touch-icon.png` ✅ | 180×180 "UE" on accent square (source `scripts/images/apple-touch-icon.html`) | Faz 4 |
+| `public/og/default.png` ✅ | 1200×630 share image (source `scripts/images/og-default.html`, `npm run images`) | Faz 4 |
+| `public/robots.txt` ✅ | allow all (AI crawlers included — lead decision 2026-10-17) + `Sitemap:` | Faz 4 |
 
 ## Config
 
 | File | Key settings |
 |---|---|
-| `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base` |
+| `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base`; `integrations: [sitemap({ filter })]`; `markdown.syntaxHighlight: false`; `security.csp.directives` (ADR-011) |
+| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 4 URLs, 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
 | `tsconfig.json` ✅ | extends `astro/tsconfigs/strict`; `noUncheckedIndexedAccess`; `paths` `@/*` → `./src/*`; include `.astro/types.d.ts`, `**/*`; exclude `dist` |
 | `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
 | `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |
 | `.prettierignore` ✅ | generated output, lockfile, `plans/`, `references/`, `.claude/`, `.agents/`, root `*.md` |
 | `src/content.config.ts` ✅ | `projects` collection: `glob` loader (`astro/loaders`), zod schema (`astro/zod`) with `image()`; schema in `references/content_schema.md` |
-| `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts` |
+| `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts`, `scripts/**/*.test.ts` |
 | `.nvmrc` ✅ / `package.json#engines` ✅ | `24` / `node >=22.22.0` |
-| `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test |
+| `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test, `check:dist` (`node scripts/check-dist.mjs`), `lhci` (`lhci autorun`), `images` (`node scripts/render-images.mjs`) |
+| `scripts/check-dist.mjs` ✅ | dependency-free dist checks (see methodology → Testing); exports pure functions, tested in `scripts/check-dist.test.ts` (18 tests) |
+| `scripts/render-images.mjs` ✅ | local only: Chrome headless (`CHROME_PATH` or macOS default) + `magick -strip` → `public/og/default.png`, `public/apple-touch-icon.png` |
 | `.editorconfig` ✅ | utf-8, lf, 2 spaces, final newline; no trailing-space trim for `*.md` |
 | `.gitignore` | ✅ exists — node_modules, dist, .astro, coverage, .lighthouseci, logs, env files, keys, OS/editor noise, `.claude/settings.local.json` |
 
@@ -175,12 +187,14 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 
 | Workflow | Trigger | Permissions | Jobs | Actions |
 |---|---|---|---|---|
-| `.github/workflows/ci.yml` ✅ | `pull_request`; push with `branches-ignore: main` | `contents: read`; env `ASTRO_TELEMETRY_DISABLED=1`; concurrency per ref (cancel in progress) | `quality-gate`: npm ci → check → lint `--max-warnings 0` → format:check → test → build (check:dist [PLANNED — Faz 4]) | `actions/checkout@v7`, `actions/setup-node@v7` (`node-version-file: .nvmrc`, npm cache) |
+| `.github/workflows/ci.yml` ✅ | `pull_request`; push with `branches-ignore: main` | `contents: read`; env `ASTRO_TELEMETRY_DISABLED=1`; concurrency per ref (cancel in progress) | `quality-gate`: npm ci → check → lint `--max-warnings 0` → format:check → test → build → `check:dist` (Faz 4); Lighthouse CI not in CI (lead decision, ADR-013) | `actions/checkout@v7`, `actions/setup-node@v7` (`node-version-file: .nvmrc`, npm cache) |
 | `.github/workflows/deploy.yml` ✅ | `workflow_dispatch` only; push to `main` [PLANNED — Faz 5 task 2] | `contents: read`, `pages: write`, `id-token: write`; env `ASTRO_TELEMETRY_DISABLED=1`; `concurrency: pages` (no cancel) | `build` (withastro/action, Node 24) → `deploy` (environment `github-pages`) | `actions/checkout@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` |
 
 Workflow syntax not yet validated by actionlint (not installed); YAML parses. First real run in Faz 5.
 
 ## Known Issues / Gotchas
 
-- GitHub Pages cannot set HTTP headers; CSP only via `<meta>` (ADR-011, decided in Faz 4).
+- GitHub Pages cannot set HTTP headers; CSP only via `<meta>` (ADR-011 accepted): no `frame-ancestors`/reporting;
+  CSP is not applied in `astro dev` — verify with `build` + `preview`; never add `style="…"` attributes or
+  inline scripts without checking the built CSP (Astro hashes `<script>`/`<style>` it renders, not attributes).
 - Repository name must be exactly `ulascanerturk.github.io`, otherwise the site is served under `/{repo}/`.

@@ -1,12 +1,13 @@
 ---
-// Shared page shell (faz-1 §2 task 5). The Seo component replaces the meta
-// block in Faz 4.
+// Shared page shell (faz-1 §2 task 5); head metadata via Seo (faz-4 §2 task 1).
 import '@/styles/global.css';
 
+import Seo from '@/components/layout/Seo.astro';
 import SiteFooter from '@/components/layout/SiteFooter.astro';
 import SiteHeader from '@/components/layout/SiteHeader.astro';
 import SkipLink from '@/components/layout/SkipLink.astro';
 import { site } from '@/data/site';
+import { absoluteUrl, pageTitle, type JsonLd } from '@/lib/seo';
 import { themeScript } from '@/lib/theme';
 
 interface Props {
@@ -15,12 +16,24 @@ interface Props {
   description?: string;
   /** Excludes the page from search engines (e.g. 404); no canonical is emitted. */
   noindex?: boolean;
+  /** Open Graph type: `article` for project pages. */
+  ogType?: 'website' | 'article';
+  /** Share image (path or URL); defaults to `site.ogImage`. */
+  image?: { src: string; width: number; height: number; alt: string };
+  jsonLd?: JsonLd;
 }
 
-const { title, description = site.description, noindex = false } = Astro.props;
+const {
+  title,
+  description = site.description,
+  noindex = false,
+  ogType = 'website',
+  image = { ...site.ogImage, src: site.ogImage.path },
+  jsonLd,
+} = Astro.props;
 
-const pageTitle = title ? `${title}${site.titleSeparator}${site.name}` : site.name;
-const canonical = noindex ? undefined : new URL(Astro.url.pathname, Astro.site).href;
+const siteUrl = Astro.site ?? site.url;
+const canonical = noindex ? undefined : absoluteUrl(Astro.url.pathname, siteUrl);
 const mainId = 'icerik';
 ---
 
@@ -29,12 +42,20 @@ const mainId = 'icerik';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    {canonical && <link rel="canonical" href={canonical} />}
-    {noindex && <meta name="robots" content="noindex" />}
+    <Seo
+      title={pageTitle(title, site.name, site.titleSeparator)}
+      description={description}
+      canonical={canonical}
+      noindex={noindex}
+      siteName={site.name}
+      locale={site.locale}
+      type={ogType}
+      image={{ ...image, url: absoluteUrl(image.src, siteUrl) }}
+      jsonLd={jsonLd}
+    />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <script is:inline set:html={themeScript} />
   </head>
   <body>

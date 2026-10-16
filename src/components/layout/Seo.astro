@@ -1,0 +1,58 @@
+---
+// Head metadata (faz-4 §2 task 1): title, description, canonical, robots,
+// Open Graph, Twitter Card and JSON-LD. BaseLayout resolves every value
+// (absolute URLs included) and passes it in as props.
+import { serializeJsonLd, type JsonLd } from '@/lib/seo';
+
+interface Props {
+  /** Full document title. */
+  title: string;
+  description: string;
+  /** Absolute canonical URL; omitted on noindex pages. */
+  canonical?: string;
+  noindex?: boolean;
+  siteName: string;
+  /** Open Graph locale, e.g. `tr_TR`. */
+  locale: string;
+  type: 'website' | 'article';
+  /** Share image with an absolute URL. */
+  image: { url: string; width: number; height: number; alt: string };
+  jsonLd?: JsonLd;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  noindex = false,
+  siteName,
+  locale,
+  type,
+  image,
+  jsonLd,
+} = Astro.props;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{canonical && <link rel="canonical" href={canonical} />}
+{noindex && <meta name="robots" content="noindex" />}
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content={locale} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+{canonical && <meta property="og:url" content={canonical} />}
+<meta property="og:image" content={image.url} />
+<meta property="og:image:width" content={String(image.width)} />
+<meta property="og:image:height" content={String(image.height)} />
+<meta property="og:image:alt" content={image.alt} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image.url} />
+<meta name="twitter:image:alt" content={image.alt} />
+
+{jsonLd && <script is:inline type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}

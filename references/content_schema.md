@@ -1,6 +1,6 @@
 # references/content_schema.md — Content Schema
 
-> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
+> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -31,6 +31,9 @@ Wording approved by the lead 2026-10-17 (Faz 1 plan).
 | `url`, `lang` | `https://ulascanerturk.github.io`, `tr` | S5, ADR-006 |
 | `description` | default meta description (İstanbul, yazılım geliştirici ve teknoloji girişimcisi; web, mobil, B2B SaaS) | §1 |
 | `titleSeparator` | " · " → `"{page} · Ulaşcan Ertürk"` | faz-1 task 5 |
+| `locale` | `tr_TR` (`og:locale`) | ADR-006, faz-4 task 1 |
+| `ogImage` | `{ path: '/og/default.png', width: 1200, height: 630, alt }` — alt "Ulaşcan Ertürk — Yazılım Geliştirici · Teknoloji Girişimcisi" (lead approval 2026-10-17, Faz 4) | title line |
+| `jsonLd.jobTitle` | "Yazılım Geliştirici" (Person `jobTitle`; `worksFor` omitted — lead decision, Faz 4) | §2 "Mesleki tanım" |
 | `skipLink`, `newTabHint`, `themeToggleLabel` | "İçeriğe geç", "(yeni sekmede açılır)", "Koyu tema" | UI text |
 | `nav` | label "Ana menü"; Hakkımda (`/#hakkimda`), Projeler (`/projeler/`, Faz 3), GitHub, LinkedIn | §10 |
 | `footer` | label "Alt bağlantılar"; © holder; GitHub, LinkedIn, Kaynak kodu (`github.com/ulascanerturk/ulascanerturk.github.io`) | §10, ADR-002 |
@@ -85,6 +88,32 @@ Not on the page: §9 and every §11 exclusion. `#projeler` (Faz 3) shows the `fe
 | `techLabel`, `linksTitle`, `backLink` | "Teknolojiler" (tag list `aria-label`), "Bağlantılar", "Tüm projeler" |
 | `pager` | label "Proje gezinmesi", "Önceki proje", "Sonraki proje" |
 
+## Structured Data (JSON-LD) ✅ (faz-4 §2 task 3, `src/lib/seo.ts`)
+
+Built in the pages from existing data; rendered by `Seo.astro` as `<script type="application/ld+json">`
+(`<` escaped). Public professional fields only — `FORBIDDEN_JSON_LD_KEYS` (email, telephone, address,
+homeLocation, birthDate, …) are rejected by Vitest (`seo.test.ts`) and `check:dist`.
+
+| Page | Type | Fields → source |
+|---|---|---|
+| `/` | `ProfilePage` (`@id` = home URL, `name` = `site.name`, `inLanguage` = `site.lang`, `dateModified` = `profile.lastUpdated`) → `mainEntity` `Person` | `@id` `{home}#person`; `name` ← `profile.name`; `url` ← home; `jobTitle` ← `site.jsonLd.jobTitle` (§2); `description` ← `profilePage.description`; `knowsAbout` ← `profile.focusAreas[].title` (§8); `sameAs` ← `profile.links` of kind github/linkedin (§10) |
+| `/projeler/{slug}/` | `CreativeWork` | `name` ← `title`; `description` ← `summary`; `url`; `inLanguage`; `keywords` ← `tech` (joined); `dateCreated` ← `period.start` (only when set); `author` → Person `{home}#person` |
+| `/projeler/`, `/404.html` | none | — |
+
+Not used on purpose: `worksFor` (§5 wording "profesyonel bağı", titles may change — lead decision),
+`SoftwareApplication` (expects offers/ratings), `image` (no photo — S3).
+
+## Share Images ✅ (faz-4 §2 tasks 2 and 6)
+
+| File | Size | Source | Text |
+|---|---|---|---|
+| `public/og/default.png` | 1200×630 | `scripts/images/og-default.html` → `npm run images` | monogram, "Ulaşcan Ertürk", "Yazılım Geliştirici · Teknoloji Girişimcisi", `ulascanerturk.github.io` (title line; lead approval 2026-10-17) |
+| `public/apple-touch-icon.png` | 180×180 | `scripts/images/apple-touch-icon.html` | "UE" monogram |
+| project cover → `og:image` | 1200 px JPEG (`getImage`) | entry `cover` | `og:image:alt` = `coverAlt` |
+
+Rendered with local Chrome headless + ImageMagick `-strip`; PNG chunks verified (IHDR/IDAT/IEND
+[+PLTE] only). Re-run `npm run images` after changing a source or the wording (lead approval first).
+
 ## Collections
 
 ### projects (`src/content/projects`, glob loader) ✅ (`src/content.config.ts`, plans/01-mimari.md §4.2)
@@ -102,7 +131,7 @@ Not on the page: §9 and every §11 exclusion. `#projeler` (Faz 3) shows the `fe
 | `period` | `{ start: int; end?: int }` | years 1990–2100, `end ≥ start` | ⬜ | omit if unknown; no `end` → "{start} – devam ediyor" |
 | `tech` | string[] | ≥ 1 | ✅ | rendered as tags |
 | `links` | `{ label, url }[]` | `url` https only | ⬜ | public URLs only; section hidden when empty |
-| `cover` | `image()` | `src/assets/projects/` | ⬜ | metadata stripped; rendered with `astro:assets` `<Image>` |
+| `cover` | `image()` | `src/assets/projects/` | ⬜ | metadata stripped; rendered with `astro:assets` `<Picture>` (AVIF/WebP, widths 480/768/1536 capped at the source, eager + `fetchpriority=high`); also the page's `og:image` (1200 px JPEG) — Faz 4 |
 | `coverAlt` | string | min 1 | with `cover` ✅ | refine: required when `cover` is set (lead-approved addition) |
 | `featured` | boolean | default `false` | ⬜ | shown on `/` (`#projeler`) |
 | `order` | int | — | ⬜ | lower first; missing → last |
@@ -141,7 +170,7 @@ gaps; no store link unless published; no repository link (no public remote).
 
 | File | Used by | Metadata stripped | Rights | alt |
 |---|---|---|---|---|
-| — | none yet | — | — | — |
+| `public/og/default.png`, `public/apple-touch-icon.png` | share image, touch icon (see Share Images) | ✅ generated with `-strip`; chunks checked | own work (monogram + name) | `site.ogImage.alt` / decorative icon |
 
 ## Never Published
 

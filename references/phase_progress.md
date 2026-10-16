@@ -1,14 +1,15 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
+> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 3 — Proje Sayfaları: closed** (branch `feat/faz-3-project-pages`).
-Next unblocked phase: **Faz 4 — SEO, Erişilebilirlik ve Performans** (Faz 2 and Faz 3 closed).
-Overall: tasks 36/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8) · acceptance 29/47.
+**Faz 4 — SEO, Erişilebilirlik ve Performans: acceptance criteria met** (branch `feat/faz-4-seo-a11y-perf`);
+task 9 partly open — VoiceOver check by the lead.
+Next phase: **Faz 5 — Yayın ve Dağıtım** (lead creates the remote and pushes).
+Overall: tasks 48/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 partial) · acceptance 36/47.
 
 ## Open Questions
 
@@ -21,8 +22,10 @@ Overall: tasks 36/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8) ·
 | S5 | Custom domain? | No; `ulascanerturk.github.io` | 2026-10-17 | lead |
 | S6 | ADR-001 (Astro)? | Accepted | 2026-10-17 | lead |
 
-Pending lead inputs: robots.txt AI crawler policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10);
-Lockbox store links once the app is published (content update, not a phase task).
+Decided in Faz 4 (lead, 2026-10-17): robots.txt allows all crawlers incl. AI crawlers; Lighthouse CI local
+only (not in CI); JSON-LD without `worksFor`; CSP via Astro `security.csp` (ADR-011).
+Pending lead inputs: VoiceOver check (Faz 4 task 9); Lockbox store links once the app is published
+(content update, not a phase task).
 
 ## Faz 0 — Proje Kurulumu   (plans/fazlar/faz-0-proje-kurulumu.md)
 Status: closed (2026-10-17)
@@ -124,32 +127,36 @@ Status: closed (2026-10-17, branch `feat/faz-3-project-pages`)
 - `src/data/projects.ts` (`projectsPage`) holds the project UI text; status label for `active` is "Aktif geliştirmede".
 
 ## Faz 4 — SEO, Erişilebilirlik ve Performans   (plans/fazlar/faz-4-seo-erisilebilirlik-performans.md)
-Status: not started (unblocked — Faz 2 and Faz 3 closed)
+Status: acceptance criteria met (2026-10-17, branch `feat/faz-4-seo-a11y-perf`) — task 9 VoiceOver pending (lead)
 ### Tasks
-- [ ] 1. `Seo.astro`
-- [ ] 2. OG images
-- [ ] 3. JSON-LD (`Person`, project schema)
-- [ ] 4. Sitemap
-- [ ] 5. `robots.txt` (AI crawler policy — [REVIEW NEEDED] lead)
-- [ ] 6. Favicon set
-- [ ] 7. `scripts/check-dist.mjs` + `npm run check:dist` in CI
-- [ ] 8. axe / pa11y audit
-- [ ] 9. Manual a11y audit
-- [ ] 10. Lighthouse CI (in CI or not — [REVIEW NEEDED] lead)
-- [ ] 11. Image optimization
-- [ ] 12. CSP decision (ADR-011)
-- [ ] 13. Dependency audit
+- [x] 1. `Seo.astro` — `src/components/layout/Seo.astro` (folder decided: layout); title, description, canonical, robots, OG (+ `og:site_name`, image size/alt), Twitter `summary_large_image`, JSON-LD
+- [x] 2. OG images — `public/og/default.png` 1200×630 (text approved by lead); project pages: cover → 1200 px JPEG via `getImage`, else default (verified with a temporary cover entry, deleted)
+- [x] 3. JSON-LD — `/`: ProfilePage → Person (no `worksFor`, lead decision); projects: CreativeWork; builders in `src/lib/seo.ts`, forbidden personal keys tested
+- [x] 4. Sitemap — `@astrojs/sitemap` (ADR-012), `/404` filtered; 3 URLs
+- [x] 5. `robots.txt` — allow all incl. AI crawlers (lead decision) + `Sitemap:` line
+- [x] 6. Favicon set — `favicon.svg` (Faz 1) + `apple-touch-icon.png` 180×180 + `<link rel="apple-touch-icon">`
+- [x] 7. `scripts/check-dist.mjs` + `npm run check:dist` in CI — plan list + uniqueness, OG/Twitter, JSON-LD privacy, CSP, img size, sitemap/robots; 18 checker tests
+- [x] 8. axe audit — axe-core 4.14.0 in the browser on `astro preview`: 4 pages × 2 themes, 0 violations (`@axe-core/cli` ChromeDriver mismatch — methodology)
+- [~] 9. Manual a11y audit — done: keyboard (skip link first, 3 px focus ring, skip → `main`), 360 px and 640 px (= 200 % zoom at 1280) `scrollWidth` = viewport on all pages, no positive tabindex, no target < 24 px, reduced-motion rules present, theme toggle under CSP; computed-style contrast min 6.14 (light) / 6.93 (dark). **Open: VoiceOver on `/` and a project page (lead); JS-disabled browser check**
+- [x] 10. Lighthouse CI — `lighthouserc.json`, `npm run lhci`, local only (lead decision, ADR-013)
+- [x] 11. Image optimization — cover via `<Picture>` AVIF/WebP + widths, eager/high priority (hero); no other images
+- [x] 12. CSP decision — ADR-011 accepted: Astro `security.csp`, hashes for scripts and styles, no `'unsafe-inline'`; Shiki off
+- [x] 13. Dependency audit — `npm audit --omit=dev --audit-level=high`: 0 (full audit 0 too)
 ### Acceptance Criteria
-- [ ] Unique title + description + canonical on every page
-- [ ] JSON-LD valid, public info only
-- [ ] `sitemap-index.xml` and `robots.txt` generated
-- [ ] check:dist, axe and Lighthouse thresholds met
-- [ ] ≤ 10 KB client JS per page (measurement recorded in Audits)
-- [ ] CSP decision recorded as ADR
-- [ ] Checklist: all sections reviewed
+- [x] Unique title + description + canonical on every page — `check:dist` site checks; titles: "Ulaşcan Ertürk", "Projeler · …", "Lockbox — Çevrimdışı Parola Kasası · …", "Sayfa bulunamadı · …"
+- [x] JSON-LD valid, public info only — parses, schema.org context, no forbidden keys (Vitest + `check:dist`); Rich Results Test after publishing (Faz 5)
+- [x] `sitemap-index.xml` and `robots.txt` generated — `dist/sitemap-index.xml` → `sitemap-0.xml` (3 URLs, no 404); `dist/robots.txt`
+- [x] check:dist, axe and Lighthouse thresholds met — 0 errors; 0 violations; median 100/100/100/100 (404: 100/100/100, SEO excluded)
+- [x] ≤ 10 KB client JS per page — 478 B gzip max (Audits)
+- [x] CSP decision recorded as ADR — ADR-011 (accepted, applied)
+- [x] Checklist: all sections reviewed — Genel ✅ (approved files + 1 approved fix; new deps with ADR-012/013, audit 0; layering: Seo gets props, `src/lib/seo.ts` pure; console only in scripts/), İçerik ve Gizlilik ✅ (OG text/alt from the title line, approved; JSON-LD public fields only, no `worksFor`; generated PNGs metadata-free), Erişilebilirlik ✅ (axe, contrast, keyboard, 360 px, 200 %), SEO ve Paylaşım ✅, Performans ✅ (478 B JS, `<Picture>`, no external resources), Güvenlik ✅ (CSP enforced, injected inline script blocked), Dağıtım ✅ (CI step added, permissions unchanged)
+### Notes
+- Plan deviations approved 2026-10-17: CSP via Astro `security.csp` instead of a hand-maintained hash and `style-src 'unsafe-inline'`; ProfilePage/CreativeWork JSON-LD types; extra `check:dist` rules + checker tests (`vitest` include `scripts/**`); `scripts/images/` + `npm run images`; `og:type` per page.
+- Fix cycle 1 (approved): `astro check` error — JSDoc `Record<string, string>` on `parsePage` maps in `check-dist.mjs`.
+- Temporary verification files (cover entry + image) were created and deleted; nothing left in `src/`.
 
 ## Faz 5 — Yayın ve Dağıtım   (plans/fazlar/faz-5-yayin-ve-dagitim.md)
-Status: not started (blocked by Faz 4)
+Status: not started (unblocked once Faz 4 is closed by the lead)
 ### Tasks
 - [ ] 1. Domain — decided: no custom domain (S5); nothing to implement beyond confirming no `CNAME`
 - [ ] 2. Enable deploy on push to `main`
@@ -195,6 +202,7 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 | 2026-10-17 | not run | not run | 0 B (placeholder page) | Faz 0 dist check: 1 page, 0 errors |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script, 996 B raw) | Faz 1 dist check: 2 pages, 0 errors, 0 warnings; 360 px, keyboard, theme checks in browser (macOS) |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
+| 2026-10-17 | 100/100/100/100 (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1, local Chrome 155 | 0 violations (axe-core 4.14.0, 4 pages × 2 themes) | 478 B gzip (theme script only) | Faz 4 `check:dist`: 4 pages, 0 errors; CSP enforced, no console violations |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 3 dist check: 4 pages, 0 errors, 0 warnings; one h1 per page; all internal links resolve; 360 px `scrollWidth = 360` on `/`, `/projeler/`, `/projeler/lockbox-mobile/`, `/404.html` (browser, dark theme) |
 
 ## Follow-ups
@@ -204,10 +212,11 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
-- `Seo.astro` folder (`src/components/` root vs a subfolder) not fixed in plans — decide in Faz 4 planning.
 - Faz 1 risk table: check rendering on Windows and Android (system font stack) — only macOS was checked — Faz 1.
-- Verify the site with JavaScript actually disabled in a browser (only simulated in Faz 1) — Faz 4 manual a11y audit.
+- Verify the site with JavaScript actually disabled in a browser (only simulated in Faz 1; the browser pane cannot disable JS) — lead, Faz 4 task 9.
 - Faz 0 phase doc acceptance checkboxes are still unticked in `plans/fazlar/faz-0-proje-kurulumu.md` (progress lives here) — Faz 1.
 - Lockbox: when the app is published, add the store `links`, update "Durum", `summary` and `ulascanerturk.md` §6 together (lead provides URLs) — Faz 3.
-- Project pages were not checked with a screen reader (only structure via dist checks) — Faz 4 manual a11y audit.
-- `site.description` (Faz 1, default meta for pages without their own — now only 404) is third person ("…geliştirir"); the profile text is first person (lead decision) — align when Faz 3/4 touches meta descriptions — Faz 2.
+- VoiceOver check of `/` and `/projeler/lockbox-mobile/` (Faz 4 task 9) — lead.
+- `site.description` (Faz 1, default meta for pages without their own — since Faz 4 no page uses it; 404 passes its message) is third person ("…geliştirir"); the profile text is first person (lead decision) — align when Faz 3/4 touches meta descriptions — Faz 2.
+- `plans/01-mimari.md` §2 folder tree / §6.1 scripts do not yet show `src/components/layout/Seo.astro`, `scripts/images/`, `scripts/render-images.mjs`, `lighthouserc.json` and `npm run images` [PLAN DRIFT — cosmetic] — Faz 4.
+- Faz 5: run Google Rich Results Test / Schema.org validator and the social share debuggers on the live URLs; re-run Lighthouse on the live site — Faz 4 §3.

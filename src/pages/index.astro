@@ -2,6 +2,7 @@
 // Profile page (faz-2 §2 task 6). Sections follow plans/02-icerik-ve-tasarim.md
 // §2–§3; data and text come from src/data/profile.ts (ulascanerturk.md).
 // "Öne çıkan projeler" (#projeler, faz-3 §2 task 8) lists the `featured` entries.
+// JSON-LD: ProfilePage → Person, public fields only (faz-4 §2 task 3).
 import { getCollection } from 'astro:content';
 
 import EcosystemNote from '@/components/profile/EcosystemNote.astro';
@@ -18,8 +19,10 @@ import Section from '@/components/ui/Section.astro';
 import { profile, profilePage } from '@/data/profile';
 import { projectsPage } from '@/data/projects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
 import { formatDate } from '@/lib/date';
 import { isPublished, sortProjects } from '@/lib/projects';
+import { absoluteUrl, profilePageJsonLd } from '@/lib/seo';
 
 const { about, skills, experience, projects, education, ecosystem, focusAreas, links, footnote } =
   profilePage;
@@ -36,9 +39,27 @@ const featured = sortProjects(
     ({ data }) => data.featured && isPublished(data, import.meta.env.PROD),
   ),
 );
+
+const homeUrl = absoluteUrl('/', Astro.site ?? site.url);
+const jsonLd = profilePageJsonLd({
+  url: homeUrl,
+  name: site.name,
+  inLanguage: site.lang,
+  dateModified: profile.lastUpdated,
+  person: {
+    name: profile.name,
+    url: homeUrl,
+    jobTitle: site.jsonLd.jobTitle,
+    description: profilePage.description,
+    knowsAbout: profile.focusAreas.map((area) => area.title),
+    sameAs: profile.links
+      .filter((link) => link.kind === 'github' || link.kind === 'linkedin')
+      .map((link) => link.url),
+  },
+});
 ---
 
-<BaseLayout description={profilePage.description}>
+<BaseLayout description={profilePage.description} jsonLd={jsonLd}>
   <ProfileHero
     name={profile.name}
     headline={profile.headline}

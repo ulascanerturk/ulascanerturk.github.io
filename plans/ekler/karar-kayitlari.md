@@ -123,9 +123,72 @@
 - **Yardımcı paketler:** `@astrojs/check` (astro check), `@eslint/js` ve
   `globals` (ESLint flat config temel parçaları).
 
-## ADR-011 — İçerik Güvenlik Politikası (aday)
+## ADR-011 — İçerik Güvenlik Politikası: Astro yerleşik meta CSP
 
-- **Durum:** Ertelendi — Faz 4'te karara bağlanacak
-- **Bağlam:** GitHub Pages başlık ayarlamaya izin vermez; meta CSP mümkündür
-  ancak `frame-ancestors` ve raporlama desteklemez.
-- **Karar adayı:** Faz 4 §2.3 madde 12'deki politika.
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 4 planı onayı)
+- **Bağlam:** GitHub Pages başlık ayarlamaya izin vermez; CSP yalnızca
+  `<meta http-equiv="Content-Security-Policy">` ile verilebilir. Sitede iki tür
+  inline öğe var: tema betiği (`src/lib/theme.ts`, statik) ve Astro'nun küçük
+  bileşen stillerini sayfaya gömdüğü `<style>` blokları. Faz 4 §2.3 madde 12'deki
+  aday politika `style-src 'unsafe-inline'` ve elle hesaplanan bir script hash'i öneriyordu.
+- **Karar:** Astro'nun yerleşik `security.csp` özelliği (Astro 6+) kullanılır
+  (`astro.config.mjs`). Ek direktifler: `default-src 'self'; img-src 'self' data:;
+  object-src 'none'; base-uri 'self'; form-action 'none'`. `script-src` ve
+  `style-src` değerlerini Astro derleme sırasında üretir: `'self'` + her inline
+  script ve stilin sha256 hash'i. `'unsafe-inline'` kullanılmaz.
+- **Alternatifler:**
+
+  | Seçenek | Artı | Eksi |
+  |---|---|---|
+  | Plan adayı: elle meta + betikle hash üretimi | Tam denetim | Her stil/script değişikliğinde hash bakımı; stiller için `'unsafe-inline'` gerekiyordu |
+  | `style-src 'unsafe-inline'` | Basit | Stil enjeksiyonuna karşı koruma yok; Astro bu durumda hash üretmeyi bırakır |
+  | CSP yok | Sıfır bakım | XSS'e karşı savunma katmanı kaybı |
+
+- **Sınırlar (bilinçli olarak kabul edildi):**
+  - Meta CSP `frame-ancestors`, `sandbox` ve raporlama (`report-to`) desteklemez;
+    tıklama korsanlığına karşı koruma GitHub Pages'te verilemez.
+  - Astro meta etiketini `<head>`'in sonuna, tema betiğinden sonra basar; tema
+    betiği politikadan önce çalışır. Betik statik ve projeye ait olduğundan risk
+    yoktur (hash'i yine listededir); politika ondan sonraki her şeyi kapsar.
+  - `astro dev`'de CSP uygulanmaz; doğrulama `build` + `preview` ile yapılır.
+  - Shiki (Markdown kod vurgulama) inline stil kullandığı için uyumsuz:
+    `markdown.syntaxHighlight: false`. Kod bloğu gerekirse `'prism'` kullanılır.
+  - Element üzerinde `style="…"` özniteliği hash'lenmez; kullanılmaz.
+- **Doğrulama (2026-10-17):** `astro preview` ile 4 sayfa açıldı, konsolda CSP
+  ihlali yok; deneme olarak enjekte edilen inline script engellendi ve konsola
+  düştü; tema geçişi çalışıyor; Lighthouse best-practices 100.
+  `npm run check:dist` her sayfada CSP meta etiketini arar.
+
+## ADR-012 — Sitemap: `@astrojs/sitemap`
+
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 4 planı onayı)
+- **Bağlam:** Faz 4 §2.1 madde 4 ve `01-mimari.md` §5: `/sitemap-index.xml`,
+  404 ve taslaklar hariç.
+- **Karar:** Resmî Astro entegrasyonu `@astrojs/sitemap` (^3.7.4, `dependencies`);
+  `filter` ile `/404` dışlanır, taslaklar üretimde zaten derlenmez.
+  `public/robots.txt` sitemap adresini verir.
+- **Alternatifler:** Elle `sitemap-index.xml.ts` endpoint'i (bağımlılık yok, ama
+  Faz 6'daki `hreflang`/i18n desteğini yeniden yazmak gerekir).
+- **Sonuçlar:** Derleme zamanı aracıdır; ziyaretçiye JS göndermez. Geçişli
+  bağımlılıklar: `sitemap`, `zod`. Faz 6'da `i18n` seçeneği ile genişler.
+  `npm audit --omit=dev` temiz (2026-10-17).
+
+## ADR-013 — Lighthouse CI: `@lhci/cli` (yalnızca yerelde); axe bağımlılık değil
+
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 4 planı onayı; CI'a eklenmemesi lead kararı)
+- **Bağlam:** Değişmez Kural 4 (Lighthouse mobil ≥ 95) ve Faz 4 §2.3 madde 10;
+  ADR-010 aracı seçmişti, bağımlılık kaydı burada.
+- **Karar:** `@lhci/cli` (^0.15.1) `devDependencies`'e eklenir; `npm run lhci`
+  (`lighthouserc.json`: `dist/` statik sunucu, 4 URL, mobil, 3 çalıştırma, medyan,
+  4 kategori ≥ 0.95; `noindex` olan 404'te SEO hariç). Raporlar yalnızca yerelde
+  `.lighthouseci/` klasörüne yazılır (gitignore); herkese açık geçici depolamaya
+  yükleme yapılmaz. Lighthouse CI'da **çalışmaz**: faz kapanışında ve lead
+  isteğiyle yerelde koşulur.
+- **axe:** Proje bağımlılığı eklenmez. Seçenekler: `npx @axe-core/cli` (yerel
+  Chrome ile eşleşen ChromeDriver gerekir:
+  `npx browser-driver-manager install chrome`) ya da Lighthouse ile gelen
+  `axe-core`'un `astro preview` üzerinde tarayıcıda çalıştırılması (Faz 4
+  kapanışında kullanılan yöntem; ayrıntı `references/methodology.md`).
+- **Sonuçlar:** Büyük bir geliştirme bağımlılık ağacı (lighthouse 12.6.1);
+  CI'da kullanılmasa da `npm ci` ile kurulur (kurulum süresi maliyeti). Yerel
+  Chrome gerekir. CI'a alınması gerekirse ayrı bir job + yeni karar.

@@ -46,3 +46,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Dist checks
+        run: npm run check:dist

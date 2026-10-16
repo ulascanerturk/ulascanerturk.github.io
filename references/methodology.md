@@ -1,6 +1,6 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
+> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -8,7 +8,8 @@ Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). The d
 system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI components, 404);
 the profile page since Faz 2 (`src/data/profile.ts`, `src/components/profile/`);
 the project collection and pages since Faz 3 (`src/content.config.ts`, `src/content/projects/`,
-`src/components/projects/`, `ProjectLayout`). SEO features are still planned.
+`src/components/projects/`, `ProjectLayout`); SEO, sharing, CSP and the dist/Lighthouse/axe checks since
+Faz 4 (`Seo.astro`, `src/lib/seo.ts`, `scripts/check-dist.mjs`, `lighthouserc.json`).
 
 ## Core Philosophy
 
@@ -86,6 +87,13 @@ Rules not tied to config are enforced from Faz 1 onward.
   actions, links for navigation; targets ≥ 44×44 px; `prefers-reduced-motion`;
   contrast ≥ 4.5:1 text, ≥ 3:1 large text/UI.
 - Fonts: system font stack (ADR-009); no external font/CDN/iframe requests.
+- SEO (Faz 4): every page goes through `BaseLayout` → `Seo`; pages pass `title`/`description`
+  (≤ 160) and optionally `ogType`, `image`, `jsonLd`. Titles and descriptions must be unique across
+  pages (`check:dist`). JSON-LD is built in pages with the `src/lib/seo.ts` builders — never
+  hand-written objects — and may not contain `FORBIDDEN_JSON_LD_KEYS`.
+- CSP (ADR-011): Astro emits the meta policy with hashes for the `<script>`/`<style>` it renders.
+  No `style="…"` attributes, no event-handler attributes, no third-party origins; Shiki stays off.
+  CSP only exists in `build`/`preview` — check the browser console there after touching head/scripts.
 
 ## Content Rules
 
@@ -112,7 +120,7 @@ Rules not tied to config are enforced from Faz 1 onward.
 
 | Rule | Exception | Location | Reason | Approved |
 |---|---|---|---|---|
-| — | none yet | — | — | — |
+| Tokens only (no hex outside `tokens.css`) | Hard-coded light-theme hex colors | `scripts/images/*.html` (share image + touch icon sources), `public/favicon.svg` | Self-contained image sources rendered to PNG; they mirror `tokens.css` | Faz 1 (favicon), Faz 4 plan approval 2026-10-17 |
 
 ## Versions (verified 2026-10-17 — npm registry, nodejs.org dist index)
 
@@ -130,6 +138,8 @@ Rules not tied to config are enforced from Faz 1 onward.
 | globals | ^17.13.0 | |
 | prettier / prettier-plugin-astro | ^3.9.10 / ^1.1.1 | |
 | vitest | ^5.0.5 | config via `getViteConfig` from `astro/config` |
+| @astrojs/sitemap | ^3.7.4 | `dependencies`; ADR-012 (verified 2026-10-17, npm registry) |
+| @lhci/cli | ^0.15.1 | `devDependencies`, bundles lighthouse 12.6.1 + axe-core 4.14.0; ADR-013; local only |
 | GitHub Actions | `actions/checkout@v7`, `actions/setup-node@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` | latest major tags 2026-10-17 |
 
 ### Environment Notes
@@ -153,8 +163,24 @@ Rules not tied to config are enforced from Faz 1 onward.
 
 - Vitest for `src/lib` (`*.test.ts` beside the module; `vitest.config.ts` includes `src/**/*.test.ts`) ✅ — first suite: `src/lib/slug.test.ts`.
 - `astro build` = content schema validation.
-- Built-HTML checks: `scripts/check-dist.mjs` from Faz 4; until then the Python fallback in `test-lint` §7.
-- Lighthouse ≥ 0.95 (mobile, every category) and axe 0 violations at phase close from Faz 4.
+- Vitest also includes `scripts/**/*.test.ts` (Faz 4): `scripts/check-dist.test.ts` tests the checker itself.
+- Built-HTML checks: `npm run check:dist` (`scripts/check-dist.mjs`, no dependencies, CI step after build).
+  Per page: `lang`, non-empty `<title>`, description present and ≤ 160, exactly one `<h1>`, no skipped
+  heading level, `<img>` alt + width/height, internal links resolve in `dist/`, `target=_blank` has
+  `noopener`, canonical = `{site}{path}` (none on noindex pages), `og:type/title/description/url/image/
+  image:alt/locale=tr_TR` + `twitter:card=summary_large_image` on indexable pages, `og:image` exists in
+  `dist/`, JSON-LD parses / schema.org context / no forbidden keys, CSP meta with `default-src 'self'`,
+  client JS ≤ 10 KB gzip. Site: unique titles and descriptions, sitemap lists every indexable page and
+  no noindex page and nothing unbuilt, robots.txt has the `Sitemap:` line. The tokenizer searches raw
+  text case-insensitively without `toLowerCase()` ("İ" changes string length).
+- Lighthouse ≥ 0.95 (mobile, every category; 404 without SEO because of `noindex`) via `npm run lhci`
+  at phase close / on request — local only (ADR-013).
+- axe 0 violations at phase close: `npx @axe-core/cli` needs a ChromeDriver matching local Chrome
+  (`npx browser-driver-manager install chrome`). Without it (Faz 4): copy
+  `node_modules/axe-core/axe.min.js` into `dist/` temporarily, open each page via `astro preview`, load it
+  with a `<script src>` (allowed by CSP `'self'`), run `axe.run` with wcag2a/aa, wcag21a/aa, wcag22aa,
+  best-practice in both themes, then delete the copy. axe reports `color-contrast` as *incomplete* for
+  off-screen text in a hidden browser pane — cross-check with a computed-style contrast pass.
 - Agent skills: `.claude/skills/` (Claude Code, `/skill`) and `.agents/skills/` (Codex, `$skill`) — kept in sync.
 
 ## Commands
@@ -168,8 +194,9 @@ Rules not tied to config are enforced from Faz 1 onward.
 | Lint | `npm run lint -- --max-warnings 0` |
 | Format | `npm run format` / `npm run format:check` |
 | Unit tests | `npm test` |
-| Dist checks | `npm run check:dist` [PLANNED — Faz 4]; until then `test-lint` §7 Python fallback |
-| Lighthouse CI | `npm run lhci` [PLANNED — Faz 4] |
+| Dist checks | `npm run check:dist` (after `npm run build`) |
+| Lighthouse CI | `npm run lhci` (local Chrome; reports in `.lighthouseci/`) |
+| Share image / touch icon | `npm run images` (local Chrome + ImageMagick) |
 
 ## Release and Rollback [PLANNED — plans/fazlar/faz-5-yayin-ve-dagitim.md §2 task 10]
 
@@ -178,6 +205,7 @@ Site URL `https://ulascanerturk.github.io` (no custom domain — S5). Rollback:
 
 ## Known Gaps / Review Needed
 
+- `@axe-core/cli` 4.14's ChromeDriver supports Chrome 152; local Chrome is 155 — see Testing Conventions for the axe fallback.
 - `actionlint` and `exiftool` are not installed locally: workflow syntax is verified on the first push (Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
 - [REVIEW NEEDED] ADR-006 and ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan).
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

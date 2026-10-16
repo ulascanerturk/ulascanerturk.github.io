@@ -1,0 +1,5 @@
+# faz-4 §2 task 5 — all crawlers allowed, AI crawlers included (lead decision 2026-10-17).
+User-agent: *
+Allow: /
+
+Sitemap: https://ulascanerturk.github.io/sitemap-index.xml
