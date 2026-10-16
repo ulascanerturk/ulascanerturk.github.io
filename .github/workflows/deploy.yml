@@ -1,14 +1,15 @@
 name: Deploy to GitHub Pages
 
-# Manual only until Faz 5 enables `push: branches: [main]`
+# Every push to `main` deploys, but only after the CI quality gate passes
 # (plans/fazlar/faz-5-yayin-ve-dagitim.md §2 task 2).
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 env:
   ASTRO_TELEMETRY_DISABLED: 1
@@ -18,7 +19,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  quality-gate:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
   build:
+    needs: quality-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,6 +39,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

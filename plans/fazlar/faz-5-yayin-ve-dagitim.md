@@ -14,10 +14,13 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
 
 ## 2. Görev Listesi
 
-1. **Alan adı (S5: özel alan adı yok).** Site `ulascanerturk.github.io`
+1. ✅ **Alan adı (S5: özel alan adı yok).** Site `ulascanerturk.github.io`
    adresinde yayınlanır; `CNAME` dosyası ve DNS adımı yoktur.
-2. **Deploy iş akışını etkinleştir.** `.github/workflows/deploy.yml` tetikleyicisine
+2. ✅ **Deploy iş akışını etkinleştir.** `.github/workflows/deploy.yml` tetikleyicisine
    `push: branches: [main]` eklenir (Faz 0'da yalnızca `workflow_dispatch` idi).
+   Yayın, `ci.yml`'yi `workflow_call` ile çalıştıran `quality-gate` işine bağlıdır
+   (`ci.yml` `main` push'larında kendiliğinden çalışmaz); kapı geçmezse yayın yapılmaz.
+   `pages: write` / `id-token: write` yalnızca `deploy` işinde (lead onayı 2026-10-17).
 3. **Uzak depo (lead).** GitHub'da `ulascanerturk/ulascanerturk.github.io`
    **public** deposu oluşturulur (README/.gitignore eklenmeden).
    ```bash
@@ -25,9 +28,11 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
    ```
 4. **Pages ayarı (lead).** *Settings → Pages → Build and deployment → Source:
    GitHub Actions*. (Alternatif: `gh api` ile; lead tercihine bağlı.)
-5. **Dal koruması (öneri, lead).** `main` için: CI başarılı olmadan merge yok,
-   force-push yok. Tek geliştirici akışında yerel squash merge sonrası push yapıldığı
-   için "PR zorunlu" kuralı **açılmaz** (aksi hâlde iş akışı ile çakışır).
+5. **Dal koruması (öneri, lead).** `main` için kural seti: force-push ve dal silme
+   engellenir. Tek geliştirici akışında yerel squash merge sonrası doğrudan push
+   yapıldığı için "PR zorunlu" ve "zorunlu status check" kuralları **açılmaz**:
+   yeni commit'in henüz durumu olmadığından zorunlu kontrol push'u reddeder. CI
+   kapısı bunun yerine deploy iş akışındadır (görev 2; lead onayı 2026-10-17).
 6. **İlk push (lead).** `git push -u origin main` → CI ve deploy iş akışları izlenir.
 7. **Canlı doğrulama.**
    - Tüm sayfalar 200; `/olmayan-sayfa/` → özel 404.
@@ -39,7 +44,7 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
    ayrı küçük görev.
 9. **GitHub profil bağlantısı (opsiyonel, lead).** GitHub profilindeki "Website"
    alanına site adresi.
-10. **Geri alma prosedürü.** `references/methodology.md` → "Yayın ve geri alma":
+10. ✅ **Geri alma prosedürü.** `references/methodology.md` → "Yayın ve geri alma":
     hatalı yayında `git revert {hash}` + push veya Actions'ta önceki başarılı
     çalıştırmayı yeniden çalıştırma.
 
@@ -55,8 +60,8 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
 - [ ] Site canlı ve tüm sayfalar erişilebilir.
 - [ ] `main`'e push otomatik yayın üretiyor; manuel adım gerekmiyor.
 - [ ] Canlı Lighthouse eşikleri sağlanıyor.
-- [ ] Geri alma prosedürü belgelendi.
-- [ ] Depoda sır, `.env`, `dist/` yok (`git ls-files` kontrolü).
+- [x] Geri alma prosedürü belgelendi.
+- [x] Depoda sır, `.env`, `dist/` yok (`git ls-files` kontrolü).
 - [ ] Kontrol listesi: Dağıtım bölümü gözden geçirildi.
 
 ## 5. Riskler

@@ -1,6 +1,6 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
+> Last updated: 2026-10-17 (Faz 5 — chore/faz-5-deploy-pipeline)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -150,13 +150,16 @@ Rules not tied to config are enforced from Faz 1 onward.
 
 ## Git Conventions
 
-- Repository: initialized on `main`; no remote until Faz 5 (lead creates it).
+- Repository: `main`; remote `origin` = `github.com/ulascanerturk/ulascanerturk.github.io` (created by the lead — Faz 5 task 3).
 - Branches: `{type}/faz-{N}-{desc}` for phase work, `{type}/{domain}/{desc}` otherwise (`git-start`).
   Types: feat · fix · refactor · test · chore · content · perf · docs · release.
 - Conventional Commits; scope = domain from the branch; English, imperative, ≤ 72 chars.
 - Stage files explicitly (never `git add -A` / `.`); commit only after lead approval.
 - Local squash merge into `main` (`merge-main`), branch deleted after tree-equality proof (`delete-branch`).
-- The workflow never pushes. After Faz 5, pushing `main` deploys the site — the lead pushes.
+- The workflow never pushes. Since Faz 5, pushing `main` deploys the site (after the CI gate) — the lead pushes.
+- `main` ruleset (lead, Faz 5 task 5): block force pushes and deletion only — no required status
+  checks and no required PRs, because local squash merges are pushed directly (a new commit has no
+  status yet, so a required check would reject the push). The gate lives in `deploy.yml`.
 - Bootstrap exception: the initial commits (plans, skills, S1–S6 decisions) were made directly on `main` with lead approval.
 
 ## Testing Conventions
@@ -198,10 +201,32 @@ Rules not tied to config are enforced from Faz 1 onward.
 | Lighthouse CI | `npm run lhci` (local Chrome; reports in `.lighthouseci/`) |
 | Share image / touch icon | `npm run images` (local Chrome + ImageMagick) |
 
-## Release and Rollback [PLANNED — plans/fazlar/faz-5-yayin-ve-dagitim.md §2 task 10]
+## Release and Rollback (Faz 5 task 10)
 
-Site URL `https://ulascanerturk.github.io` (no custom domain — S5). Rollback:
-`git revert {hash}` + push, or re-run the last successful deploy workflow.
+Site URL `https://ulascanerturk.github.io/` (no custom domain — S5; no `CNAME`). Repository
+`ulascanerturk/ulascanerturk.github.io` (public), Pages source "GitHub Actions" (ADR-002).
+
+**Release.** The workflow ends with a local squash merge into `main`; the lead pushes
+(`git push origin main`). `deploy.yml` then runs `quality-gate` (the whole `ci.yml` via
+`workflow_call`) → `build` (`withastro/action`) → `deploy` (`actions/deploy-pages`). A failing gate
+stops the run before anything is published; the previous deployment stays live. Runs are queued, not
+cancelled (`concurrency: pages`). After each push: run status green
+(`gh run list --workflow deploy.yml --limit 1`) and the live check below.
+
+**Live check.** `curl -sI https://ulascanerturk.github.io/` → `200` + `content-type: text/html`;
+every route in `sitemap-0.xml` → `200`; `/olmayan-sayfa/` → `404` with the custom page;
+`http://` redirects to `https://`. Lighthouse on live URLs at phase close.
+
+**Rollback** (faulty release is live):
+1. Fastest — re-deploy the last good build: *Actions → Deploy to GitHub Pages →* last successful run
+   → *Re-run all jobs* (`gh run rerun {run-id}`; possible up to 30 days after the run). Re-runs use that run's commit, so this only
+   restores the site; `main` still holds the faulty commit and the next push publishes it again.
+2. Permanent — revert on `main`: `git revert {hash}` (squash merges are single commits) → quality gate
+   locally → lead pushes → deploy runs as usual. Use this after step 1 or instead of it.
+3. Never `git push --force` / `git reset` on the remote `main` (ruleset blocks force pushes and
+   deletion; history is the audit trail).
+4. Afterwards: live check, then record the incident and the fix in `references/phase_progress.md`
+   → Follow-ups.
 
 ## Known Gaps / Review Needed
 

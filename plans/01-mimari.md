@@ -201,15 +201,18 @@ Gövde bölümleri (önerilen): **Problem**, **Çözüm**, **Rolüm**, **Teknolo
 
 ### 6.2 CI (`.github/workflows/ci.yml`)
 
-Tetik: `pull_request` ve `main` dışı dallara `push`. Adımlar: `npm ci` →
+Tetik: `pull_request`, `main` dışı dallara `push` ve `workflow_call` (`main`
+push'larında deploy iş akışı çağırır). Adımlar: `npm ci` →
 `check` → `lint --max-warnings 0` → `format:check` → `test` → `build` →
 `check:dist` (Faz 4'ten itibaren).
 
 ### 6.3 Dağıtım (`.github/workflows/deploy.yml`)
 
-Tetik: `main` dalına `push` + `workflow_dispatch`. `withastro/action` ile derleme,
-`actions/deploy-pages` ile yayın. İzinler: `contents: read`, `pages: write`,
-`id-token: write`. `concurrency: pages`. Depo ayarı: *Settings → Pages →
+Tetik: `main` dalına `push` + `workflow_dispatch`. Önce `quality-gate` işi
+`ci.yml`'yi `workflow_call` ile çalıştırır (6.2'deki adımların tamamı); geçmezse
+yayın yapılmaz. Ardından `withastro/action` ile derleme, `actions/deploy-pages` ile
+yayın. İzinler: üst düzeyde `contents: read`; `pages: write` ve `id-token: write`
+yalnızca `deploy` işinde. `concurrency: pages`. Depo ayarı: *Settings → Pages →
 Source: GitHub Actions* (Faz 5).
 
 ## 7. Güvenlik ve Gizlilik Notları

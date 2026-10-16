@@ -1,15 +1,15 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 4 — feat/faz-4-seo-a11y-perf)
+> Last updated: 2026-10-17 (Faz 5 — chore/faz-5-deploy-pipeline)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 4 — SEO, Erişilebilirlik ve Performans: acceptance criteria met** (branch `feat/faz-4-seo-a11y-perf`);
-task 9 partly open — VoiceOver check by the lead.
-Next phase: **Faz 5 — Yayın ve Dağıtım** (lead creates the remote and pushes).
-Overall: tasks 48/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 partial) · acceptance 36/47.
+**Faz 5 — Yayın ve Dağıtım: in progress** (branch `chore/faz-5-deploy-pipeline`) — repo-side tasks done
+(1, 2, 10); remote, Pages setting, ruleset and first push are with the lead (3–6), then live verification (7).
+Faz 4: acceptance criteria met; task 9 VoiceOver still open — lead approved starting Faz 5 with it open (2026-10-17).
+Overall: tasks 51/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 partial) · acceptance 38/47.
 
 ## Open Questions
 
@@ -156,25 +156,31 @@ Status: acceptance criteria met (2026-10-17, branch `feat/faz-4-seo-a11y-perf`) 
 - Temporary verification files (cover entry + image) were created and deleted; nothing left in `src/`.
 
 ## Faz 5 — Yayın ve Dağıtım   (plans/fazlar/faz-5-yayin-ve-dagitim.md)
-Status: not started (unblocked once Faz 4 is closed by the lead)
+Status: in progress (2026-10-17, branch `chore/faz-5-deploy-pipeline`) — started with Faz 4 task 9 open (lead decision)
 ### Tasks
-- [ ] 1. Domain — decided: no custom domain (S5); nothing to implement beyond confirming no `CNAME`
-- [ ] 2. Enable deploy on push to `main`
-- [ ] 3. Create public remote repo (lead)
+- [x] 1. Domain — no custom domain (S5); no `CNAME` in the repo or `public/` (checked 2026-10-17)
+- [x] 2. Deploy on push to `main` — `deploy.yml` `push: branches: [main]` + `workflow_dispatch`; `quality-gate` job calls `ci.yml` (`workflow_call`) and `build` needs it; `pages`/`id-token` write only on the `deploy` job (approved plan deviation)
+- [ ] 3. Create public remote repo (lead) — `gh` installed, not logged in
 - [ ] 4. Pages source: GitHub Actions (lead)
-- [ ] 5. Branch protection (lead, optional)
+- [ ] 5. Branch protection (lead, optional) — ruleset text changed: block force push + deletion only, no required status checks / PRs (approved 2026-10-17)
 - [ ] 6. First push (lead)
 - [ ] 7. Live verification
 - [ ] 8. Search console registration (optional, lead)
 - [ ] 9. GitHub profile website link (optional, lead)
-- [ ] 10. Rollback procedure in `references/methodology.md`
+- [x] 10. Rollback procedure — `references/methodology.md` → Release and Rollback (re-run last good deploy, `git revert` + push, no force push)
 ### Acceptance Criteria
 - [ ] Site live, all pages reachable
 - [ ] Push to `main` deploys automatically
 - [ ] Live Lighthouse thresholds met
-- [ ] Rollback procedure documented
-- [ ] No secrets, `.env` or `dist/` in the repo
-- [ ] Checklist: Dağıtım reviewed
+- [x] Rollback procedure documented — methodology.md → Release and Rollback
+- [x] No secrets, `.env` or `dist/` in the repo — `git ls-files` (113 files): no `.env*`, `dist/`, `.astro/`, `node_modules/`, keys, `CNAME`; secret grep (test-lint 6f) 0 hits — re-check on the remote after the first push
+- [ ] Checklist: Dağıtım reviewed — repo side ✅ (no build output, explicit least-privilege permissions, actions from GitHub/withastro on major tags); live verification after the first push pending
+### Notes
+- Gap found while planning: `ci.yml` ignores pushes to `main` and feature branches are never pushed, so CI would never run;
+  `withastro/action` only builds. Fix (lead-approved): deploy is gated by `ci.yml` via `workflow_call`.
+  `plans/01-mimari.md` §6.2–6.3 and faz-5 §2 tasks 2 and 5 updated.
+- Quality gate 2026-10-17 (1st run): check 0/0/0, lint 0, format OK, 74 tests, build 4 pages, dist 0 errors (478 B gzip JS),
+  invariants a–j 0 hits, docs links OK, actionlint skipped (not installed).
 
 ## Faz 6 — İngilizce Sürüm ve Bakım   (plans/fazlar/faz-6-ingilizce-surum-ve-bakim.md)
 Status: not started (blocked by Faz 5) — English version confirmed (S4)
@@ -208,7 +214,7 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 ## Follow-ups
 
 - Confirm ADR-006 and ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2).
-- Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0.
+- Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0. Now also the `workflow_call` gate in `deploy.yml` — Faz 5.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
