@@ -1,0 +1,63 @@
+---
+// Skill categories (h3) with Tag lists (faz-2 §2 task 4, ulascanerturk.md §4).
+import Tag from '@/components/ui/Tag.astro';
+
+interface SkillGroup {
+  category: string;
+  items: string[];
+  note?: string;
+}
+
+interface Props {
+  groups: SkillGroup[];
+}
+
+const { groups } = Astro.props;
+---
+
+<div class="skills-grid">
+  {groups.map((group) => (
+    <div class="skills-grid__group">
+      <h3 class="skills-grid__title">{group.category}</h3>
+      <ul class="skills-grid__tags">
+        {group.items.map((item) => (
+          <li>
+            <Tag label={item} />
+          </li>
+        ))}
+      </ul>
+      {group.note && <p class="skills-grid__note">{group.note}</p>}
+    </div>
+  ))}
+</div>
+
+<style>
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  .skills-grid__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .skills-grid__title {
+    font-size: var(--step-0);
+  }
+
+  .skills-grid__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .skills-grid__note {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+</style>

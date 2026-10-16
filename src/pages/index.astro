@@ -1,14 +1,101 @@
 ---
-// Temporary Faz 0 placeholder, on BaseLayout since Faz 1. Replaced by the profile
-// page in Faz 2 (plans/fazlar/faz-2-profil-sayfasi.md). Text source: ulascanerturk.md
-// title line; GitHub / LinkedIn links are in the header and footer.
+// Profile page (faz-2 §2 task 6). Sections follow plans/02-icerik-ve-tasarim.md
+// §2–§3; data and text come from src/data/profile.ts (ulascanerturk.md).
+// "Öne çıkan projeler" (#projeler) is added in Faz 3 task 8.
+import EcosystemNote from '@/components/profile/EcosystemNote.astro';
+import EducationList from '@/components/profile/EducationList.astro';
+import ExperienceList from '@/components/profile/ExperienceList.astro';
+import FocusAreas from '@/components/profile/FocusAreas.astro';
+import LinkList from '@/components/profile/LinkList.astro';
+import ProfileHero from '@/components/profile/ProfileHero.astro';
+import SkillsGrid from '@/components/profile/SkillsGrid.astro';
+import WorkAreas from '@/components/profile/WorkAreas.astro';
+import Callout from '@/components/ui/Callout.astro';
+import Section from '@/components/ui/Section.astro';
+import { profile, profilePage } from '@/data/profile';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { formatDate } from '@/lib/date';
+
+const { about, skills, experience, education, ecosystem, focusAreas, links, footnote } =
+  profilePage;
+
+const heroActions = profilePage.hero.actions.flatMap((action) => {
+  const link = profile.links.find((candidate) => candidate.kind === action.kind);
+  return link ? [{ label: action.label, href: link.url }] : [];
+});
 ---
 
-<BaseLayout description="Ulaşcan Ertürk — yazılım geliştirici ve teknoloji girişimcisi. Kişisel site yapım aşamasında.">
-  <h1>Ulaşcan Ertürk</h1>
-  <p>
-    Yazılım Geliştirici · Teknoloji Girişimcisi · Full-Stack Web ve Mobil Uygulama Geliştiricisi
-  </p>
-  <p>Site yapım aşamasında.</p>
+<BaseLayout description={profilePage.description}>
+  <ProfileHero
+    name={profile.name}
+    headline={profile.headline}
+    location={profile.location}
+    tagline={profile.tagline}
+    actions={heroActions}
+  />
+
+  <Section id={about.id} title={about.title}>
+    {profile.summary.map((paragraph) => (
+      <p>{paragraph}</p>
+    ))}
+  </Section>
+
+  <Section id={skills.id} title={skills.title}>
+    <p>{skills.intro}</p>
+    <SkillsGrid groups={profile.skills} />
+  </Section>
+
+  <Section id={experience.id} title={experience.title}>
+    <ExperienceList items={profile.experience} problemsLabel={experience.problemsLabel} />
+    <WorkAreas
+      title={experience.workAreasTitle}
+      items={profile.workAreas.items}
+      note={profile.workAreas.note}
+    />
+    <Callout>{experience.note}</Callout>
+  </Section>
+
+  <Section id={education.id} title={education.title}>
+    <EducationList
+      items={profile.education}
+      groups={education.groups}
+      kindLabels={education.kindLabels}
+      note={education.note}
+    />
+  </Section>
+
+  <Section id={ecosystem.id} title={ecosystem.title}>
+    <p>{ecosystem.intro}</p>
+    <EcosystemNote
+      context={profile.ecosystem.context}
+      programs={profile.ecosystem.programs}
+      note={profile.ecosystem.note}
+    />
+  </Section>
+
+  <Section id={focusAreas.id} title={focusAreas.title}>
+    <FocusAreas items={profile.focusAreas} />
+  </Section>
+
+  <Section id={links.id} title={links.title}>
+    <LinkList links={profile.links} />
+  </Section>
+
+  <div class="profile-footnote">
+    <p>{footnote.text}</p>
+    <p>
+      {footnote.updatedLabel}
+      <time datetime={profile.lastUpdated}>{formatDate(profile.lastUpdated)}</time>
+    </p>
+  </div>
 </BaseLayout>
+
+<style>
+  .profile-footnote {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+</style>

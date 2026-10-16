@@ -1,14 +1,14 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
+> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 1 — Tasarım Sistemi ve Layout: closed** (branch `feat/faz-1-design-system-layout`).
-Next unblocked phases: **Faz 2 — Profil Sayfası** ∥ **Faz 3 — Proje Sayfaları**.
-Overall: tasks 21/70 (+1 optional skipped) · acceptance 14/47.
+**Faz 2 — Profil Sayfası: closed** (branch `feat/faz-2-profile-page`).
+Next unblocked phase: **Faz 3 — Proje Sayfaları** (Faz 4 waits for it).
+Overall: tasks 27/70 (+1 optional skipped, +1 deferred to Faz 3) · acceptance 22/47.
 
 ## Open Questions
 
@@ -21,8 +21,7 @@ Overall: tasks 21/70 (+1 optional skipped) · acceptance 14/47.
 | S5 | Custom domain? | No; `ulascanerturk.github.io` | 2026-10-17 | lead |
 | S6 | ADR-001 (Astro)? | Accepted | 2026-10-17 | lead |
 
-Pending lead inputs: profile footnote decision (Faz 2 task 7),
-LockBox Mobile publication status + text approval (Faz 3), robots.txt AI crawler
+Pending lead inputs: LockBox Mobile publication status + text approval (Faz 3), robots.txt AI crawler
 policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10).
 
 ## Faz 0 — Proje Kurulumu   (plans/fazlar/faz-0-proje-kurulumu.md)
@@ -76,24 +75,28 @@ Status: closed (2026-10-17, branch `feat/faz-1-design-system-layout`)
 - Small additions during implementation: `--container` token, footer nav label "Alt bağlantılar", `--color-warning` (Callout).
 
 ## Faz 2 — Profil Sayfası   (plans/fazlar/faz-2-profil-sayfasi.md)
-Status: not started (unblocked)
+Status: closed (2026-10-17, branch `feat/faz-2-profile-page`)
 ### Tasks
-- [ ] 1. LinkedIn URL from lead → `ulascanerturk.md` §10 ✅ (commit 578d8e0) + `profile.ts` (pending)
-- [ ] 2. `src/data/profile.ts` with source comments
-- [ ] 3. Text draft + lead approval
-- [ ] 4. Profile components
-- [ ] 5. Featured projects section
-- [ ] 6. `src/pages/index.astro`
-- [ ] 7. Footnote decision ([REVIEW NEEDED] — lead)
+- [x] 1. LinkedIn URL — `ulascanerturk.md` §10 (commit 578d8e0) + `profile.links` (`kind: 'linkedin'`); no e-mail/phone
+- [x] 2. `src/data/profile.ts` — `Profile` + `profilePage`, `// kaynak: ulascanerturk.md §N` comment per field
+- [x] 3. Text draft + lead approval — first person (lead decision), approved 2026-10-17
+- [x] 4. Profile components — `src/components/profile/` (8 components)
+- [—] 5. Featured projects section — deferred to Faz 3 task 8 (lead decision 2026-10-17): no `#projeler` section and no "Projeleri gör" hero action until `/projeler/` exists (no broken internal link)
+- [x] 6. `src/pages/index.astro` — sections in 02 §2 order with `id` anchors; meta description from the profile summary
+- [x] 7. Footnote — lead decision 2026-10-17: at the end of `/` (not in the footer): §11 self-declaration note + "Son güncelleme" (`<time>`, `formatDate`)
 ### Acceptance Criteria
-- [ ] Profile texts approved by lead (date recorded here)
-- [ ] LinkedIn URL in `ulascanerturk.md` §10 and on the site
-- [ ] Shifter Pro / Lite in experience; no separate project page
-- [ ] Every section consistent with `ulascanerturk.md`; nothing from §9/§11
-- [ ] Education and entrepreneurship wording follows §3 and §7
-- [ ] Page fully readable without JS
-- [ ] Quality gate PASS (`all`)
-- [ ] Checklist: İçerik ve Gizlilik, Erişilebilirlik reviewed
+- [x] Profile texts approved by lead — 2026-10-17 (first person; plan + revised draft approved)
+- [x] LinkedIn URL in `ulascanerturk.md` §10 and on the site — §10, header/footer (Faz 1), hero action, Bağlantılar
+- [x] Shifter Pro / Lite in experience; no separate project page — `ExperienceList` products (h4), no `/projeler/` route
+- [x] Every section consistent with `ulascanerturk.md`; nothing from §9/§11 — source comments per field; privacy scan a–j 0 hits; content review of every keyword hit
+- [x] Education and entrepreneurship wording follows §3 and §7 — degree/training grouped and labelled + §3 note; programs under "Shifter girişimi bağlamında…" + §7 note; Vitest asserts one degree (Uluslararası İlişkiler) and Shifter context
+- [x] Page fully readable without JS — all content is static HTML; only the theme script (480 B gzip) runs
+- [x] Quality gate PASS (`all`) — `test-lint all` 2nd run 2026-10-17 (1st run: Prettier only, 11 files)
+- [x] Checklist: İçerik ve Gizlilik ✅ (sources, §9/§11, §3/§7 wording, no invented claims, work areas not presented as products), Erişilebilirlik ✅ (one h1, h1→h4 without skips, meaningful link text, 44 px targets for hero/link-list links, tokens only, no horizontal scroll at 360 px)
+### Notes
+- Plan deviations approved 2026-10-17: `Profile` gains `tagline`, `skills[].note`, `experience[].products`, `workAreas`, `lastUpdated` (`plans/01-mimari.md` §4.1 updated); page text lives in `profilePage`; extra anchor `#odak-alanlari`; one section-level "titles may change" Callout instead of per-entry notes.
+- ADR-005 accepted 2026-10-17.
+- `Tag.astro` change (planned "only if needed") was not needed: `scrollWidth = 360` at 360 px.
 
 ## Faz 3 — Proje Sayfaları   (plans/fazlar/faz-3-proje-sayfalari.md)
 Status: not started (unblocked)
@@ -105,7 +108,7 @@ Status: not started (unblocked)
 - [ ] 5. `ProjectLayout.astro`
 - [ ] 6. Pages (`/projeler/`, `/projeler/[slug]/`) — also add "Projeler" to `site.nav.items` and "Projelere göz at" to `site.notFound.links` (deferred from Faz 1)
 - [ ] 7. `lockbox-mobile.md`
-- [ ] 8. Profile integration (featured)
+- [ ] 8. Profile integration (featured) — also adds the `#projeler` section (between `#deneyim` and `#egitim`, `profilePage`) and the "Projeleri gör" hero action (deferred Faz 2 task 5)
 - [ ] 9. "How to add a project" guide in `references/content_schema.md`
 ### Acceptance Criteria
 - [ ] Adding a project requires only one `.md` file
@@ -117,7 +120,7 @@ Status: not started (unblocked)
 - [ ] Checklist: İçerik ve Gizlilik, Erişilebilirlik, SEO reviewed
 
 ## Faz 4 — SEO, Erişilebilirlik ve Performans   (plans/fazlar/faz-4-seo-erisilebilirlik-performans.md)
-Status: not started (blocked by Faz 2 and Faz 3)
+Status: not started (blocked by Faz 3; Faz 2 closed)
 ### Tasks
 - [ ] 1. `Seo.astro`
 - [ ] 2. OG images
@@ -187,11 +190,11 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 |---|---|---|---|---|
 | 2026-10-17 | not run | not run | 0 B (placeholder page) | Faz 0 dist check: 1 page, 0 errors |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script, 996 B raw) | Faz 1 dist check: 2 pages, 0 errors, 0 warnings; 360 px, keyboard, theme checks in browser (macOS) |
+| 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
 
 ## Follow-ups
 
-- Profile type needs a field for §6 work areas (`WorkAreas` component) — init-references, see `content_schema.md`.
-- Confirm ADR-005 … ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1).
+- Confirm ADR-006 and ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2).
 - Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
@@ -199,5 +202,5 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 - `Seo.astro` folder (`src/components/` root vs a subfolder) not fixed in plans — decide in Faz 4 planning.
 - Faz 1 risk table: check rendering on Windows and Android (system font stack) — only macOS was checked — Faz 1.
 - Verify the site with JavaScript actually disabled in a browser (only simulated in Faz 1) — Faz 4 manual a11y audit.
-- `/#hakkimda` nav anchor resolves once Faz 2 adds the `#hakkimda` section — Faz 1.
 - Faz 0 phase doc acceptance checkboxes are still unticked in `plans/fazlar/faz-0-proje-kurulumu.md` (progress lives here) — Faz 1.
+- `site.description` (Faz 1, default meta for pages without their own — now only 404) is third person ("…geliştirir"); the profile text is first person (lead decision) — align when Faz 3/4 touches meta descriptions — Faz 2.

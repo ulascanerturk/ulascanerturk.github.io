@@ -1,0 +1,38 @@
+---
+// Entrepreneurship and ecosystem programs (faz-2 §2 task 4, ulascanerturk.md §7).
+// Programs are listed in the Shifter context, never as personal awards.
+import Callout from '@/components/ui/Callout.astro';
+
+interface Props {
+  context: string;
+  programs: string[];
+  note: string;
+}
+
+const { context, programs, note } = Astro.props;
+---
+
+<div class="ecosystem">
+  <h3>{context}</h3>
+  <ul>
+    {programs.map((program) => (
+      <li>{program}</li>
+    ))}
+  </ul>
+  <Callout>{note}</Callout>
+</div>
+
+<style>
+  .ecosystem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .ecosystem ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    padding-inline-start: var(--space-m);
+  }
+</style>

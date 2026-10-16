@@ -57,7 +57,7 @@
 
 ## ADR-005 — İçerik modeli
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 2 planı onayı)
 - **Karar:** Projeler `src/content/projects/*.md` (content collection + zod);
   profil `src/data/profile.ts` (tipli nesne). `ulascanerturk.md` kaynak belgedir,
   sitede doğrudan render edilmez.

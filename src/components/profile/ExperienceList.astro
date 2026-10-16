@@ -1,0 +1,101 @@
+---
+// Professional experience (faz-2 §2 task 4, ulascanerturk.md §5–§6). Products
+// such as Shifter Pro / Lite are described here, without separate pages (S1).
+import Callout from '@/components/ui/Callout.astro';
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+
+interface Product {
+  name: string;
+  description: string;
+  problems: string[];
+}
+
+interface Experience {
+  organization: string;
+  role?: string;
+  url?: string;
+  highlights: string[];
+  note?: string;
+  products?: Product[];
+}
+
+interface Props {
+  items: Experience[];
+  problemsLabel: string;
+}
+
+const { items, problemsLabel } = Astro.props;
+---
+
+<div class="experience">
+  {items.map((item) => (
+    <article class="experience__item">
+      <h3>
+        {item.url ? (
+          <ExternalLink href={item.url}>{item.organization}</ExternalLink>
+        ) : (
+          item.organization
+        )}
+      </h3>
+      {item.role && <p class="experience__role">{item.role}</p>}
+      <ul class="experience__highlights">
+        {item.highlights.map((highlight) => (
+          <li>{highlight}</li>
+        ))}
+      </ul>
+      {item.products?.map((product) => (
+        <div class="experience__product">
+          <h4>{product.name}</h4>
+          <p>{product.description}</p>
+          <p class="experience__label">{problemsLabel}</p>
+          <ul>
+            {product.problems.map((problem) => (
+              <li>{problem}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {item.note && <Callout>{item.note}</Callout>}
+    </article>
+  ))}
+</div>
+
+<style>
+  .experience {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+
+  .experience__item,
+  .experience__product {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .experience__role {
+    color: var(--color-text-muted);
+  }
+
+  .experience__highlights,
+  .experience__product ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    max-width: var(--measure);
+    padding-inline-start: var(--space-m);
+  }
+
+  .experience__product {
+    margin-top: var(--space-xs);
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface);
+  }
+
+  .experience__label {
+    font-weight: 600;
+  }
+</style>

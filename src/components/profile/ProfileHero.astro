@@ -1,0 +1,100 @@
+---
+// Profile hero (faz-2 §2 task 4): monogram, the page's only <h1>, headline,
+// location, one-sentence summary and action links. Text arrives via props.
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+import Monogram from '@/components/ui/Monogram.astro';
+
+interface Action {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  name: string;
+  headline: string;
+  location: string;
+  tagline: string;
+  actions: Action[];
+}
+
+const { name, headline, location, tagline, actions } = Astro.props;
+---
+
+<header class="profile-hero">
+  <Monogram size={88} />
+  <div class="profile-hero__body">
+    <h1>{name}</h1>
+    <p class="profile-hero__headline">{headline}</p>
+    <p class="profile-hero__location">{location}</p>
+    <p class="profile-hero__tagline">{tagline}</p>
+    {actions.length > 0 && (
+      <ul class="profile-hero__actions">
+        {actions.map((action) => (
+          <li>
+            <ExternalLink href={action.href} class="profile-hero__action">
+              {action.label}
+            </ExternalLink>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</header>
+
+<style>
+  .profile-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-m);
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .profile-hero__body {
+    display: flex;
+    flex: 1 1 18rem;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .profile-hero__headline {
+    color: var(--color-text);
+    font-size: var(--step-1);
+    line-height: var(--line-height-heading);
+  }
+
+  .profile-hero__location {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .profile-hero__tagline {
+    margin-top: var(--space-2xs);
+  }
+
+  .profile-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .profile-hero__action {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-s);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-m);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .profile-hero__action:hover {
+    background-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+  }
+</style>

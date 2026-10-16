@@ -1,12 +1,13 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
+> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-Faz 1 state: design tokens, global styles, theme (inline script + `src/lib/theme.ts`),
-`BaseLayout`, layout and UI components, `/404.html` and the monogram favicon exist.
-`/` is still the temporary placeholder (now on BaseLayout). Profile, projects and SEO are planned.
+Faz 2 state: design tokens, global styles, theme (inline script + `src/lib/theme.ts`),
+`BaseLayout`, layout and UI components, `/404.html` and the monogram favicon exist (Faz 1);
+`/` is the profile page built from `src/data/profile.ts` with the profile components (Faz 2).
+Projects and SEO are planned.
 
 ## Site Overview (`astro.config.mjs` ✅)
 
@@ -24,15 +25,18 @@ Faz 1 state: design tokens, global styles, theme (inline script + `src/lib/theme
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | BaseLayout | inline text (ulascanerturk.md title line) | ✅ temporary placeholder — h1, headline, "Site yapım aşamasında." (GitHub/LinkedIn via header/footer); replaced in Faz 2 by the profile page (`profile.ts`) |
+| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name) | `profile`, `profilePage` (`src/data/profile.ts`); `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 7 → footnote ("Son güncelleme" `<time>`); hero actions resolved from `profile.links` by `kind` |
 | `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout | `getCollection('projects')` | [PLANNED — faz-3 §2 task 6] |
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` + `render()`; v1 slug: `lockbox-mobile` | [PLANNED — faz-3 §2 task 6] |
 | `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön"; projects link added in Faz 3 task 6 |
 | `/sitemap-index.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | [PLANNED — faz-4 §2 task 4] |
 | `/en/`, `/en/projects/`, `/en/projects/{slug}/` | i18n routes | — | `profile.en.ts`, English entries | [PLANNED — faz-6 §2.1] |
 
-Home page anchors [PLANNED — plans/02-icerik-ve-tasarim.md §2]: `#hakkimda`,
-`#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#baglantilar`.
+Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
+`#yetkinlikler`, `#deneyim`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`.
+`#odak-alanlari` is an addition to plans/02-icerik-ve-tasarim.md §2 (lead approval 2026-10-17).
+`#projeler` [PLANNED — faz-3 task 8] goes between `#deneyim` and `#egitim`, with the
+"Projeleri gör" hero action (deferred from Faz 2 task 5).
 Header nav (✅ `site.nav`): Hakkımda (`/#hakkimda`) · GitHub · LinkedIn · theme toggle.
 Projeler (`/projeler/`) is added in Faz 3 task 6 — the route does not exist yet and would
 be a broken internal link (lead decision 2026-10-17).
@@ -61,19 +65,19 @@ be a broken internal link (lead decision 2026-10-17).
 | SiteHeader | `src/components/layout/SiteHeader.astro` | `siteName`, `navLabel`, `items: NavItem[]`, `currentPath`, `themeToggleLabel` | BaseLayout | ✅ brand link (decorative Monogram + name), nav, ThemeToggle; `aria-current="page"` only for exact non-anchor matches; wraps at 360 px |
 | SiteFooter | `src/components/layout/SiteFooter.astro` | `label`, `copyrightHolder`, `links: FooterLink[]` | BaseLayout | ✅ © build year, GitHub, LinkedIn, Kaynak kodu |
 | ThemeToggle | `src/components/layout/ThemeToggle.astro` | `label` | SiteHeader | ✅ `<button data-theme-toggle aria-pressed>`, moon/sun icon by `data-theme`; hidden when `:root` has no `data-theme` (JS off) |
-| Section | `src/components/ui/Section.astro` | `id`, `title`, `level?: 2 \| 3` (default 2) | — (Faz 2) | ✅ `<section id aria-labelledby>`; heading id `{id}-baslik` |
-| Tag | `src/components/ui/Tag.astro` | `label` | — (Faz 2/3) | ✅ |
-| ExternalLink | `src/components/ui/ExternalLink.astro` | `href`, `newTab?`, `newTabHint?`, other `<a>` attrs (no `rel`/`target`) | SiteHeader, SiteFooter | ✅ always `rel="noopener noreferrer"`; new tab only when `newTab` (hint read by screen readers) |
-| Callout | `src/components/ui/Callout.astro` | `variant?: 'note' \| 'warning'`, `title?` | — (Faz 2/3) | ✅ `role="note"`, accent / warning border |
-| Monogram | `src/components/ui/Monogram.astro` | `label?` (→ `role="img"` + `aria-label`; absent → `aria-hidden`), `size?` (64) | SiteHeader (decorative); ProfileHero (Faz 2, with label) | ✅ same drawing as `public/favicon.svg` |
-| ProfileHero | `src/components/profile/ProfileHero.astro` | profile subset | `/` | [PLANNED — faz-2 task 4] |
-| SkillsGrid | `src/components/profile/SkillsGrid.astro` | skills | `/` | [PLANNED — faz-2 task 4] |
-| ExperienceList | `src/components/profile/ExperienceList.astro` | experience (incl. Shifter Pro/Lite) | `/` | [PLANNED — faz-2 task 4] |
-| WorkAreas | `src/components/profile/WorkAreas.astro` | work areas (§6 note) | `/` | [PLANNED — faz-2 task 4] |
-| EducationList | `src/components/profile/EducationList.astro` | education (degree vs training) | `/` | [PLANNED — faz-2 task 4] |
-| EcosystemNote | `src/components/profile/EcosystemNote.astro` | ecosystem | `/` | [PLANNED — faz-2 task 4] |
-| FocusAreas | `src/components/profile/FocusAreas.astro` | focusAreas | `/` | [PLANNED — faz-2 task 4] |
-| LinkList | `src/components/profile/LinkList.astro` | links | `/` | [PLANNED — faz-2 task 4] |
+| Section | `src/components/ui/Section.astro` | `id`, `title`, `level?: 2 \| 3` (default 2) | `/` (7 sections) | ✅ `<section id aria-labelledby>`; heading id `{id}-baslik` |
+| Tag | `src/components/ui/Tag.astro` | `label` | SkillsGrid (Faz 3: project tech) | ✅ `nowrap`; longest skill tag fits at 360 px (checked Faz 2) |
+| ExternalLink | `src/components/ui/ExternalLink.astro` | `href`, `newTab?`, `newTabHint?`, other `<a>` attrs (no `rel`/`target`) | SiteHeader, SiteFooter, ProfileHero, ExperienceList, LinkList | ✅ always `rel="noopener noreferrer"`; new tab only when `newTab` (hint read by screen readers) |
+| Callout | `src/components/ui/Callout.astro` | `variant?: 'note' \| 'warning'`, `title?` | `/` (experience note), ExperienceList, WorkAreas, EducationList, EcosystemNote | ✅ `role="note"`, accent / warning border |
+| Monogram | `src/components/ui/Monogram.astro` | `label?` (→ `role="img"` + `aria-label`; absent → `aria-hidden`), `size?` (64) | SiteHeader, ProfileHero (both decorative — the name is next to it) | ✅ same drawing as `public/favicon.svg` |
+| ProfileHero | `src/components/profile/ProfileHero.astro` | `name`, `headline`, `location`, `tagline`, `actions: { label, href }[]` | `/` | ✅ `<header>` in main: decorative Monogram (88), the page's only `<h1>`, headline, location, tagline, action links (ExternalLink, 44 px, outlined) |
+| SkillsGrid | `src/components/profile/SkillsGrid.astro` | `groups: { category, items[], note? }[]` | `/` | ✅ auto-fill grid; `<h3>` per category, `<ul>` of Tag, muted note (Java) |
+| ExperienceList | `src/components/profile/ExperienceList.astro` | `items: { organization, role?, url?, highlights[], note?, products?[] }[]`, `problemsLabel` | `/` | ✅ `<article>` per organization, `<h3>` (linked when `url`), highlights list, products as surface boxes with `<h4>` + description + problems list (Shifter Pro/Lite, S1), optional per-entry Callout |
+| WorkAreas | `src/components/profile/WorkAreas.astro` | `title`, `items[]`, `note` | `/` (inside `#deneyim`) | ✅ `<h3>`, list, §6 note as Callout |
+| EducationList | `src/components/profile/EducationList.astro` | `items: { institution, program, kind }[]`, `groups`, `kindLabels` (`Record<'degree' \| 'training', string>`), `note` | `/` | ✅ one `<h3>` group per kind (degree first), kind badge (degree = accent border/text, training = muted), §3 note as Callout |
+| EcosystemNote | `src/components/profile/EcosystemNote.astro` | `context`, `programs[]`, `note` | `/` | ✅ `<h3>` context ("Shifter girişimi bağlamında…"), list, §7 note as Callout |
+| FocusAreas | `src/components/profile/FocusAreas.astro` | `items: { title, description }[]` | `/` | ✅ `<dl>` grid of surface cards (`dt` bold, `dd` muted) |
+| LinkList | `src/components/profile/LinkList.astro` | `links: { label, url }[]` | `/` | ✅ auto-fill grid of ExternalLink (44 px) |
 | ProjectCard | `src/components/projects/ProjectCard.astro` | project data (linked title, summary, status, tech) | `/projeler/`, `/` featured | [PLANNED — faz-3 task 4] |
 | ProjectMeta | `src/components/projects/ProjectMeta.astro` | role, period, status (`<dl>`) | ProjectLayout | [PLANNED — faz-3 task 4] |
 | ProjectLinks | `src/components/projects/ProjectLinks.astro` | links | ProjectLayout | [PLANNED — faz-3 task 4] |
@@ -133,7 +137,8 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `slugify` (`src/lib/slug.ts`) | `(input: string): string` — explicit Turkish map (ı İ ğ ş ç ö ü), NFKD accent strip, lowercase, non-alphanumerics → single `-`, trimmed | `src/lib/slug.test.ts` (5 tests) | ✅ |
 | `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
 | `sortProjects`, `isPublished`, `formatPeriod` | project helpers | `src/lib/projects.test.ts` | [PLANNED — faz-3 task 3] |
-| profile structural tests | — | `src/lib/profile.test.ts` | [PLANNED — faz-2 §3] |
+| `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (4 tests) | ✅ |
+| profile structural tests (data in `src/data/profile.ts`) | — | `src/lib/profile.test.ts` (11 tests: no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn, one degree = Uluslararası İlişkiler, Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda`, description ≤ 160, ISO `lastUpdated`) | ✅ |
 
 ## Public Assets
 

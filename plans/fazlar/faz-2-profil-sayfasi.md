@@ -2,6 +2,7 @@
 
 > Önkoşul: Faz 1 · Faz 3 ile paralel yürütülebilir · Dal: `feat/faz-2-*` · Kapsam: `content` + `site`
 > İlgili: [`02-icerik-ve-tasarim.md`](../02-icerik-ve-tasarim.md) §1–§3 · [`01-mimari.md`](../01-mimari.md) §4.1 · ADR-005
+> **Durum: Kapandı (2026-10-17, dal `feat/faz-2-profile-page`)** — kanıtlar `references/phase_progress.md`'de.
 
 ## 1. Amaç
 
@@ -38,10 +39,13 @@ anlatan, taranabilir ve semantik bir profil sayfası yayınlamak.
 5. **Öne çıkan projeler bölümü.** Faz 3 tamamlanmadıysa geçici olarak
    `/projeler/` bağlantısı; Faz 3 sonrası `featured` projelerin `ProjectCard`'ları
    (v1: LockBox Mobile).
+   → **Faz 3 görev 8'e ertelendi** (lead kararı 2026-10-17): `/projeler/` yokken kırık
+   iç bağlantı verilmez; `#projeler` bölümü ve "Projeleri gör" eylemi Faz 3'te eklenir.
 6. **`src/pages/index.astro`.** Bölümleri `02-icerik-ve-tasarim.md` §2 sırası ve
    `id` çapalarıyla birleştirir; sayfa `description` meta'sı profil özetinden.
 7. **Dipnot (lead kararı).** "Bazı yetkinlik başlıkları beyana dayalıdır" notu
    ve "son güncelleme" tarihi footer'da veya sayfa sonunda.
+   → Karar (2026-10-17): profil sayfasının sonunda; footer değişmez.
 
 ## 3. Testler
 
@@ -54,14 +58,14 @@ anlatan, taranabilir ve semantik bir profil sayfası yayınlamak.
 
 ## 4. Kabul Kriterleri
 
-- [ ] Profil metinleri lead tarafından onaylandı (onay tarihi `phase_progress.md`'de).
-- [ ] LinkedIn URL'si lead'den alındı ve hem `ulascanerturk.md` §10'da hem sitede yer alıyor.
-- [ ] Shifter Pro / Lite "Deneyim" bölümünde anlatılıyor; ayrı proje sayfası yok.
-- [ ] Her bölüm `ulascanerturk.md` ile tutarlı; §9 ve §11 dışı bilgi yok.
-- [ ] Eğitim ve girişimcilik ifadeleri §3 ve §7'deki ayrımlara uyuyor.
-- [ ] Sayfa JS olmadan tamamen okunabilir.
-- [ ] Kalite kapısı `all` kapsamında PASS.
-- [ ] Kontrol listesi: İçerik ve Gizlilik, Erişilebilirlik gözden geçirildi.
+- [x] Profil metinleri lead tarafından onaylandı (onay tarihi `phase_progress.md`'de).
+- [x] LinkedIn URL'si lead'den alındı ve hem `ulascanerturk.md` §10'da hem sitede yer alıyor.
+- [x] Shifter Pro / Lite "Deneyim" bölümünde anlatılıyor; ayrı proje sayfası yok.
+- [x] Her bölüm `ulascanerturk.md` ile tutarlı; §9 ve §11 dışı bilgi yok.
+- [x] Eğitim ve girişimcilik ifadeleri §3 ve §7'deki ayrımlara uyuyor.
+- [x] Sayfa JS olmadan tamamen okunabilir.
+- [x] Kalite kapısı `all` kapsamında PASS.
+- [x] Kontrol listesi: İçerik ve Gizlilik, Erişilebilirlik gözden geçirildi.
 
 ## 5. Riskler
 

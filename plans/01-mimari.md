@@ -117,23 +117,31 @@ Kurallar:
 export interface Profile {
   name: string;                       // "Ulaşcan Ertürk"
   headline: string;                   // "Yazılım Geliştirici · Teknoloji Girişimcisi · ..."
+  tagline: string;                    // Hero'daki tek cümlelik özet (Faz 2)
   location: string;                   // "İstanbul, Türkiye" (yalnızca şehir/ülke)
   since: number;                      // 2018
   summary: string[];                  // Kısa tanıtım paragrafları
-  skills: { category: string; items: string[] }[];
+  skills: { category: string; items: string[]; note?: string }[]; // note: Java "eğitim ve önceki deneyim"
   experience: {
     organization: string;
-    role?: string;                    // Kamuya açık unvan; yoksa boş
+    role?: string;                    // Kamuya açık unvan; bağlam gerekiyorsa highlights'ta
     url?: string;
     highlights: string[];
     note?: string;                    // Unvan değişebilir uyarısı vb.
+    products?: { name: string; description: string; problems: string[] }[]; // Shifter Pro / Lite (S1)
   }[];
+  workAreas: { items: string[]; note: string }; // §6 "Diğer yazılım çalışma alanları" + not
   education: { institution: string; program: string; kind: 'degree' | 'training' }[];
   ecosystem: { context: string; programs: string[]; note: string };
   focusAreas: { title: string; description: string }[];
   links: { label: string; url: string; kind: 'github' | 'linkedin' | 'company' | 'product' | 'blog' | 'other' }[];
+  lastUpdated: string;                // ISO tarih — ulascanerturk.md `last_updated`
 }
 ```
+
+Sayfa metinleri (bölüm başlıkları ve `id` çapaları, giriş cümleleri, etiketler,
+dipnot, meta açıklaması) aynı dosyada ayrı bir `profilePage` nesnesindedir;
+bileşenler bunları prop olarak alır (Faz 2, lead onayı 2026-10-17).
 
 ### 4.2 Projeler (`src/content/projects/*.md`)
 

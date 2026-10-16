@@ -1,12 +1,13 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
+> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). The design
-system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI components, 404).
-Profile, project and SEO features are still planned.
+system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI components, 404);
+the profile page since Faz 2 (`src/data/profile.ts`, `src/components/profile/`).
+Project and SEO features are still planned.
 
 ## Core Philosophy
 
@@ -54,6 +55,10 @@ Rules not tied to config are enforced from Faz 1 onward.
 - Client JS: no UI framework (ADR-004); only the inline theme script (≤ 1 KB).
 - UI text reaches components only as props: `BaseLayout` (or the page) reads `src/data/site.ts`
   and passes labels down; components never import `src/data/*` (Faz 1, e.g. `SiteHeader`).
+  Components declare their own structural prop interfaces instead of importing data types.
+- Page-level text (section titles, `id` anchors, intros, labels, notes, meta description) sits
+  next to the page's facts in the same data file as a separate `{name}Page` object
+  (`profile` + `profilePage` in `src/data/profile.ts`, Faz 2) — one file per language in Faz 6.
 - Inline scripts that cannot be bundled live as a static string in `src/lib` and are executed by
   a Vitest test against a fake DOM, next to the pure function they mirror
   (`src/lib/theme.ts` `themeScript` ↔ `resolveTheme`). Rationale: tested + size-checked, no FOUC,
@@ -87,7 +92,7 @@ Rules not tied to config are enforced from Faz 1 onward.
 - **Never published:** §9 (agent working preferences) and everything §11 excludes.
   `ulascanerturk.md` is never copied to `public/` or `dist/`.
 - **Decisions (2026-10-17):** projects = LockBox Mobile only (S1); contact = GitHub + LinkedIn,
-  no e-mail/phone (S2); monogram avatar, no photo (S3).
+  no e-mail/phone (S2); monogram avatar, no photo (S3); profile text in the first person (Faz 2).
 - **Images:** via `astro:assets` with width/height; metadata stripped
   (`exiftool -all= {file}`) and verified; usage rights confirmed; screenshots
   only with sample data.
@@ -163,5 +168,5 @@ Site URL `https://ulascanerturk.github.io` (no custom domain — S5). Rollback:
 ## Known Gaps / Review Needed
 
 - `actionlint` and `exiftool` are not installed locally: workflow syntax is verified on the first push (Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
-- [REVIEW NEEDED] ADR-005 … ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan).
+- [REVIEW NEEDED] ADR-006 and ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan).
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

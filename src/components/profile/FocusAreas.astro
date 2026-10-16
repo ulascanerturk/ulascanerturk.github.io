@@ -1,0 +1,45 @@
+---
+// Focus areas (faz-2 §2 task 4, ulascanerturk.md §8) as a description list.
+interface FocusArea {
+  title: string;
+  description: string;
+}
+
+interface Props {
+  items: FocusArea[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="focus-areas">
+  {items.map((item) => (
+    <div class="focus-areas__item">
+      <dt>{item.title}</dt>
+      <dd>{item.description}</dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .focus-areas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-s);
+  }
+
+  .focus-areas__item {
+    padding: var(--space-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface);
+  }
+
+  .focus-areas dt {
+    font-weight: 700;
+  }
+
+  .focus-areas dd {
+    color: var(--color-text-muted);
+  }
+</style>

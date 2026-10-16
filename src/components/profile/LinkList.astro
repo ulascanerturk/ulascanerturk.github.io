@@ -1,0 +1,42 @@
+---
+// Public links (faz-2 §2 task 4, ulascanerturk.md §10, S2). External links only,
+// through ExternalLink.
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+
+interface Link {
+  label: string;
+  url: string;
+}
+
+interface Props {
+  links: Link[];
+}
+
+const { links } = Astro.props;
+---
+
+<ul class="link-list">
+  {links.map((link) => (
+    <li>
+      <ExternalLink href={link.url} class="link-list__link">
+        {link.label}
+      </ExternalLink>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .link-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+
+  .link-list__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+</style>

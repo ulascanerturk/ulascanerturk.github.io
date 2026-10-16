@@ -1,0 +1,97 @@
+---
+// Education (faz-2 §2 task 4, ulascanerturk.md §3). The degree and the software
+// training programs are grouped and labelled separately, so a training program
+// is never read as a degree.
+import Callout from '@/components/ui/Callout.astro';
+
+type EducationKind = 'degree' | 'training';
+
+interface Education {
+  institution: string;
+  program: string;
+  kind: EducationKind;
+}
+
+interface Props {
+  items: Education[];
+  groups: Record<EducationKind, string>;
+  kindLabels: Record<EducationKind, string>;
+  note: string;
+}
+
+const { items, groups, kindLabels, note } = Astro.props;
+const kinds: EducationKind[] = ['degree', 'training'];
+const sections = kinds
+  .map((kind) => ({ kind, entries: items.filter((item) => item.kind === kind) }))
+  .filter((section) => section.entries.length > 0);
+---
+
+<div class="education">
+  {sections.map((section) => (
+    <div class="education__group">
+      <h3>{groups[section.kind]}</h3>
+      <ul>
+        {section.entries.map((entry) => (
+          <li class="education__item">
+            <span class:list={['education__kind', `education__kind--${entry.kind}`]}>
+              {kindLabels[entry.kind]}
+            </span>
+            <span class="education__institution">{entry.institution}</span>
+            <span>{entry.program}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+  <Callout>{note}</Callout>
+</div>
+
+<style>
+  .education {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .education__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .education__group ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .education__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3xs);
+  }
+
+  .education__institution {
+    font-weight: 600;
+  }
+
+  .education__kind {
+    padding: 0 var(--space-2xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-s);
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .education__kind--degree {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .education__kind--training {
+    color: var(--color-text-muted);
+  }
+</style>

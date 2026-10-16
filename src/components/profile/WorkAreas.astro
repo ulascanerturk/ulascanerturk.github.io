@@ -1,0 +1,39 @@
+---
+// "Other software work areas" (faz-2 §2 task 4, ulascanerturk.md §6). Shown as a
+// short list with the §6 note — never presented as independent products.
+import Callout from '@/components/ui/Callout.astro';
+
+interface Props {
+  title: string;
+  items: string[];
+  note: string;
+}
+
+const { title, items, note } = Astro.props;
+---
+
+<div class="work-areas">
+  <h3>{title}</h3>
+  <ul>
+    {items.map((item) => (
+      <li>{item}</li>
+    ))}
+  </ul>
+  <Callout>{note}</Callout>
+</div>
+
+<style>
+  .work-areas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .work-areas ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    max-width: var(--measure);
+    padding-inline-start: var(--space-m);
+  }
+</style>
