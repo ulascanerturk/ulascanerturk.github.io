@@ -164,6 +164,7 @@ Bu bölüm, Ulaşcan Ertürk'e yardımcı olacak ajanlar için **çalışma bağ
 ## 10. Kamuya Açık Bağlantılar
 
 - **GitHub:** <https://github.com/ulascanerturk>
+- **LinkedIn:** <https://www.linkedin.com/in/ulascanerturk>
 - **Insapption Technology:** <https://insapption.com/>
 - **Insapption ekip sayfası:** <https://insapption.com/our-team/>
 - **Shifter:** <https://www.shifter.com.tr/>
