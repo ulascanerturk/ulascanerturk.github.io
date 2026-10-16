@@ -85,9 +85,16 @@
 
 ## ADR-008 — Çalışma ortamı: Node.js LTS + npm
 
-- **Durum:** Önerildi — kesin sürüm Faz 0'da doğrulanıp buraya yazılacak
+- **Durum:** Kabul edildi (2026-10-17, Faz 0 planı onayı)
 - **Karar:** Node.js güncel Active LTS; `.nvmrc` + `package.json#engines`;
   npm ve commit edilen `package-lock.json`; CI'da `npm ci`.
+- **Doğrulanan sürümler (2026-10-17, nodejs.org dist index + npm registry):**
+  Active LTS **Node 24** (Krypton, v24.22.0) → `.nvmrc = 24`; `withastro/action@v6`
+  varsayılanı da 24. Astro 7.4 `node >=22.22.0` istediği için
+  `engines.node = ">=22.22.0"` — yerel Node 22 (Maintenance LTS) ile geliştirme
+  sürer, CI ve yayın 24'te koşar.
+- **Not:** Yerel ortamda `NODE_ENV=production` tanımlıysa npm devDependencies'i
+  atlar; bu durumda `npm install --include=dev` kullanılır.
 
 ## ADR-009 — Yazı tipi: sistem font yığını
 
@@ -100,12 +107,21 @@
 
 ## ADR-010 — Kalite araçları
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, Faz 0 planı onayı)
 - **Karar:** `astro check` (tip), ESLint flat config (`eslint-plugin-astro`,
-  `eslint-plugin-jsx-a11y`, `typescript-eslint`), Prettier
+  `eslint-plugin-jsx-a11y-x`, `typescript-eslint`), Prettier
   (`prettier-plugin-astro`), Vitest (`src/lib`), bağımlılıksız
   `scripts/check-dist.mjs` (derlenmiş HTML), Lighthouse CI ve axe/pa11y (faz
   kapanışlarında). Hepsi `test-lint` skill'inin kapı matrisinde.
+- **Sapmalar (2026-10-17):**
+  - `eslint-plugin-jsx-a11y` (6.10.2) ESLint 10'u desteklemiyor (peer `^3…^9`);
+    yerine `eslint-plugin-astro` 3.x'in resmî olarak desteklediği
+    `eslint-plugin-jsx-a11y-x` (es-tooling, 0.2.x) kullanılır. Orijinal eklenti
+    ESLint 10 desteği verdiğinde geri dönülebilir (`eslint-plugin-astro` ikisini de yükler).
+  - TypeScript `~6.0.3`'e sabitlendi: `typescript-eslint` (`<6.1.0`) ve
+    `@astrojs/check` (`^5 || ^6`) henüz TS 7'yi desteklemiyor.
+- **Yardımcı paketler:** `@astrojs/check` (astro check), `@eslint/js` ve
+  `globals` (ESLint flat config temel parçaları).
 
 ## ADR-011 — İçerik Güvenlik Politikası (aday)
 

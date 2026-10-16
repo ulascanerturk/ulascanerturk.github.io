@@ -1,13 +1,13 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (init-references, PLANS-ONLY mode)
+> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 0 — Proje Kurulumu: in progress** (tasks 1–2 done). Next unblocked phase
-after Faz 0 closes: Faz 1. Overall: tasks 2/70 · acceptance 2/47.
+**Faz 0 — Proje Kurulumu: closed** (branch `feat/faz-0-astro-scaffold-toolchain`).
+Next unblocked phase: **Faz 1 — Tasarım Sistemi ve Layout**. Overall: tasks 12/70 · acceptance 7/47.
 
 ## Open Questions
 
@@ -25,31 +25,31 @@ LockBox Mobile publication status + text approval (Faz 3), robots.txt AI crawler
 policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10).
 
 ## Faz 0 — Proje Kurulumu   (plans/fazlar/faz-0-proje-kurulumu.md)
-Status: in progress
+Status: closed (2026-10-17)
 ### Tasks
 - [x] 1. ADR-001 approval — `plans/ekler/karar-kayitlari.md` "Kabul edildi (2026-10-17)", commit 640534e
-- [x] 2. Reference maps — `references/*.md` created by init-references (PLANS-ONLY), uncommitted
-- [ ] 3. Verify Astro + Node LTS versions; `.nvmrc`, `engines`, ADR-008
-- [ ] 4. Astro skeleton (temp dir, then move; placeholder index page)
-- [ ] 5. `astro.config.mjs`
-- [ ] 6. TypeScript config
-- [ ] 7. ESLint + Prettier + `.editorconfig`
-- [ ] 8. Vitest + `src/lib/slug.ts` and test
-- [ ] 9. npm scripts
-- [ ] 10. CI workflow
-- [ ] 11. Deploy workflow (`workflow_dispatch` only)
-- [ ] 12. Documentation (AGENTS.md commands, methodology versions)
+- [x] 2. Reference maps — `references/*.md` created by init-references (PLANS-ONLY), commit 83acbc0
+- [x] 3. Versions verified 2026-10-17 (Astro 7.4.0, Node 24 Active LTS) — `.nvmrc` 24, `engines >=22.22.0`, ADR-008 accepted
+- [x] 4. Astro skeleton — hand-written minimal setup (no `npm create`), placeholder `src/pages/index.astro` (text approved by lead)
+- [x] 5. `astro.config.mjs`
+- [x] 6. `tsconfig.json`
+- [x] 7. `eslint.config.js` (jsx-a11y-x, ADR-010 deviation), `.prettierrc.json`, `.prettierignore`, `.editorconfig`
+- [x] 8. `vitest.config.ts`, `src/lib/slug.ts` + `slug.test.ts` (5 tests)
+- [x] 9. npm scripts (dev, build, preview, check, lint, format, format:check, test)
+- [x] 10. `.github/workflows/ci.yml`
+- [x] 11. `.github/workflows/deploy.yml` (`workflow_dispatch` only)
+- [x] 12. AGENTS.md Commands; `references/methodology.md` Versions + Commands
 ### Acceptance Criteria
 - [x] ADR-001 accepted — karar-kayitlari.md
 - [x] `references/` exists with four map files — this run
-- [ ] `.nvmrc` and `engines` show the verified Node LTS
-- [ ] All quality-gate commands pass with zero errors/warnings
-- [ ] CI workflow syntax valid (actionlint, or noted for first push in Faz 5)
-- [ ] `dist/`, `.astro/`, `node_modules/` not committed
-- [ ] Checklist: Genel, Dağıtım reviewed
+- [x] `.nvmrc` and `engines` show the verified Node LTS — `.nvmrc` 24; `engines >=22.22.0` (lead-approved deviation: Astro minimum, keeps local Node 22 working)
+- [x] All quality-gate commands pass with zero errors/warnings — `test-lint all` PASS 2026-10-17 (2nd run, after fix: prettier, defineConfig, telemetry env)
+- [x] CI workflow syntax valid — actionlint not installed; YAML parses, permissions explicit; **verify on first push in Faz 5**
+- [x] `dist/`, `.astro/`, `node_modules/` not committed — ignored by `.gitignore`, absent from the change set
+- [x] Checklist: Genel ✅ (plan-only changes + approved fixes; new deps covered by ADR-010; audit 0 vulnerabilities; references updated), Dağıtım ✅ (explicit permissions; actions from GitHub/withastro on major tags; no build output)
 
 ## Faz 1 — Tasarım Sistemi ve Layout   (plans/fazlar/faz-1-tasarim-sistemi-ve-layout.md)
-Status: not started (blocked by Faz 0)
+Status: not started (unblocked)
 ### Tasks
 - [ ] 1. Tokens — `src/styles/tokens.css`
 - [ ] 2. Global styles — `src/styles/global.css`
@@ -180,11 +180,15 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 
 | Date | Lighthouse (perf/a11y/bp/seo) | axe | Max JS (gzip) | Notes |
 |---|---|---|---|---|
-| — | not run | not run | — | no site yet |
+| 2026-10-17 | not run | not run | 0 B (placeholder page) | Faz 0 dist check: 1 page, 0 errors |
 
 ## Follow-ups
 
 - Profile type needs a field for §6 work areas (`WorkAreas` component) — init-references, see `content_schema.md`.
-- Confirm ADR-003 … ADR-010 ("Önerildi") with the lead when their phases start — init-references.
+- Confirm ADR-003 … ADR-007 and ADR-009 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0).
+- Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0.
+- Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
+- `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
+- Replace the plain GitHub `<a>` on the placeholder page with `ExternalLink` when the page is rebuilt in Faz 2 — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
 - `Seo.astro` folder (`src/components/` root vs a subfolder) not fixed in plans — decide in Faz 4 planning.

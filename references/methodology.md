@@ -1,11 +1,11 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (init-references, PLANS-ONLY mode)
+> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-No code or config exists yet. Rules below come from `plans/`; tooling that
-enforces them is `[PLANNED — plans/fazlar/faz-0-proje-kurulumu.md §3]`.
+Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). Site
+features (layouts, components, content) are still planned.
 
 ## Core Philosophy
 
@@ -24,7 +24,7 @@ From `plans/README.md` §4.
 | 1 | Public professional info only — nothing from `ulascanerturk.md` §11's excluded list in content, meta, JSON-LD, EXIF or repo; §9 never published | `test-lint` §6 a–d, g (privacy scan); `git-commit` diff scan + EXIF check; review |
 | 2 | Content accuracy — every claim backed by `ulascanerturk.md` or lead approval; keep §3/§5/§7 distinctions | `plan-feature` source column; `test-lint` §6 content accuracy review (manual); lead wording approval |
 | 3 | Static and tracker-free — no server code, cookies, analytics, third-party runtime scripts; no secrets | `test-lint` §6 e, f, j; ADR required for exceptions |
-| 4 | Accessible and fast — WCAG 2.2 AA; Lighthouse mobile ≥ 95; ≤ 10 KB client JS (gzip)/page | ESLint jsx-a11y [PLANNED]; `test-lint` §7 dist checks (budget, headings, alt, links); §11 Lighthouse + axe |
+| 4 | Accessible and fast — WCAG 2.2 AA; Lighthouse mobile ≥ 95; ≤ 10 KB client JS (gzip)/page | ESLint `astro/jsx-a11y/*` (via `eslint-plugin-jsx-a11y-x`) ✅; `test-lint` §7 dist checks (budget, headings, alt, links); §11 Lighthouse + axe |
 | 5 | Generated output never committed; deploy only from `main` via Actions | `.gitignore` ✅; `merge-main` §2 grep; `git-commit` filter |
 | 6 | No phase closes without acceptance criteria + quality gate | `phase_progress.md` evidence; `dev-workflow` |
 
@@ -40,15 +40,19 @@ From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual rev
 | Data | `src/data/**`, `src/content/**` | lib (types only) | pages, layouts, components |
 | Helper | `src/lib/**` | other lib modules | `.astro` components, `astro:*` modules |
 
-## Astro / TypeScript Standards [PLANNED — plans/01-mimari.md §1–§3, faz-0 §3]
+## Astro / TypeScript Standards
 
-- TypeScript `astro/tsconfigs/strict` + `noUncheckedIndexedAccess`; alias `@/*` → `src/*`.
+Config in place (✅): `tsconfig.json`, `eslint.config.js`, `.prettierrc.json`, `.editorconfig`.
+Rules not tied to config are enforced from Faz 1 onward.
+
+- TypeScript `astro/tsconfigs/strict` + `noUncheckedIndexedAccess`; alias `@/*` → `src/*` (`paths` only — `baseUrl` is deprecated in TS 6) ✅.
+- Prettier: `singleQuote`, `printWidth: 100`, `prettier-plugin-astro`; hand-written docs (`plans/`, `references/`, skills, root `*.md`) are excluded via `.prettierignore` ✅.
 - `getCollection` / `getEntry` only in `src/pages`; components receive data via props.
 - No hard-coded UI text in components — text lives in `src/data/*` or content files (prerequisite for Faz 6 `/en/`).
 - Styles: tokens from `src/styles/tokens.css`; Astro scoped `<style>`; no CSS framework (ADR-003).
 - Client JS: no UI framework (ADR-004); only the inline theme script (≤ 1 KB).
 - External links through `ExternalLink` (`rel="noopener noreferrer"`).
-- `console.*` only in `scripts/` (ESLint `no-console: error`).
+- `console.*` only in `scripts/` (ESLint `no-console: error`, off for `scripts/**`) ✅.
 - Slugs/URLs: ASCII lowercase with hyphens (ç→c, ğ→g, ı/İ→i, ö→o, ş→s, ü→u), trailing slash.
 - Accessibility: semantic landmarks; one `<h1>` per page; no skipped heading levels;
   meaningful `alt` (decorative → `alt=""`); visible `:focus-visible`; buttons for
@@ -82,13 +86,29 @@ From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual rev
 |---|---|---|---|---|
 | — | none yet | — | — | — |
 
-## Versions [REVIEW NEEDED — verify in Faz 0 task 3]
+## Versions (verified 2026-10-17 — npm registry, nodejs.org dist index)
 
-| Tool | Version | Verified | Source |
-|---|---|---|---|
-| Astro | current stable — not pinned | ⬜ | astro.build |
-| Node.js | current Active LTS — not pinned (`.nvmrc` [PLANNED]) | ⬜ | nodejs.org |
-| npm | bundled with Node | ⬜ | — |
+| Tool | Version | Notes |
+|---|---|---|
+| Node.js | `.nvmrc` = 24 (Active LTS Krypton); `engines.node` = `>=22.22.0` | CI/deploy on 24; local dev on Node 22.23.1 is supported (Astro minimum) |
+| npm | 10.9.8 (local) | lockfile committed; CI uses `npm ci` |
+| astro | ^7.4.0 | |
+| @astrojs/check | ^0.9.10 | peer TS `^5 \|\| ^6` |
+| typescript | ~6.0.3 | pinned below 7 — `typescript-eslint` needs `<6.1.0` (ADR-010) |
+| eslint / @eslint/js | ^10.13.0 / ^10.0.1 | config via `defineConfig` from `eslint/config` |
+| typescript-eslint | ^8.71.2 | |
+| eslint-plugin-astro | ^3.2.1 | loads `eslint-plugin-jsx-a11y-x` automatically |
+| eslint-plugin-jsx-a11y-x | ^0.2.0 | replaces `eslint-plugin-jsx-a11y` (no ESLint 10 support) — ADR-010 |
+| globals | ^17.13.0 | |
+| prettier / prettier-plugin-astro | ^3.9.10 / ^1.1.1 | |
+| vitest | ^5.0.5 | config via `getViteConfig` from `astro/config` |
+| GitHub Actions | `actions/checkout@v7`, `actions/setup-node@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` | latest major tags 2026-10-17 |
+
+### Environment Notes
+- If `NODE_ENV=production` is set (it is in the lead's current environment), npm omits
+  devDependencies: install with `npm install --include=dev`.
+- Astro CLI telemetry: disabled in CI/deploy via `ASTRO_TELEMETRY_DISABLED=1`;
+  locally run `npx astro telemetry disable` once (machine setting).
 
 ## Git Conventions
 
@@ -101,15 +121,15 @@ From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual rev
 - The workflow never pushes. After Faz 5, pushing `main` deploys the site — the lead pushes.
 - Bootstrap exception: the initial commits (plans, skills, S1–S6 decisions) were made directly on `main` with lead approval.
 
-## Testing Conventions [PLANNED — plans/01-mimari.md §6, faz-0 §4, faz-4 §2]
+## Testing Conventions
 
-- Vitest for `src/lib` (`*.test.ts` beside the module).
+- Vitest for `src/lib` (`*.test.ts` beside the module; `vitest.config.ts` includes `src/**/*.test.ts`) ✅ — first suite: `src/lib/slug.test.ts`.
 - `astro build` = content schema validation.
 - Built-HTML checks: `scripts/check-dist.mjs` from Faz 4; until then the Python fallback in `test-lint` §7.
 - Lighthouse ≥ 0.95 (mobile, every category) and axe 0 violations at phase close from Faz 4.
 - Agent skills: `.claude/skills/` (Claude Code, `/skill`) and `.agents/skills/` (Codex, `$skill`) — kept in sync.
 
-## Commands [PLANNED — plans/01-mimari.md §6.1]
+## Commands
 
 | Purpose | Command |
 |---|---|
@@ -120,8 +140,8 @@ From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual rev
 | Lint | `npm run lint -- --max-warnings 0` |
 | Format | `npm run format` / `npm run format:check` |
 | Unit tests | `npm test` |
-| Dist checks | `npm run check:dist` (Faz 4) |
-| Lighthouse CI | `npm run lhci` (Faz 4) |
+| Dist checks | `npm run check:dist` [PLANNED — Faz 4]; until then `test-lint` §7 Python fallback |
+| Lighthouse CI | `npm run lhci` [PLANNED — Faz 4] |
 
 ## Release and Rollback [PLANNED — plans/fazlar/faz-5-yayin-ve-dagitim.md §2 task 10]
 
@@ -130,6 +150,6 @@ Site URL `https://ulascanerturk.github.io` (no custom domain — S5). Rollback:
 
 ## Known Gaps / Review Needed
 
-- [REVIEW NEEDED] Astro / Node versions unverified (Faz 0 task 3).
-- [REVIEW NEEDED] ADR-003 … ADR-010 are "Önerildi"; confirm with the lead when the relevant phase starts.
+- `actionlint` and `exiftool` are not installed locally: workflow syntax is verified on the first push (Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
+- [REVIEW NEEDED] ADR-003 … ADR-007 and ADR-009 are "Önerildi"; confirm with the lead when the relevant phase starts.
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

@@ -49,7 +49,10 @@ Per-change checklist: `plans/ekler/kontrol-listesi.md`.
   with metadata stripped.
 - Every new dependency gets an ADR in `plans/ekler/karar-kayitlari.md`.
 
-## Commands (available after Faz 0)
+## Commands
+
+Node 24 (`.nvmrc`; Astro 7 requires `>=22.22.0`). If `NODE_ENV=production` is set in
+your environment, install with `npm install --include=dev`.
 
 ```bash
 npm install
@@ -58,10 +61,11 @@ npm run build          # astro build (validates content schemas)
 npm run preview        # astro preview
 npm run check          # astro check
 npm run lint           # eslint . (run with --max-warnings 0)
+npm run format         # prettier --write .
 npm run format:check   # prettier --check .
 npm test               # vitest run
-npm run check:dist     # built-HTML checks (from Faz 4)
-npm run lhci           # Lighthouse CI (from Faz 4)
+npm run check:dist     # built-HTML checks (added in Faz 4)
+npm run lhci           # Lighthouse CI (added in Faz 4)
 ```
 
 The git repository is initialized on `main` with no remote; the remote and

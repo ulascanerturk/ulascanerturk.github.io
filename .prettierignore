@@ -1,0 +1,14 @@
+# generated
+dist/
+.astro/
+node_modules/
+coverage/
+.lighthouseci/
+package-lock.json
+
+# hand-written docs and agent skills (kept as authored)
+plans/
+references/
+.claude/
+.agents/
+/*.md

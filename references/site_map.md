@@ -1,29 +1,29 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (init-references, PLANS-ONLY mode)
+> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-No site code exists yet (`src/`, `public/`, config files and workflows are absent).
-Every entry below is planned.
+Faz 0 state: Astro skeleton with one temporary page, `src/lib/slug.ts`, config and
+CI/deploy workflows exist. Layouts, components, styles and content are planned.
 
-## Site Overview [PLANNED — plans/01-mimari.md §1, §5]
+## Site Overview (`astro.config.mjs` ✅)
 
-| Setting | Planned value |
+| Setting | Value |
 |---|---|
-| Generator | Astro, static output (ADR-001 — accepted 2026-10-17) |
+| Generator | Astro 7.4, static output (ADR-001 — accepted 2026-10-17) |
 | Site URL | `https://ulascanerturk.github.io` (no custom domain — S5) |
 | `base` | not set (user site served at root) |
 | `trailingSlash` | `'always'` |
 | `build.format` | `'directory'` |
-| Integrations | `@astrojs/sitemap` (Faz 4); `i18n` config (Faz 6) |
+| Integrations | none yet — `@astrojs/sitemap` [PLANNED — Faz 4]; `i18n` [PLANNED — Faz 6] |
 | Language | `tr-TR`; `/en/` after v1 (S4) |
 
 ## Routes
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | BaseLayout | `src/data/profile.ts`, featured projects | [PLANNED — faz-2 §2] |
+| `/` | `src/pages/index.astro` | none (self-contained `<html>`) | inline text (ulascanerturk.md title + §10) | ✅ temporary Faz 0 placeholder — h1, headline, "Site yapım aşamasında.", GitHub link; replaced in Faz 2 by the profile page (BaseLayout, `profile.ts`) |
 | `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout | `getCollection('projects')` | [PLANNED — faz-3 §2 task 6] |
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` + `render()`; v1 slug: `lockbox-mobile` | [PLANNED — faz-3 §2 task 6] |
 | `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`) | — | [PLANNED — faz-1 §2 task 9] |
@@ -99,7 +99,7 @@ Budget: ≤ 10 KB gzip per page (Değişmez Kural 4).
 
 | Export | Signature | Tests | Status |
 |---|---|---|---|
-| `slugify` [REVIEW NEEDED — name] | `(input: string) → string` (Turkish → ASCII) | `src/lib/slug.test.ts` | [PLANNED — faz-0 task 8] |
+| `slugify` (`src/lib/slug.ts`) | `(input: string): string` — explicit Turkish map (ı İ ğ ş ç ö ü), NFKD accent strip, lowercase, non-alphanumerics → single `-`, trimmed | `src/lib/slug.test.ts` (5 tests) | ✅ |
 | theme resolver | stored > system > default | `src/lib/theme.test.ts` | [PLANNED — faz-1 §3] |
 | `sortProjects`, `isPublished`, `formatPeriod` | project helpers | `src/lib/projects.test.ts` | [PLANNED — faz-3 task 3] |
 | profile structural tests | — | `src/lib/profile.test.ts` | [PLANNED — faz-2 §3] |
@@ -113,25 +113,29 @@ Budget: ≤ 10 KB gzip per page (Değişmez Kural 4).
 | `public/og/default.png` | 1200×630 share image | Faz 4 |
 | `public/robots.txt` | allow all + sitemap (AI crawler policy [REVIEW NEEDED]) | Faz 4 |
 
-## Config [PLANNED — faz-0 §3 tasks 5–9]
+## Config
 
 | File | Key settings |
 |---|---|
-| `astro.config.mjs` | site, trailingSlash, build.format (see Site Overview) |
-| `tsconfig.json` | `astro/tsconfigs/strict`, `noUncheckedIndexedAccess`, `@/*` alias |
-| `eslint.config.js` | flat config: `eslint-plugin-astro`, `eslint-plugin-jsx-a11y`, `typescript-eslint`; `no-console: error` (except `scripts/`) |
-| `.prettierrc` | `prettier-plugin-astro` |
-| `vitest.config.ts` | `getViteConfig` |
-| `.nvmrc`, `package.json#engines` | verified Node LTS |
-| `.editorconfig` | — |
+| `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base` |
+| `tsconfig.json` ✅ | extends `astro/tsconfigs/strict`; `noUncheckedIndexedAccess`; `paths` `@/*` → `./src/*`; include `.astro/types.d.ts`, `**/*`; exclude `dist` |
+| `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
+| `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |
+| `.prettierignore` ✅ | generated output, lockfile, `plans/`, `references/`, `.claude/`, `.agents/`, root `*.md` |
+| `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts` |
+| `.nvmrc` ✅ / `package.json#engines` ✅ | `24` / `node >=22.22.0` |
+| `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test |
+| `.editorconfig` ✅ | utf-8, lf, 2 spaces, final newline; no trailing-space trim for `*.md` |
 | `.gitignore` | ✅ exists — node_modules, dist, .astro, coverage, .lighthouseci, logs, env files, keys, OS/editor noise, `.claude/settings.local.json` |
 
-## CI/CD [PLANNED — plans/01-mimari.md §6.2–§6.3]
+## CI/CD
 
 | Workflow | Trigger | Permissions | Jobs | Actions |
 |---|---|---|---|---|
-| `.github/workflows/ci.yml` | `pull_request`; push to non-`main` branches | `contents: read` | npm ci → check → lint → format:check → test → build → check:dist (Faz 4) | `actions/checkout`, `actions/setup-node` (versions verified in Faz 0) |
-| `.github/workflows/deploy.yml` | `workflow_dispatch` only (Faz 0); + push to `main` (Faz 5) | `contents: read`, `pages: write`, `id-token: write`; `concurrency: pages` | build + deploy | `withastro/action`, `actions/deploy-pages` |
+| `.github/workflows/ci.yml` ✅ | `pull_request`; push with `branches-ignore: main` | `contents: read`; env `ASTRO_TELEMETRY_DISABLED=1`; concurrency per ref (cancel in progress) | `quality-gate`: npm ci → check → lint `--max-warnings 0` → format:check → test → build (check:dist [PLANNED — Faz 4]) | `actions/checkout@v7`, `actions/setup-node@v7` (`node-version-file: .nvmrc`, npm cache) |
+| `.github/workflows/deploy.yml` ✅ | `workflow_dispatch` only; push to `main` [PLANNED — Faz 5 task 2] | `contents: read`, `pages: write`, `id-token: write`; env `ASTRO_TELEMETRY_DISABLED=1`; `concurrency: pages` (no cancel) | `build` (withastro/action, Node 24) → `deploy` (environment `github-pages`) | `actions/checkout@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` |
+
+Workflow syntax not yet validated by actionlint (not installed); YAML parses. First real run in Faz 5.
 
 ## Known Issues / Gotchas
 
