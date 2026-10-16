@@ -1,0 +1,83 @@
+---
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface Props {
+  label: string;
+  copyrightHolder: string;
+  links: FooterLink[];
+}
+
+const { label, copyrightHolder, links } = Astro.props;
+// Build-time year: the static site is rebuilt on every deploy.
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <p>
+      © {year} {copyrightHolder}
+    </p>
+    <nav aria-label={label}>
+      <ul>
+        {links.map((link) => (
+          <li>
+            {link.external ? (
+              <ExternalLink href={link.href} class="site-footer__link">
+                {link.label}
+              </ExternalLink>
+            ) : (
+              <a href={link.href} class="site-footer__link">
+                {link.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-m);
+    width: min(100% - 2 * var(--space-s), var(--container));
+    margin-inline: auto;
+    padding-block: var(--space-m);
+  }
+
+  .site-footer ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    color: var(--color-text-muted);
+  }
+
+  .site-footer__link:hover {
+    color: var(--color-accent);
+  }
+</style>

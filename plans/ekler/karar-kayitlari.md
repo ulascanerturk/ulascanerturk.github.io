@@ -39,7 +39,7 @@
 
 ## ADR-003 — Stil: native CSS + custom properties
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 1 planı onayı)
 - **Karar:** Tasarım token'ları CSS custom properties olarak `src/styles/tokens.css`'te;
   bileşen stilleri Astro scoped `<style>`. Tailwind/Bootstrap kullanılmaz.
 - **Alternatifler:** Tailwind (hızlı prototip, ama ek bağımlılık ve sınıf
@@ -49,7 +49,7 @@
 
 ## ADR-004 — İstemci JavaScript: framework yok
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 1 planı onayı)
 - **Karar:** Hiçbir UI framework'ü istemciye gönderilmez. Tek istemci betiği
   tema geçişidir (inline, ≤ 1 KB). Etkileşim ihtiyacı doğarsa önce CSS/HTML
   çözümü; olmazsa `@astrojs/react` island — yeni ADR ile.
@@ -98,7 +98,7 @@
 
 ## ADR-009 — Yazı tipi: sistem font yığını
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, lead — Faz 1 planı onayı)
 - **Karar:** `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`
   ve kod için `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`.
 - **Gerekçe:** Harici font isteği yok (gizlilik, CSP, performans); Türkçe

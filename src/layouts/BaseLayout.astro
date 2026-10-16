@@ -1,0 +1,78 @@
+---
+// Shared page shell (faz-1 §2 task 5). The Seo component replaces the meta
+// block in Faz 4.
+import '@/styles/global.css';
+
+import SiteFooter from '@/components/layout/SiteFooter.astro';
+import SiteHeader from '@/components/layout/SiteHeader.astro';
+import SkipLink from '@/components/layout/SkipLink.astro';
+import { site } from '@/data/site';
+import { themeScript } from '@/lib/theme';
+
+interface Props {
+  /** Page name; rendered as "{title} · Ulaşcan Ertürk". Omit on the home page. */
+  title?: string;
+  description?: string;
+  /** Excludes the page from search engines (e.g. 404); no canonical is emitted. */
+  noindex?: boolean;
+}
+
+const { title, description = site.description, noindex = false } = Astro.props;
+
+const pageTitle = title ? `${title}${site.titleSeparator}${site.name}` : site.name;
+const canonical = noindex ? undefined : new URL(Astro.url.pathname, Astro.site).href;
+const mainId = 'icerik';
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline set:html={themeScript} />
+  </head>
+  <body>
+    <SkipLink label={site.skipLink} target={mainId} />
+    <SiteHeader
+      siteName={site.name}
+      navLabel={site.nav.label}
+      items={site.nav.items}
+      currentPath={Astro.url.pathname}
+      themeToggleLabel={site.themeToggleLabel}
+    />
+    <main id={mainId} tabindex="-1" class="site-main">
+      <slot />
+    </main>
+    <SiteFooter
+      label={site.footer.label}
+      copyrightHolder={site.footer.copyrightHolder}
+      links={site.footer.links}
+    />
+  </body>
+</html>
+
+<style>
+  .site-main {
+    width: min(100% - 2 * var(--space-s), var(--container));
+    margin-inline: auto;
+    padding-block: var(--space-xl);
+  }
+
+  .site-main:focus {
+    outline: none;
+  }
+
+  .site-main :global(p) {
+    max-width: var(--measure);
+  }
+
+  .site-main > :global(* + *) {
+    margin-top: var(--space-s);
+  }
+</style>

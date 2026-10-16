@@ -1,11 +1,12 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
+> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-Faz 0 state: Astro skeleton with one temporary page, `src/lib/slug.ts`, config and
-CI/deploy workflows exist. Layouts, components, styles and content are planned.
+Faz 1 state: design tokens, global styles, theme (inline script + `src/lib/theme.ts`),
+`BaseLayout`, layout and UI components, `/404.html` and the monogram favicon exist.
+`/` is still the temporary placeholder (now on BaseLayout). Profile, projects and SEO are planned.
 
 ## Site Overview (`astro.config.mjs` ✅)
 
@@ -23,25 +24,30 @@ CI/deploy workflows exist. Layouts, components, styles and content are planned.
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | none (self-contained `<html>`) | inline text (ulascanerturk.md title + §10) | ✅ temporary Faz 0 placeholder — h1, headline, "Site yapım aşamasında.", GitHub link; replaced in Faz 2 by the profile page (BaseLayout, `profile.ts`) |
+| `/` | `src/pages/index.astro` | BaseLayout | inline text (ulascanerturk.md title line) | ✅ temporary placeholder — h1, headline, "Site yapım aşamasında." (GitHub/LinkedIn via header/footer); replaced in Faz 2 by the profile page (`profile.ts`) |
 | `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout | `getCollection('projects')` | [PLANNED — faz-3 §2 task 6] |
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` + `render()`; v1 slug: `lockbox-mobile` | [PLANNED — faz-3 §2 task 6] |
-| `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`) | — | [PLANNED — faz-1 §2 task 9] |
+| `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön"; projects link added in Faz 3 task 6 |
 | `/sitemap-index.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | [PLANNED — faz-4 §2 task 4] |
 | `/en/`, `/en/projects/`, `/en/projects/{slug}/` | i18n routes | — | `profile.en.ts`, English entries | [PLANNED — faz-6 §2.1] |
 
 Home page anchors [PLANNED — plans/02-icerik-ve-tasarim.md §2]: `#hakkimda`,
 `#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#baglantilar`.
-Header nav: Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`) · GitHub · LinkedIn · theme toggle.
+Header nav (✅ `site.nav`): Hakkımda (`/#hakkimda`) · GitHub · LinkedIn · theme toggle.
+Projeler (`/projeler/`) is added in Faz 3 task 6 — the route does not exist yet and would
+be a broken internal link (lead decision 2026-10-17).
 
 ## Layouts
 
-### BaseLayout.astro [PLANNED — faz-1 §2 task 5]
-- Head: charset, viewport, title template `"{page} · Ulaşcan Ertürk"`, description,
-  canonical, favicon, `color-scheme` meta, inline theme script (≤ 1 KB, FOUC-free);
-  `Seo` component from Faz 4.
-- Body: SkipLink → SiteHeader → `<main id="icerik">` (slot) → SiteFooter.
-- Props: [REVIEW NEEDED — defined during Faz 1 planning]
+### BaseLayout.astro ✅ (`src/layouts/BaseLayout.astro`)
+- Props: `title?` (page name; omitted on `/` → title is just the site name),
+  `description?` (default `site.description`), `noindex?` (adds `robots: noindex`, drops canonical).
+- Head: charset, viewport, `<title>` `"{title} · Ulaşcan Ertürk"`, description, canonical
+  (`Astro.url.pathname` on `Astro.site`), favicon (`/favicon.svg`), `color-scheme: light dark`,
+  inline theme script (`themeScript` from `src/lib/theme.ts`, before the stylesheet → no FOUC).
+  `Seo` component replaces the meta block in Faz 4.
+- Body: SkipLink → SiteHeader → `<main id="icerik" tabindex="-1">` (slot) → SiteFooter.
+- Imports `src/styles/global.css`; main width `min(100% - 2rem, var(--container))`, `p` max `--measure`.
 
 ### ProjectLayout.astro [PLANNED — faz-3 §2 task 5]
 - Extends BaseLayout: title, ProjectMeta, cover (optional), `<article>` content,
@@ -51,15 +57,15 @@ Header nav: Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`) · GitHub · Lin
 
 | Component | File | Props | Used by | Status |
 |---|---|---|---|---|
-| SkipLink | `src/components/layout/SkipLink.astro` | — | BaseLayout | [PLANNED — faz-1 task 6] |
-| SiteHeader | `src/components/layout/SiteHeader.astro` | current path (`aria-current`) | BaseLayout | [PLANNED — faz-1 task 6] |
-| SiteFooter | `src/components/layout/SiteFooter.astro` | — (© year, GitHub, LinkedIn, source link) | BaseLayout | [PLANNED — faz-1 task 6] |
-| ThemeToggle | `src/components/layout/ThemeToggle.astro` | — (`<button aria-pressed>`, hidden without JS) | SiteHeader | [PLANNED — faz-1 task 6] |
-| Section | `src/components/ui/Section.astro` | title, id | profile page | [PLANNED — faz-1 task 7] |
-| Tag | `src/components/ui/Tag.astro` | label | skills, projects | [PLANNED — faz-1 task 7] |
-| ExternalLink | `src/components/ui/ExternalLink.astro` | href, label | everywhere | [PLANNED — faz-1 task 7] |
-| Callout | `src/components/ui/Callout.astro` | variant (note/warning) | experience, projects | [PLANNED — faz-1 task 7] |
-| Monogram | `src/components/ui/Monogram.astro` | — (`role="img"`, `aria-label`) | ProfileHero, favicon design | [PLANNED — faz-1 task 8] |
+| SkipLink | `src/components/layout/SkipLink.astro` | `label`, `target` (main id) | BaseLayout | ✅ hidden until focused; first focusable element |
+| SiteHeader | `src/components/layout/SiteHeader.astro` | `siteName`, `navLabel`, `items: NavItem[]`, `currentPath`, `themeToggleLabel` | BaseLayout | ✅ brand link (decorative Monogram + name), nav, ThemeToggle; `aria-current="page"` only for exact non-anchor matches; wraps at 360 px |
+| SiteFooter | `src/components/layout/SiteFooter.astro` | `label`, `copyrightHolder`, `links: FooterLink[]` | BaseLayout | ✅ © build year, GitHub, LinkedIn, Kaynak kodu |
+| ThemeToggle | `src/components/layout/ThemeToggle.astro` | `label` | SiteHeader | ✅ `<button data-theme-toggle aria-pressed>`, moon/sun icon by `data-theme`; hidden when `:root` has no `data-theme` (JS off) |
+| Section | `src/components/ui/Section.astro` | `id`, `title`, `level?: 2 \| 3` (default 2) | — (Faz 2) | ✅ `<section id aria-labelledby>`; heading id `{id}-baslik` |
+| Tag | `src/components/ui/Tag.astro` | `label` | — (Faz 2/3) | ✅ |
+| ExternalLink | `src/components/ui/ExternalLink.astro` | `href`, `newTab?`, `newTabHint?`, other `<a>` attrs (no `rel`/`target`) | SiteHeader, SiteFooter | ✅ always `rel="noopener noreferrer"`; new tab only when `newTab` (hint read by screen readers) |
+| Callout | `src/components/ui/Callout.astro` | `variant?: 'note' \| 'warning'`, `title?` | — (Faz 2/3) | ✅ `role="note"`, accent / warning border |
+| Monogram | `src/components/ui/Monogram.astro` | `label?` (→ `role="img"` + `aria-label`; absent → `aria-hidden`), `size?` (64) | SiteHeader (decorative); ProfileHero (Faz 2, with label) | ✅ same drawing as `public/favicon.svg` |
 | ProfileHero | `src/components/profile/ProfileHero.astro` | profile subset | `/` | [PLANNED — faz-2 task 4] |
 | SkillsGrid | `src/components/profile/SkillsGrid.astro` | skills | `/` | [PLANNED — faz-2 task 4] |
 | ExperienceList | `src/components/profile/ExperienceList.astro` | experience (incl. Shifter Pro/Lite) | `/` | [PLANNED — faz-2 task 4] |
@@ -73,42 +79,67 @@ Header nav: Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`) · GitHub · Lin
 | ProjectLinks | `src/components/projects/ProjectLinks.astro` | links | ProjectLayout | [PLANNED — faz-3 task 4] |
 | Seo | `src/components/Seo.astro` [REVIEW NEEDED — folder not fixed in plans] | title, description, canonical, OG, Twitter, JSON-LD | BaseLayout | [PLANNED — faz-4 task 1] |
 
-## Styles and Theme [PLANNED — faz-1 §2 tasks 1–3, plans/02-icerik-ve-tasarim.md §5]
+## Styles and Theme ✅ (faz-1 §2 tasks 1–3, plans/02-icerik-ve-tasarim.md §5)
 
-- `src/styles/tokens.css`: `--color-*` (bg, surface, text, text-muted, border,
-  accent, accent-contrast, focus), `--font-*`, `--step-*` (fluid type scale ≈ 1.25),
-  `--space-*`, `--radius-*`, `--shadow-*`, `--measure` (~68ch).
-- Light theme on `:root`; dark via `[data-theme='dark']` and
-  `@media (prefers-color-scheme: dark)` when no manual choice; choice persisted in `localStorage`.
-- `src/styles/global.css`: reset, base typography, `:focus-visible`, `.visually-hidden`, reduced motion.
+- `src/styles/tokens.css`: `--color-*` (bg, surface, text, text-muted, border, accent,
+  accent-contrast, focus, warning), `--font-sans` / `--font-mono` (ADR-009),
+  `--line-height-body/heading`, `--step--1 … --step-5` (fluid `clamp()`, ≈ 1.25, 360 → 1280 px),
+  `--space-3xs … --space-2xl`, `--radius-s/m/full`, `--shadow-s/m`, `--measure` (68ch),
+  `--container` (48rem), `--tap-target` (44px), `--focus-ring-width` (3px).
+- Light theme on `:root`; dark on `:root[data-theme='dark']`; with no `data-theme`
+  (JavaScript off) `@media (prefers-color-scheme: dark)` applies. The dark palette is
+  written twice (attribute + media block) — keep both in sync.
+- `src/styles/global.css` (imports tokens): reset, body flex column (footer at bottom),
+  heading scale, link styles, `:focus-visible` outline (`--color-focus`), `.visually-hidden`,
+  smooth scroll only with `prefers-reduced-motion: no-preference`, reduced-motion overrides.
+- Choice persisted in `localStorage['theme']` (`'light' | 'dark'`); no stored value → system.
 
-### Contrast Table
-| Pair | Light | Dark | Threshold |
-|---|---|---|---|
-| — | [PLANNED — faz-1 task 3] | — | ≥ 4.5:1 text · ≥ 3:1 large text/UI |
+### Contrast Table (WCAG 2.x relative luminance, computed 2026-10-17)
+
+| Pair | Light | Dark | Threshold | Result |
+|---|---|---|---|---|
+| text / bg | 17.49 | 18.11 | 4.5 | ✅ |
+| text / surface | 16.03 | 16.03 | 4.5 | ✅ |
+| text-muted / bg | 7.63 | 7.83 | 4.5 | ✅ |
+| text-muted / surface | 6.99 | 6.93 | 4.5 | ✅ |
+| accent (links) / bg | 6.70 | 10.96 | 4.5 | ✅ |
+| accent / surface | 6.14 | 9.70 | 4.5 | ✅ |
+| accent-contrast / accent (skip link, monogram, selection) | 6.70 | 10.96 | 4.5 | ✅ |
+| focus ring / bg | 6.70 | 10.96 | 3 (UI) | ✅ |
+| focus ring / surface | 6.14 | 9.70 | 3 (UI) | ✅ |
+| warning (Callout border) / bg | 5.02 | 11.83 | 3 (UI) | ✅ |
+| warning / surface | 4.60 | 10.48 | 3 (UI) | ✅ |
+| border / bg | 1.49 | 1.92 | — | decorative only; no control is identified by its border alone |
+
+Palette — light: bg `#ffffff`, surface `#f5f5f4`, text `#1c1917`, text-muted `#57534e`,
+border `#d6d3d1`, accent/focus `#1d4ed8`, accent-contrast `#ffffff`, warning `#b45309`.
+Dark: bg `#0c0a09`, surface `#1c1917`, text `#f5f5f4`, text-muted `#a8a29e`, border `#44403c`,
+accent/focus `#93c5fd`, accent-contrast `#0c0a09`, warning `#fbbf24`.
+Any token change → recompute this table.
 
 ## Client JavaScript
 
-| Script | Pages | Purpose | Size (gzip) |
+| Script | Pages | Purpose | Size |
 |---|---|---|---|
-| Theme script (inline, `<head>`) | all | resolve stored/system theme before paint; toggle | [PLANNED — budget ≤ 1 KB] |
+| Theme script (`themeScript`, `src/lib/theme.ts`; inline in `<head>` via `set:html`) | all | apply stored/system theme before paint; toggle via delegated click on `[data-theme-toggle]`; sync `aria-pressed`; persist choice; follow system changes while nothing is stored | 996 B raw / 480 B gzip (test asserts ≤ 1024 B raw) |
 
-Budget: ≤ 10 KB gzip per page (Değişmez Kural 4).
+Budget: ≤ 10 KB gzip per page (Değişmez Kural 4); Faz 1 target ≤ 1 KB (theme script only).
+The script is a static string (no interpolation) so a CSP hash stays valid (Faz 4, ADR-011).
 
 ## src/lib
 
 | Export | Signature | Tests | Status |
 |---|---|---|---|
 | `slugify` (`src/lib/slug.ts`) | `(input: string): string` — explicit Turkish map (ı İ ğ ş ç ö ü), NFKD accent strip, lowercase, non-alphanumerics → single `-`, trimmed | `src/lib/slug.test.ts` (5 tests) | ✅ |
-| theme resolver | stored > system > default | `src/lib/theme.test.ts` | [PLANNED — faz-1 §3] |
+| `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
 | `sortProjects`, `isPublished`, `formatPeriod` | project helpers | `src/lib/projects.test.ts` | [PLANNED — faz-3 task 3] |
 | profile structural tests | — | `src/lib/profile.test.ts` | [PLANNED — faz-2 §3] |
 
-## Public Assets [PLANNED]
+## Public Assets
 
 | File | Purpose | Phase |
 |---|---|---|
-| `public/favicon.svg` | monogram favicon | Faz 1 |
+| `public/favicon.svg` ✅ | "UE" monogram (same paths as `Monogram.astro`); colors switch with `prefers-color-scheme` inside the SVG | Faz 1 |
 | `public/apple-touch-icon.png` | 180×180 icon | Faz 4 |
 | `public/og/default.png` | 1200×630 share image | Faz 4 |
 | `public/robots.txt` | allow all + sitemap (AI crawler policy [REVIEW NEEDED]) | Faz 4 |

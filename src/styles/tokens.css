@@ -1,0 +1,94 @@
+/*
+ * Design tokens (plans/02-icerik-ve-tasarim.md §5, ADR-003).
+ * Light theme on :root; dark theme when the theme script sets data-theme="dark",
+ * or from the system preference when no theme has been set (JavaScript off).
+ * Contrast ratios for every pair: references/site_map.md → Contrast Table.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Color — neutral gray scale + one accent */
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f4;
+  --color-text: #1c1917;
+  --color-text-muted: #57534e;
+  --color-border: #d6d3d1;
+  --color-accent: #1d4ed8;
+  --color-accent-contrast: #ffffff;
+  --color-focus: #1d4ed8;
+  --color-warning: #b45309;
+
+  /* Typography — system font stack (ADR-009) */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --line-height-body: 1.6;
+  --line-height-heading: 1.25;
+
+  /* Fluid type scale (≈ 1.25 ratio), 360 px → 1280 px viewport */
+  --step--1: clamp(0.83rem, 0.81rem + 0.1vw, 0.89rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.09rem);
+  --step-1: clamp(1.2rem, 1.15rem + 0.24vw, 1.36rem);
+  --step-2: clamp(1.44rem, 1.36rem + 0.37vw, 1.7rem);
+  --step-3: clamp(1.73rem, 1.6rem + 0.56vw, 2.13rem);
+  --step-4: clamp(2.07rem, 1.88rem + 0.83vw, 2.66rem);
+  --step-5: clamp(2.49rem, 2.21rem + 1.2vw, 3.32rem);
+
+  /* Spacing */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+
+  /* Shape and depth */
+  --radius-s: 0.25rem;
+  --radius-m: 0.5rem;
+  --radius-full: 999px;
+  --shadow-s: 0 1px 2px rgb(28 25 23 / 0.08);
+  --shadow-m: 0 4px 12px rgb(28 25 23 / 0.1);
+
+  /* Layout */
+  --measure: 68ch;
+  --container: 48rem;
+  --tap-target: 44px;
+  --focus-ring-width: 3px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #0c0a09;
+  --color-surface: #1c1917;
+  --color-text: #f5f5f4;
+  --color-text-muted: #a8a29e;
+  --color-border: #44403c;
+  --color-accent: #93c5fd;
+  --color-accent-contrast: #0c0a09;
+  --color-focus: #93c5fd;
+  --color-warning: #fbbf24;
+  --shadow-s: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-m: 0 4px 12px rgb(0 0 0 / 0.5);
+}
+
+/* No theme chosen by the script (JavaScript off): follow the system. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --color-bg: #0c0a09;
+    --color-surface: #1c1917;
+    --color-text: #f5f5f4;
+    --color-text-muted: #a8a29e;
+    --color-border: #44403c;
+    --color-accent: #93c5fd;
+    --color-accent-contrast: #0c0a09;
+    --color-focus: #93c5fd;
+    --color-warning: #fbbf24;
+    --shadow-s: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-m: 0 4px 12px rgb(0 0 0 / 0.5);
+  }
+}

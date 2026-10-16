@@ -1,0 +1,24 @@
+---
+// Small label for skills and project technologies.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<span class="tag">{label}</span>
+
+<style>
+  .tag {
+    display: inline-block;
+    padding: var(--space-3xs) var(--space-2xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--step--1);
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+</style>

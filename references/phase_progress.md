@@ -1,26 +1,27 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
+> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 0 — Proje Kurulumu: closed** (branch `feat/faz-0-astro-scaffold-toolchain`).
-Next unblocked phase: **Faz 1 — Tasarım Sistemi ve Layout**. Overall: tasks 12/70 · acceptance 7/47.
+**Faz 1 — Tasarım Sistemi ve Layout: closed** (branch `feat/faz-1-design-system-layout`).
+Next unblocked phases: **Faz 2 — Profil Sayfası** ∥ **Faz 3 — Proje Sayfaları**.
+Overall: tasks 21/70 (+1 optional skipped) · acceptance 14/47.
 
 ## Open Questions
 
 | # | Question | Answer | Date | Decided by |
 |---|---|---|---|---|
 | S1 | Which projects get pages? | LockBox Mobile only (no macOS); Shifter Pro/Lite in profile experience | 2026-10-17 | lead |
-| S2 | Contact channels besides GitHub? | GitHub + LinkedIn; no e-mail/phone — LinkedIn URL ⏳ pending (Faz 2) | 2026-10-17 | lead |
+| S2 | Contact channels besides GitHub? | GitHub + LinkedIn; no e-mail/phone — LinkedIn URL in `ulascanerturk.md` §10 (commit 578d8e0), used in header/footer | 2026-10-17 | lead |
 | S3 | Profile image? | Monogram (UE) SVG; no photo | 2026-10-17 | lead |
 | S4 | English version? | Yes, after v1 (Faz 6, `/en/`) | 2026-10-17 | lead |
 | S5 | Custom domain? | No; `ulascanerturk.github.io` | 2026-10-17 | lead |
 | S6 | ADR-001 (Astro)? | Accepted | 2026-10-17 | lead |
 
-Pending lead inputs: LinkedIn URL (Faz 2), profile footnote decision (Faz 2 task 7),
+Pending lead inputs: profile footnote decision (Faz 2 task 7),
 LockBox Mobile publication status + text approval (Faz 3), robots.txt AI crawler
 policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10).
 
@@ -49,31 +50,35 @@ Status: closed (2026-10-17)
 - [x] Checklist: Genel ✅ (plan-only changes + approved fixes; new deps covered by ADR-010; audit 0 vulnerabilities; references updated), Dağıtım ✅ (explicit permissions; actions from GitHub/withastro on major tags; no build output)
 
 ## Faz 1 — Tasarım Sistemi ve Layout   (plans/fazlar/faz-1-tasarim-sistemi-ve-layout.md)
-Status: not started (unblocked)
+Status: closed (2026-10-17, branch `feat/faz-1-design-system-layout`)
 ### Tasks
-- [ ] 1. Tokens — `src/styles/tokens.css`
-- [ ] 2. Global styles — `src/styles/global.css`
-- [ ] 3. Contrast verification → table in `references/site_map.md`
-- [ ] 4. `src/data/site.ts`
-- [ ] 5. `BaseLayout.astro`
-- [ ] 6. Layout components (SkipLink, SiteHeader, SiteFooter, ThemeToggle)
-- [ ] 7. UI components (Section, Tag, ExternalLink, Callout)
-- [ ] 8. Monogram avatar + favicon (S3 decided: monogram)
-- [ ] 9. `404.astro`
-- [ ] 10. (Optional) dev-only style guide
+- [x] 1. Tokens — `src/styles/tokens.css` (light `:root`, dark `[data-theme='dark']` + `prefers-color-scheme` without a theme)
+- [x] 2. Global styles — `src/styles/global.css`
+- [x] 3. Contrast verification → table in `references/site_map.md` (all pairs pass; lowest UI pair 4.60)
+- [x] 4. `src/data/site.ts` (wording approved by lead 2026-10-17)
+- [x] 5. `BaseLayout.astro` (props `title?`, `description?`, `noindex?`)
+- [x] 6. Layout components (SkipLink, SiteHeader, SiteFooter, ThemeToggle)
+- [x] 7. UI components (Section, Tag, ExternalLink, Callout)
+- [x] 8. Monogram avatar + favicon (S3: monogram) — `Monogram.astro`, `public/favicon.svg`
+- [x] 9. `404.astro` (noindex; home link — projects link deferred to Faz 3 task 6, lead decision)
+- [—] 10. (Optional) dev-only style guide — skipped (lead decision 2026-10-17)
 ### Acceptance Criteria
-- [ ] All token pairs meet contrast thresholds
-- [ ] Light/dark toggle without FOUC, preference persisted
-- [ ] Site readable and navigable without JS
-- [ ] ≤ 1 KB client JS per page (theme script only)
-- [ ] No horizontal scroll at 360 px
-- [ ] Quality gate PASS (`site`)
-- [ ] Checklist: Genel, Erişilebilirlik, Performans reviewed
+- [x] All token pairs meet contrast thresholds — table in `site_map.md` → Contrast Table
+- [x] Light/dark toggle without FOUC, preference persisted — script runs in `<head>` before the stylesheet; browser check: toggle → `data-theme=dark`, `localStorage.theme=dark`, kept on `/404.html`; Vitest parity tests
+- [x] Site readable and navigable without JS — all content and links are static HTML; simulated no-JS state (no `data-theme`): toggle hidden, system theme applied in light and dark. Not tested with JS disabled in a real browser
+- [x] ≤ 1 KB client JS per page (theme script only) — 996 B raw / 480 B gzip on `/` and `/404.html`
+- [x] No horizontal scroll at 360 px — `scrollWidth = 360` on `/` and `/404.html`
+- [x] Quality gate PASS (`site`) — `test-lint site` 2nd run 2026-10-17 (1st run: Prettier only)
+- [x] Checklist: Genel ✅ (approved files + listed small additions; no new deps; layering kept — components get text via props), Erişilebilirlik ✅ (one h1, skip link first focusable, visible focus ring, 44 px targets, reduced motion, contrast table), Performans ✅ (no external fonts/CDN, 480 B gzip JS)
+### Notes
+- Plan deviation (lead decision 2026-10-17): "Projeler" nav item and the 404 projects link are added in Faz 3 task 6, when `/projeler/` exists.
+- ADR-003, ADR-004, ADR-009 accepted 2026-10-17.
+- Small additions during implementation: `--container` token, footer nav label "Alt bağlantılar", `--color-warning` (Callout).
 
 ## Faz 2 — Profil Sayfası   (plans/fazlar/faz-2-profil-sayfasi.md)
-Status: not started (blocked by Faz 1)
+Status: not started (unblocked)
 ### Tasks
-- [ ] 1. LinkedIn URL from lead → `ulascanerturk.md` §10 + `profile.ts` (⏳ URL pending)
+- [ ] 1. LinkedIn URL from lead → `ulascanerturk.md` §10 ✅ (commit 578d8e0) + `profile.ts` (pending)
 - [ ] 2. `src/data/profile.ts` with source comments
 - [ ] 3. Text draft + lead approval
 - [ ] 4. Profile components
@@ -91,14 +96,14 @@ Status: not started (blocked by Faz 1)
 - [ ] Checklist: İçerik ve Gizlilik, Erişilebilirlik reviewed
 
 ## Faz 3 — Proje Sayfaları   (plans/fazlar/faz-3-proje-sayfalari.md)
-Status: not started (blocked by Faz 1)
+Status: not started (unblocked)
 ### Tasks
 - [ ] 1. LockBox Mobile facts from lead → `ulascanerturk.md` §6
 - [ ] 2. Collection schema — `src/content.config.ts`
 - [ ] 3. `src/lib/projects.ts`
 - [ ] 4. Project components
 - [ ] 5. `ProjectLayout.astro`
-- [ ] 6. Pages (`/projeler/`, `/projeler/[slug]/`)
+- [ ] 6. Pages (`/projeler/`, `/projeler/[slug]/`) — also add "Projeler" to `site.nav.items` and "Projelere göz at" to `site.notFound.links` (deferred from Faz 1)
 - [ ] 7. `lockbox-mobile.md`
 - [ ] 8. Profile integration (featured)
 - [ ] 9. "How to add a project" guide in `references/content_schema.md`
@@ -181,14 +186,18 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 | Date | Lighthouse (perf/a11y/bp/seo) | axe | Max JS (gzip) | Notes |
 |---|---|---|---|---|
 | 2026-10-17 | not run | not run | 0 B (placeholder page) | Faz 0 dist check: 1 page, 0 errors |
+| 2026-10-17 | not run | not run | 480 B gzip (theme script, 996 B raw) | Faz 1 dist check: 2 pages, 0 errors, 0 warnings; 360 px, keyboard, theme checks in browser (macOS) |
 
 ## Follow-ups
 
 - Profile type needs a field for §6 work areas (`WorkAreas` component) — init-references, see `content_schema.md`.
-- Confirm ADR-003 … ADR-007 and ADR-009 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0).
+- Confirm ADR-005 … ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1).
 - Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
-- Replace the plain GitHub `<a>` on the placeholder page with `ExternalLink` when the page is rebuilt in Faz 2 — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
 - `Seo.astro` folder (`src/components/` root vs a subfolder) not fixed in plans — decide in Faz 4 planning.
+- Faz 1 risk table: check rendering on Windows and Android (system font stack) — only macOS was checked — Faz 1.
+- Verify the site with JavaScript actually disabled in a browser (only simulated in Faz 1) — Faz 4 manual a11y audit.
+- `/#hakkimda` nav anchor resolves once Faz 2 adds the `#hakkimda` section — Faz 1.
+- Faz 0 phase doc acceptance checkboxes are still unticked in `plans/fazlar/faz-0-proje-kurulumu.md` (progress lives here) — Faz 1.

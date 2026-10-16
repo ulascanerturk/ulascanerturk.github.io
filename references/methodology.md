@@ -1,11 +1,12 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 0 tasks 3–12 — feat/faz-0-astro-scaffold-toolchain)
+> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). Site
-features (layouts, components, content) are still planned.
+Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). The design
+system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI components, 404).
+Profile, project and SEO features are still planned.
 
 ## Core Philosophy
 
@@ -30,7 +31,7 @@ From `plans/README.md` §4.
 
 ## Layering
 
-From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual review. [PLANNED]
+From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual review (in use since Faz 1).
 
 | Layer | Paths | May import | Must not import |
 |---|---|---|---|
@@ -51,6 +52,17 @@ Rules not tied to config are enforced from Faz 1 onward.
 - No hard-coded UI text in components — text lives in `src/data/*` or content files (prerequisite for Faz 6 `/en/`).
 - Styles: tokens from `src/styles/tokens.css`; Astro scoped `<style>`; no CSS framework (ADR-003).
 - Client JS: no UI framework (ADR-004); only the inline theme script (≤ 1 KB).
+- UI text reaches components only as props: `BaseLayout` (or the page) reads `src/data/site.ts`
+  and passes labels down; components never import `src/data/*` (Faz 1, e.g. `SiteHeader`).
+- Inline scripts that cannot be bundled live as a static string in `src/lib` and are executed by
+  a Vitest test against a fake DOM, next to the pure function they mirror
+  (`src/lib/theme.ts` `themeScript` ↔ `resolveTheme`). Rationale: tested + size-checked, no FOUC,
+  CSP-hashable (ADR-004, ADR-011).
+- Styling child components: pass `class` and spread the remaining props onto the root element
+  (Astro passes the parent's scope attribute that way — see `ExternalLink`).
+- Theme selectors in scoped styles use `:global([data-theme='dark'])` /
+  `:global(:root:not([data-theme]))`; colors come only from tokens (no hex outside `tokens.css`,
+  except the self-contained `public/favicon.svg`).
 - External links through `ExternalLink` (`rel="noopener noreferrer"`).
 - `console.*` only in `scripts/` (ESLint `no-console: error`, off for `scripts/**`) ✅.
 - Slugs/URLs: ASCII lowercase with hyphens (ç→c, ğ→g, ı/İ→i, ö→o, ş→s, ü→u), trailing slash.
@@ -151,5 +163,5 @@ Site URL `https://ulascanerturk.github.io` (no custom domain — S5). Rollback:
 ## Known Gaps / Review Needed
 
 - `actionlint` and `exiftool` are not installed locally: workflow syntax is verified on the first push (Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
-- [REVIEW NEEDED] ADR-003 … ADR-007 and ADR-009 are "Önerildi"; confirm with the lead when the relevant phase starts.
+- [REVIEW NEEDED] ADR-005 … ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan).
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

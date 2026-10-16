@@ -1,0 +1,72 @@
+---
+// Light/dark switch. Behavior lives in the inline theme script (src/lib/theme.ts),
+// which also keeps `aria-pressed` in sync. Hidden when JavaScript is off: the
+// script never sets `data-theme`, so the system theme applies.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--moon"
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"></path>
+  </svg>
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--sun"
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+  </svg>
+  <span class="visually-hidden">{label}</span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap-target);
+    height: var(--tap-target);
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background-color: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    background-color: var(--color-surface);
+  }
+
+  :global(:root:not([data-theme])) .theme-toggle {
+    display: none;
+  }
+
+  .theme-toggle__icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  :global([data-theme='dark']) .theme-toggle__icon--moon,
+  :global([data-theme='light']) .theme-toggle__icon--sun {
+    display: none;
+  }
+</style>

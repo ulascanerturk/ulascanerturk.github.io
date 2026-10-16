@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .bg { fill: #1d4ed8; }
+    .letters { stroke: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #93c5fd; }
+      .letters { stroke: #0c0a09; }
+    }
+  </style>
+  <circle class="bg" cx="32" cy="32" r="32"/>
+  <path class="letters" d="M16 21V36a7 7 0 0 0 14 0V21M48 21H37V43H48M37 32H46" fill="none" stroke-width="4"/>
+</svg>

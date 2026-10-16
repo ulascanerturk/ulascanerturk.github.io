@@ -1,0 +1,40 @@
+---
+// First focusable element on every page; jumps to <main id={target}>.
+interface Props {
+  label: string;
+  target: string;
+}
+
+const { label, target } = Astro.props;
+---
+
+<a class="skip-link" href={`#${target}`}>
+  {label}
+</a>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: var(--space-2xs);
+    left: var(--space-2xs);
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-s);
+    border-radius: var(--radius-m);
+    background-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  .skip-link:focus-visible {
+    outline-color: var(--color-text);
+  }
+</style>

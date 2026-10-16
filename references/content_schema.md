@@ -1,23 +1,39 @@
 # references/content_schema.md — Content Schema
 
-> Last updated: 2026-10-17 (init-references, PLANS-ONLY mode)
+> Last updated: 2026-10-17 (Faz 1 — feat/faz-1-design-system-layout)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-No content files exist yet (`src/data/`, `src/content/`, `src/content.config.ts`
-are absent). Only the source document `ulascanerturk.md` exists.
+Only `src/data/site.ts` (Faz 1) exists; `src/data/profile.ts`, `src/content/` and
+`src/content.config.ts` are still planned.
 
 ## Content Sources
 
 ```
 ulascanerturk.md (source, repo root, never published directly)
   ├──► src/data/profile.ts            profile page data         [PLANNED — faz-2 task 2]
-  ├──► src/data/site.ts               site meta, nav, UI text   [PLANNED — faz-1 task 4]
+  ├──► src/data/site.ts               site meta, nav, UI text   ✅ (title, §1, §10)
   └──► src/content/projects/*.md      project pages             [PLANNED — faz-3 task 7]
 ```
 
 Approved facts that are not yet in `ulascanerturk.md` must be added there when
-approved: LinkedIn URL (§10, Faz 2) and LockBox Mobile (§6, Faz 3).
+approved: LockBox Mobile (§6, Faz 3). The LinkedIn URL is in §10 since commit 578d8e0.
+
+## Site Data (`src/data/site.ts`) ✅
+
+`SiteConfig` object — all UI text for the shell (no text in components; layout passes it as props).
+Wording approved by the lead 2026-10-17 (Faz 1 plan).
+
+| Field | Value / content | Source |
+|---|---|---|
+| `name` | "Ulaşcan Ertürk" | title (H1) |
+| `url`, `lang` | `https://ulascanerturk.github.io`, `tr` | S5, ADR-006 |
+| `description` | default meta description (İstanbul, yazılım geliştirici ve teknoloji girişimcisi; web, mobil, B2B SaaS) | §1 |
+| `titleSeparator` | " · " → `"{page} · Ulaşcan Ertürk"` | faz-1 task 5 |
+| `skipLink`, `newTabHint`, `themeToggleLabel` | "İçeriğe geç", "(yeni sekmede açılır)", "Koyu tema" | UI text |
+| `nav` | label "Ana menü"; Hakkımda (`/#hakkimda`), GitHub, LinkedIn — "Projeler" added in Faz 3 task 6 | §10 |
+| `footer` | label "Alt bağlantılar"; © holder; GitHub, LinkedIn, Kaynak kodu (`github.com/ulascanerturk/ulascanerturk.github.io`) | §10, ADR-002 |
+| `notFound` | "Sayfa bulunamadı", message, link "Ana sayfaya dön" — "Projelere göz at" added in Faz 3 task 6 | UI text |
 
 ## Profile (`src/data/profile.ts`) [PLANNED — plans/01-mimari.md §4.1]
 
@@ -33,7 +49,7 @@ approved: LinkedIn URL (§10, Faz 2) and LockBox Mobile (§6, Faz 3).
 | `education` | `{ institution, program, kind: 'degree' \| 'training' }[]` | §3 | ESOGÜ = `degree`; BAU & Wissen, ODTÜ = `training` |
 | `ecosystem` | `{ context, programs[], note }` | §7 | context = Shifter; not personal awards |
 | `focusAreas` | `{ title, description }[]` | §8 | 7 areas |
-| `links` | `{ label, url, kind }[]` | §10 + S2 | kinds: github · linkedin · company · product · blog · other; LinkedIn URL ⏳ pending |
+| `links` | `{ label, url, kind }[]` | §10 + S2 | kinds: github · linkedin · company · product · blog · other; LinkedIn URL in §10 (`https://www.linkedin.com/in/ulascanerturk`) |
 
 [REVIEW NEEDED] The planned `Profile` type has no field for §6 "Diğer yazılım
 çalışma alanları", which the planned `WorkAreas` component (faz-2 task 4) renders.

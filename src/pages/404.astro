@@ -1,0 +1,35 @@
+---
+// Not-found page (faz-1 §2 task 9). Served by GitHub Pages as /404.html; noindex.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
+
+const { title, message, links } = site.notFound;
+---
+
+<BaseLayout title={title} description={message} noindex>
+  <h1>{title}</h1>
+  <p>{message}</p>
+  <ul class="not-found__links">
+    {links.map((link) => (
+      <li>
+        <a href={link.href}>{link.label}</a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  .not-found__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+
+  .not-found__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+</style>

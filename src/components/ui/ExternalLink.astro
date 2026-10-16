@@ -1,0 +1,19 @@
+---
+// Every external link goes through this component (plans/01-mimari.md §3).
+// A new tab is opened only when `newTab` is set deliberately; the hint text is
+// then announced to screen readers.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'rel' | 'target'> {
+  href: string;
+  newTab?: boolean;
+  newTabHint?: string;
+}
+
+const { href, newTab = false, newTabHint, ...attrs } = Astro.props;
+---
+
+<a href={href} rel="noopener noreferrer" target={newTab ? '_blank' : undefined} {...attrs}>
+  <slot />
+  {newTab && newTabHint && <span class="visually-hidden"> {newTabHint}</span>}
+</a>

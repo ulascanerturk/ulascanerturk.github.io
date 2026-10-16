@@ -1,0 +1,109 @@
+---
+import Monogram from '@/components/ui/Monogram.astro';
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+import ThemeToggle from '@/components/layout/ThemeToggle.astro';
+
+interface NavItem {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface Props {
+  siteName: string;
+  navLabel: string;
+  items: NavItem[];
+  currentPath: string;
+  themeToggleLabel: string;
+}
+
+const { siteName, navLabel, items, currentPath, themeToggleLabel } = Astro.props;
+
+// Only real pages are "current"; in-page anchors such as /#hakkimda are not.
+const currentFor = (href: string) =>
+  !href.includes('#') && href === currentPath ? ('page' as const) : undefined;
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="/" class="site-header__brand" aria-current={currentFor('/')}>
+      <Monogram size={36} />
+      <span>{siteName}</span>
+    </a>
+    <nav aria-label={navLabel} class="site-header__nav">
+      <ul>
+        {items.map((item) => (
+          <li>
+            {item.external ? (
+              <ExternalLink href={item.href} class="site-header__link">
+                {item.label}
+              </ExternalLink>
+            ) : (
+              <a href={item.href} class="site-header__link" aria-current={currentFor(item.href)}>
+                {item.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+      <ThemeToggle label={themeToggleLabel} />
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-m);
+    width: min(100% - 2 * var(--space-s), var(--container));
+    margin-inline: auto;
+    padding-block: var(--space-2xs);
+  }
+
+  .site-header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--tap-target);
+    color: var(--color-text);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .site-header__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .site-header__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-3xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-header__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+    padding-inline: var(--space-2xs);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .site-header__link:hover,
+  .site-header__link[aria-current='page'] {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+</style>
