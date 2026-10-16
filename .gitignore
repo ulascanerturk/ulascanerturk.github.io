@@ -1,0 +1,51 @@
+# dependencies
+node_modules/
+
+# Astro build output and generated types
+dist/
+.astro/
+
+# test / audit output
+coverage/
+.lighthouseci/
+lighthouse-report*.html
+lighthouse-report*.json
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# macOS (incl. AppleDouble files created on external volumes)
+.DS_Store
+._*
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*~
+
+# local agent settings (shared skills in .claude/skills and .agents/skills are tracked)
+.claude/settings.local.json
+
+# typescript
+*.tsbuildinfo
