@@ -8,7 +8,7 @@
 
 ## ADR-001 — Statik site üreticisi: Astro
 
-- **Durum:** Önerildi (Faz 0 başında lead onayı — S6)
+- **Durum:** Kabul edildi (2026-10-17, lead — S6)
 - **Bağlam:** Bir profil sayfası ve sayısı zamanla artacak proje sayfaları; GitHub
   Pages'te statik yayın; ortak layout; içeriğin kolay güncellenmesi; yüksek
   performans ve SEO. Lead'in ekosistemi PHP/Laravel, JavaScript/React, React Native.
@@ -71,8 +71,9 @@
 
 - **Durum:** Önerildi
 - **Karar:** v1 yalnızca `tr-TR`. Arayüz metinleri veri dosyalarında tutulur ki
-  İngilizce sürüm (Faz 6, S4) yapısal değişiklik gerektirmesin. URL'ler Türkçe
-  ve ASCII (`/projeler/`).
+  İngilizce sürüm yapısal değişiklik gerektirmesin. URL'ler Türkçe ve ASCII
+  (`/projeler/`). İngilizce sürüm `/en/` altında v1 sonrası yapılacak (S4,
+  2026-10-17 onaylandı — Faz 6).
 
 ## ADR-007 — Analitik yok (v1)
 

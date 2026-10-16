@@ -14,7 +14,8 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
 
 ## 2. Görev Listesi
 
-1. **S5 kararı.** Özel alan adı kullanılacak mı (varsayılan: hayır).
+1. **Alan adı (S5: özel alan adı yok).** Site `ulascanerturk.github.io`
+   adresinde yayınlanır; `CNAME` dosyası ve DNS adımı yoktur.
 2. **Deploy iş akışını etkinleştir.** `.github/workflows/deploy.yml` tetikleyicisine
    `push: branches: [main]` eklenir (Faz 0'da yalnızca `workflow_dispatch` idi).
 3. **Uzak depo (lead).** GitHub'da `ulascanerturk/ulascanerturk.github.io`

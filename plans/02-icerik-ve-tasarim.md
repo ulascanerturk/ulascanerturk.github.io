@@ -25,7 +25,7 @@ ve teknoloji girişimcisi."
 ├── #hakkimda          Kısa tanıtım
 ├── #yetkinlikler      Teknik yetkinlikler
 ├── #deneyim           Profesyonel deneyim
-├── #projeler          Öne çıkan projeler (→ /projeler/)
+├── #projeler          Öne çıkan projeler — LockBox Mobile (→ /projeler/)
 ├── #egitim            Eğitim ve mesleki gelişim
 ├── #girisimcilik      Girişimcilik ve ekosistem
 └── #baglantilar       Bağlantılar / iletişim
@@ -35,21 +35,21 @@ ve teknoloji girişimcisi."
 ```
 
 Üst menü: **Hakkımda** (`/#hakkimda`) · **Projeler** (`/projeler/`) ·
-**GitHub** (dış bağlantı) · tema geçişi.
+**GitHub** ve **LinkedIn** (dış bağlantılar) · tema geçişi.
 
 ## 3. Profil Sayfası İçerik Envanteri
 
 | Bölüm | Kaynak (`ulascanerturk.md`) | İçerik notları |
 |---|---|---|
-| Hero | Başlık + §1 | Ad, unvan satırı, tek cümlelik özet, "Projeleri gör" ve "GitHub" eylemleri |
+| Hero | Başlık + §1 | Monogram (UE) avatar, ad, unvan satırı, tek cümlelik özet, "Projeleri gör", "GitHub" ve "LinkedIn" eylemleri |
 | Hakkımda | §1, §3 "Disiplinler arası yaklaşım", §8 | 2–3 kısa paragraf; teknik + iş bakışı |
 | Yetkinlikler | §4 tablo + "Öne çıkan teknik yaklaşım" | Kategori bazlı etiket grupları; Java ekosistemi "eğitim ve önceki deneyim" notuyla |
-| Deneyim | §5 | Insapption Technology (Technology Officer — kamuya açık ekip sayfası), Shifter; "unvanlar değişebilir" notu korunur |
-| Öne çıkan projeler | §6 | Shifter Pro, Shifter Lite kartları → detay sayfaları |
+| Deneyim | §5, §6 | Insapption Technology (Technology Officer — kamuya açık ekip sayfası); Shifter — **Shifter Pro** (kurumsal, single-tenant) ve **Shifter Lite** (SaaS) ürünleri ve problem alanları burada, ayrı sayfa olmadan anlatılır (S1); §6 "Diğer yazılım çalışma alanları" kısa liste olarak, §6 notuyla; "unvanlar değişebilir" notu korunur |
+| Öne çıkan projeler | S1 kararı | LockBox Mobile kartı → `/projeler/lockbox-mobile/` |
 | Eğitim | §3 | ESOGÜ Uluslararası İlişkiler (lisans, İngilizce); BAU & Wissen Academy Java SE/EE; ODTÜ Yazılım Mühendisliği eğitim programı — **diploma olmadığı açıkça belirtilir** |
 | Girişimcilik | §7 | Program listesi **"Shifter girişimi bağlamında"** ifadesiyle; kişisel ödül/sertifika gibi sunulmaz |
 | Odak alanları | §8 | 7 alan, kısa açıklamalarla |
-| Bağlantılar | §10 | GitHub, Insapption, Insapption ekip sayfası, Shifter, Shifter Blog |
+| Bağlantılar | §10 + S2 | GitHub, LinkedIn (URL Faz 2'de lead'den), Insapption, Insapption ekip sayfası, Shifter, Shifter Blog |
 
 **Yayınlanmayacaklar:** §9 (yapay zekâ ajanı çalışma tercihleri) ve §11'de
 dışarıda bırakılan bilgiler. §11'deki doğrulama notu, sitede kısa bir dipnot
@@ -59,17 +59,36 @@ olarak ("Bazı yetkinlikler beyana dayalıdır…") kullanılabilir — lead kar
 
 | Slug | Başlık | `kind` | Kaynak | Durum |
 |---|---|---|---|---|
-| `shifter-pro` | Shifter Pro — Kurumsal Vardiya Yönetimi | `product` | §6 | Faz 3'te yazılır |
-| `shifter-lite` | Shifter Lite — SaaS Vardiya Yönetimi | `product` | §6 | Faz 3'te yazılır |
-| `calisma-alanlari` (veya liste içi bölüm) | Diğer yazılım çalışma alanları | `focus-area` | §6 "Diğer" | Ayrı sayfa mı, liste bölümü mü — Faz 3 planında karar |
-| — | Ek projeler (ör. LockBox Mobile, GitHub depoları) | — | **Lead onayı (S1)** | Onaylanmadıkça eklenmez |
+| `lockbox-mobile` | LockBox Mobile — Çevrimdışı Parola Kasası | `product` | `lockbox-mobile/docs/00-genel-bakis.md` (kamuya uygun kısımlar) + lead onayı; onay sonrası `ulascanerturk.md` §6'ya eklenir | Faz 3'te yazılır |
+| — | Ek projeler | — | Lead onayı | Yeni karar olmadan eklenmez; altyapı yeni `.md` dosyasıyla eklemeye hazırdır |
+
+Kapsam dışı (S1): Shifter Pro / Shifter Lite proje sayfaları (profilde
+"Deneyim" altında anlatılır), "Diğer çalışma alanları" sayfası (profilde kısa
+liste), LockBox macOS sürümü.
+
+LockBox Mobile sayfası için içerik çerçevesi (taslak, Faz 3'te onaylanır):
+
+- **Problem:** Parolaları buluta ve hesaba bağlı olmadan, yalnızca cihazda ve
+  güvenle saklama ihtiyacı.
+- **Çözüm:** Çevrimdışı, cihaza bağlı, uçtan uca şifreli kasa; sunucu, hesap,
+  telemetri ve ağ izni yok; parola üretme, saklama, kopyalama.
+- **Teknoloji:** Expo · React Native · TypeScript; yüksek seviyede güvenlik
+  mimarisi (Argon2id ile anahtar türetme, AEAD şifreleme, platform güvenli
+  depolama). Ayrıntılar `lockbox-mobile/docs/` ile doğrulanarak yazılır.
+- **Durum:** Uygulamanın yayın durumu ve mağaza bağlantıları lead'den alınır;
+  yayımlanmadıysa "geliştirme aşamasında" yazılır, bağlantı verilmez.
+- **Bağlantılar:** Kaynak kod deposu kamuya açık değil (uzak depo yok) —
+  depo bağlantısı verilmez.
 
 Kurallar:
 
-- §6 notu korunur: "Diğer çalışma alanları" bağımsız, yayımlanmış ürünler gibi sunulmaz.
-- Müşteri adı, sözleşme, iç ekran görüntüsü ve iç metrik kullanılmaz.
-- Ürün ekran görüntüsü yalnızca kamuya açık kaynaktan (ör. shifter.com.tr) ve
-  kullanım izni teyit edilerek eklenir.
+- Yalnızca yayımlanması uygun, yüksek seviyeli bilgi: iç belge yolları, kasa
+  dosya biçiminin ayrıntıları, tehdit modelindeki açık uçlar ve yayımlanmamış
+  mağaza/hesap bilgileri yazılmaz.
+- Ölçülebilir iddialar (performans, kapsama oranı) yalnızca doğrulanmışsa ve
+  lead onaylarsa kullanılır.
+- Ekran görüntüsü yalnızca lead'in sağladığı, kişisel/gerçek kasa verisi
+  içermeyen (örnek verili) görüntülerden; metadata temizlenerek.
 
 ## 5. Tasarım Yönü
 
@@ -81,20 +100,25 @@ Kurallar:
 | Renk | Nötr gri skala + tek vurgu rengi; açık ve koyu tema (`prefers-color-scheme` + elle geçiş, tercih `localStorage`'da) |
 | Kontrast | Metin ≥ 4.5:1, büyük metin ve UI ≥ 3:1 — token'lar bu oranlarla doğrulanır |
 | Hareket | Minimal; `prefers-reduced-motion` saygı görür |
-| Görsel | Profil fotoğrafı opsiyonel (S3); proje kapakları opsiyonel; ikonlar inline SVG |
+| Görsel | Profil fotoğrafı yok; monogram (UE) SVG avatar (S3); proje kapakları opsiyonel; ikonlar inline SVG |
 | Duyarlılık | 360 px'ten geniş ekrana; dokunma hedefleri ≥ 44×44 px |
 
 Token kategorileri (Faz 1): `--color-*` (bg, surface, text, text-muted, border,
 accent, accent-contrast, focus), `--font-*`, `--step-*` (tip ölçeği),
 `--space-*`, `--radius-*`, `--shadow-*`, `--measure`.
 
-## 6. Açık Sorular
+## 6. Açık Sorular ve Kararlar
 
-| # | Soru | Önerilen varsayılan | Gerektiği faz |
+Lead kararları — 2026-10-17:
+
+| # | Soru | Karar | Sonuç |
 |---|---|---|---|
-| S1 | Shifter Pro / Lite dışında yayınlanacak projeler? | Yalnızca bu ikisi + "çalışma alanları"; diğerleri lead listelediğinde eklenir | Faz 3 |
-| S2 | GitHub dışında iletişim kanalı? | Yalnızca GitHub + şirket bağlantıları; e-posta/telefon yok | Faz 2 |
-| S3 | Profil fotoğrafı? | Yok; monogram (UE) SVG avatar | Faz 1 |
-| S4 | İngilizce sürüm? | Faz 6'da, v1 yayından sonra | Faz 6 |
-| S5 | Özel alan adı? | Yok; `ulascanerturk.github.io` | Faz 5 |
-| S6 | ADR-001 (Astro) onayı? | Onay | Faz 0 |
+| S1 | Proje sayfası olarak yayınlanacak projeler? | Yalnızca **LockBox Mobile** | Faz 3 tek içerik dosyasıyla başlar; Shifter ürünleri Faz 2'de "Deneyim" bölümünde |
+| S2 | GitHub dışında iletişim kanalı? | **GitHub + LinkedIn** | LinkedIn URL'si Faz 2'de lead'den alınır (⏳); e-posta/telefon yok |
+| S3 | Profil fotoğrafı? | **Monogram (UE) SVG** | Faz 1 görev 8 |
+| S4 | İngilizce sürüm? | **Evet, v1 sonrası** | Faz 6 §2.1 uygulanır |
+| S5 | Özel alan adı? | **Hayır** | Faz 5'te CNAME/DNS adımı yok |
+| S6 | ADR-001 (Astro) onayı? | **Onaylandı** | ADR-001 "Kabul edildi" |
+
+Bekleyen girdiler: LinkedIn profil URL'si (Faz 2), LockBox Mobile yayın durumu
+ve metin onayı (Faz 3).

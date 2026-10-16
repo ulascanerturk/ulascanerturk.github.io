@@ -14,7 +14,7 @@
 | Stil | Native CSS + custom properties (token'lar), Astro scoped style; CSS framework yok | ADR-003 |
 | İstemci JS | Framework yok; yalnızca tema geçişi için küçük inline script | ADR-004 |
 | İçerik | Astro content collections (`projects`) + tipli `src/data/profile.ts` | ADR-005 |
-| Dil | `tr-TR` birincil; `en` Faz 6'da opsiyonel | ADR-006 |
+| Dil | `tr-TR` birincil; `en` Faz 6'da (v1 sonrası, S4) | ADR-006 |
 | Analitik | Yok (v1) | ADR-007 |
 | Çalışma ortamı | Node.js güncel LTS (`.nvmrc`), npm | ADR-008 |
 | Yazı tipi | Sistem font yığını (harici font isteği yok) | ADR-009 |
@@ -131,7 +131,7 @@ export interface Profile {
   education: { institution: string; program: string; kind: 'degree' | 'training' }[];
   ecosystem: { context: string; programs: string[]; note: string };
   focusAreas: { title: string; description: string }[];
-  links: { label: string; url: string; kind: 'github' | 'company' | 'product' | 'blog' | 'other' }[];
+  links: { label: string; url: string; kind: 'github' | 'linkedin' | 'company' | 'product' | 'blog' | 'other' }[];
 }
 ```
 
@@ -168,7 +168,7 @@ Gövde bölümleri (önerilen): **Problem**, **Çözüm**, **Rolüm**, **Teknolo
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | 3 |
 | `/404.html` | `src/pages/404.astro` | 1 |
 | `/sitemap-index.xml` | `@astrojs/sitemap` | 4 |
-| `/en/…` | (opsiyonel) | 6 |
+| `/en/…` | İngilizce sürüm (S4) | 6 |
 
 `astro.config.mjs`: `site: 'https://ulascanerturk.github.io'`, `base` tanımlanmaz
 (kullanıcı sitesi kökte yayınlanır), `trailingSlash: 'always'`,

@@ -10,7 +10,9 @@ anlatan, taranabilir ve semantik bir profil sayfası yayınlamak.
 
 ## 2. Görev Listesi
 
-1. **S2 kararı.** İletişim kanalları netleşir (varsayılan: GitHub + şirket bağlantıları).
+1. **LinkedIn URL'si (S2: GitHub + LinkedIn).** Lead profil URL'sini verir;
+   `ulascanerturk.md` §10'a ve `src/data/profile.ts` → `links`'e eklenir
+   (`kind: 'linkedin'`). E-posta ve telefon gösterilmez.
 2. **`src/data/profile.ts`.** `Profile` arayüzü ve verisi; her alanın
    `ulascanerturk.md` içindeki kaynak bölümü dosyada yorum olarak belirtilir
    (ör. `// kaynak: ulascanerturk.md §4`).
@@ -23,13 +25,19 @@ anlatan, taranabilir ve semantik bir profil sayfası yayınlamak.
 4. **Profil bileşenleri (`src/components/profile/`).**
    - `ProfileHero` — ad (`<h1>`), unvan satırı, özet, eylem bağlantıları.
    - `SkillsGrid` — kategori başlıkları + `Tag` listeleri.
-   - `ExperienceList` — kuruluş, rol, öne çıkanlar, `Callout` notu.
+   - `ExperienceList` — kuruluş, rol, öne çıkanlar, `Callout` notu. Shifter
+     girdisi Shifter Pro (kurumsal, single-tenant) ve Shifter Lite (SaaS)
+     ürünlerini §6'daki problem alanlarıyla birlikte, ayrı sayfaya bağlanmadan
+     anlatır (S1); shifter.com.tr dış bağlantısı verilir.
+   - `WorkAreas` — §6 "Diğer yazılım çalışma alanları" kısa listesi, §6 notuyla
+     (bağımsız ürün gibi sunulmaz).
    - `EducationList` — `degree` ve `training` görsel olarak ayrışır.
    - `EcosystemNote` — program listesi + bağlam notu.
    - `FocusAreas` — 7 odak alanı.
    - `LinkList` — `ExternalLink` ile bağlantılar.
 5. **Öne çıkan projeler bölümü.** Faz 3 tamamlanmadıysa geçici olarak
-   `/projeler/` bağlantısı; Faz 3 sonrası `featured` projelerin `ProjectCard`'ları.
+   `/projeler/` bağlantısı; Faz 3 sonrası `featured` projelerin `ProjectCard`'ları
+   (v1: LockBox Mobile).
 6. **`src/pages/index.astro`.** Bölümleri `02-icerik-ve-tasarim.md` §2 sırası ve
    `id` çapalarıyla birleştirir; sayfa `description` meta'sı profil özetinden.
 7. **Dipnot (lead kararı).** "Bazı yetkinlik başlıkları beyana dayalıdır" notu
@@ -47,6 +55,8 @@ anlatan, taranabilir ve semantik bir profil sayfası yayınlamak.
 ## 4. Kabul Kriterleri
 
 - [ ] Profil metinleri lead tarafından onaylandı (onay tarihi `phase_progress.md`'de).
+- [ ] LinkedIn URL'si lead'den alındı ve hem `ulascanerturk.md` §10'da hem sitede yer alıyor.
+- [ ] Shifter Pro / Lite "Deneyim" bölümünde anlatılıyor; ayrı proje sayfası yok.
 - [ ] Her bölüm `ulascanerturk.md` ile tutarlı; §9 ve §11 dışı bilgi yok.
 - [ ] Eğitim ve girişimcilik ifadeleri §3 ve §7'deki ayrımlara uyuyor.
 - [ ] Sayfa JS olmadan tamamen okunabilir.

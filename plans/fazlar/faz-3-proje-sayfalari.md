@@ -12,8 +12,10 @@ bir `.md` dosyası eklemek olmalıdır.
 
 ## 2. Görev Listesi
 
-1. **S1 kararı.** Yayınlanacak proje listesi netleşir (varsayılan: Shifter Pro,
-   Shifter Lite, çalışma alanları).
+1. **Kaynak belge güncellemesi (S1: yalnızca LockBox Mobile).** Lead'den
+   LockBox Mobile'ın yayın durumu (mağazada mı, geliştirmede mi) ve paylaşılabilir
+   bilgi sınırı alınır; onaylanan kısa tanım `ulascanerturk.md` §6'ya eklenir
+   (Değişmez Kural 2: tek içerik kaynağı).
 2. **Koleksiyon şeması — `src/content.config.ts`.** `projects` koleksiyonu,
    `glob({ pattern: '**/*.md', base: './src/content/projects' })` loader,
    `01-mimari.md` §4.2 tablosundaki zod şeması (`image()` dahil).
@@ -26,15 +28,16 @@ bir `.md` dosyası eklemek olmalıdır.
 5. **`ProjectLayout.astro`.** `BaseLayout` üzerine: başlık, meta, kapak (varsa),
    içerik (`<article>`), `disclaimer` (`Callout`), "Tüm projeler" geri bağlantısı,
    önceki/sonraki proje gezinmesi.
-6. **Sayfalar.** `src/pages/projeler/index.astro` (gruplama: ürünler / diğer),
+6. **Sayfalar.** `src/pages/projeler/index.astro` (tek proje varken gruplama
+   yok; `kind` değerine göre gruplama ikinci tür eklendiğinde devreye girer),
    `src/pages/projeler/[slug].astro` (`getStaticPaths` + `render()`).
-7. **İçerik dosyaları.**
-   - `shifter-pro.md` — `ulascanerturk.md` §6 "Shifter Pro" problem alanları;
-     bağlantı: shifter.com.tr.
-   - `shifter-lite.md` — §6 "Shifter Lite"; bağlantı: shifter.com.tr.
-   - "Diğer çalışma alanları" — §6 notuyla (`kind: focus-area`); ayrı sayfa mı
-     liste içi bölüm mü plan aşamasında karar verilir.
-   - S1 ile onaylanan ek projeler.
+7. **İçerik dosyası — `lockbox-mobile.md`.** `02-icerik-ve-tasarim.md` §4'teki
+   içerik çerçevesiyle: `kind: product`, `featured: true`, `tech: [Expo, React
+   Native, TypeScript, …]`; teknik ifadeler `lockbox-mobile/docs/` ile
+   doğrulanır; mağaza bağlantısı yalnızca uygulama yayımlandıysa; depo
+   bağlantısı yok. Metin lead onayıyla kesinleşir.
+   Kapsam dışı (S1): Shifter Pro/Lite sayfaları, "Diğer çalışma alanları"
+   sayfası, LockBox macOS.
 8. **Profil entegrasyonu.** Faz 2 tamamlandıysa ana sayfadaki "Öne çıkan
    projeler" bölümü `featured` girdilerden beslenir.
 9. **İçerik ekleme rehberi.** `references/content_schema.md` içine "Yeni proje
@@ -46,15 +49,15 @@ bir `.md` dosyası eklemek olmalıdır.
 - Şema: geçersiz ön bilgiyle (eksik `summary`, geçersiz `status`) `astro build`
   başarısız olur — geçici test dosyasıyla bir kez doğrulanır, sonra silinir;
   sonuç `phase_progress.md`'ye not edilir.
-- Derlenmiş çıktı: her proje için `dist/projeler/{slug}/index.html` var; liste
+- Derlenmiş çıktı: `dist/projeler/lockbox-mobile/index.html` var; liste
   sayfasındaki tüm bağlantılar çözülüyor; her detayda tek `<h1>`.
 
 ## 4. Kabul Kriterleri
 
 - [ ] Yeni proje eklemek yalnızca bir `.md` dosyası gerektiriyor (rehberle doğrulandı).
-- [ ] Proje metinleri lead tarafından onaylandı.
-- [ ] Hiçbir projede müşteri adı, gizli ayrıntı, doğrulanmamış metrik yok.
-- [ ] "Diğer çalışma alanları" bağımsız yayımlanmış ürün gibi sunulmuyor.
+- [ ] LockBox Mobile metni lead tarafından onaylandı ve `ulascanerturk.md` §6'ya eklendi.
+- [ ] Yayın durumu doğru (yayımlanmadıysa mağaza bağlantısı yok); depo bağlantısı yok.
+- [ ] Hiçbir projede gizli ayrıntı, iç belge yolu, doğrulanmamış metrik yok.
 - [ ] Görseller (varsa) EXIF'siz, `alt` metinli, boyutları tanımlı.
 - [ ] Kalite kapısı `all` kapsamında PASS.
 - [ ] Kontrol listesi: İçerik ve Gizlilik, Erişilebilirlik, SEO gözden geçirildi.
@@ -63,5 +66,7 @@ bir `.md` dosyası eklemek olmalıdır.
 
 | Risk | Önlem |
 |---|---|
-| Ürün ekran görüntülerinin kullanım hakkı | Yalnızca lead'in sağladığı veya kullanım izni teyit edilmiş kamuya açık görseller |
-| Shifter Pro'nun single-tenant/kurumsal yapısı nedeniyle müşteri ayrıntısı sızması | `disclaimer` alanı + `test-lint` manuel içerik incelemesi |
+| Ekran görüntülerinde gerçek kasa verisi görünmesi | Yalnızca lead'in sağladığı, örnek veriyle alınmış ve metadata'sı temizlenmiş görüntüler |
+| Güvenlik mimarisinin fazla ayrıntılı anlatılması (kasa biçimi, tehdit modeli açıkları) | Yalnızca yüksek seviyeli özellikler; `test-lint` manuel içerik incelemesi |
+| Uygulama yayınlanmadan "mağazada" gibi sunulması | Durum alanı lead'den alınır; `status: active` + "geliştirme aşamasında" ifadesi |
+| Tek projeyle liste sayfasının zayıf görünmesi | Liste sayfası tek kartla da dengeli tasarlanır; ana sayfadan doğrudan detaya bağlantı |

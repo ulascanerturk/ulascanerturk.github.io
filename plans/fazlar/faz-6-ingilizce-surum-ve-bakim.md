@@ -1,17 +1,18 @@
-# Faz 6 — İngilizce Sürüm ve Bakım (Opsiyonel)
+# Faz 6 — İngilizce Sürüm ve Bakım
 
 > Önkoşul: Faz 5 · Dal: `feat/faz-6-*` · Kapsam: `all`
-> İlgili: ADR-006 · S4
+> İlgili: ADR-006 · S4 (onaylandı, 2026-10-17)
 
 ## 1. Amaç
 
-(a) S4 onaylanırsa sitenin İngilizce sürümünü `/en/` altında yayınlamak;
+(a) Sitenin İngilizce sürümünü `/en/` altında yayınlamak (S4: onaylandı —
+v1 Türkçe yayınından sonra);
 (b) sitenin uzun vadede güncel ve güvenli kalması için bakım rutinlerini kurmak.
-(a) ve (b) birbirinden bağımsızdır; (b) S4'ten bağımsız olarak yapılır.
+(a) ve (b) birbirinden bağımsızdır.
 
 ## 2. Görev Listesi
 
-### 2.1 İngilizce sürüm (S4 onayına bağlı)
+### 2.1 İngilizce sürüm (S4: onaylandı)
 
 1. **Astro i18n yapılandırması.** `i18n: { defaultLocale: 'tr', locales: ['tr', 'en'],
    routing: { prefixDefaultLocale: false } }` — Türkçe URL'ler değişmez.
@@ -43,8 +44,8 @@
 
 ## 4. Kabul Kriterleri
 
-- [ ] (S4 onaylıysa) İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var.
-- [ ] (S4 onaylıysa) Çeviriler lead tarafından onaylandı.
+- [ ] İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var.
+- [ ] Çeviriler lead tarafından onaylandı.
 - [ ] Dependabot etkin.
 - [ ] Bakım rehberi `references/` içinde.
 - [ ] Kalite kapısı `all` kapsamında PASS.

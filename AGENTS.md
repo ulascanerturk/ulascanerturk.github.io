@@ -4,7 +4,7 @@
 
 Personal site of **Ulaşcan Ertürk** published at `https://ulascanerturk.github.io`:
 a profile page (`/`) and one static page per project (`/projeler/{slug}/`).
-Planned stack: **Astro (static output) · TypeScript strict · native CSS ·
+Stack (ADR-001 accepted): **Astro (static output) · TypeScript strict · native CSS ·
 GitHub Pages via GitHub Actions** — no client framework, no analytics.
 
 The specification lives in `plans/` (Turkish) and is the source of truth:

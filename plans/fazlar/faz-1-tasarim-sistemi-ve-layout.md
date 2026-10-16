@@ -25,12 +25,14 @@ fazları yalnızca bileşen ve içerik ekler; global stil değişikliği gerekti
    `color-scheme` meta), tema betiği (FOUC önleyen, `<head>` içinde inline,
    ≤ 1 KB), skip link, `<header>`, `<main id="icerik">`, `<footer>`.
 6. **Layout bileşenleri.** `SkipLink`, `SiteHeader` (nav + aktif sayfa
-   `aria-current`), `SiteFooter` (© yıl, GitHub, kaynak kodu bağlantısı),
+   `aria-current`), `SiteFooter` (© yıl, GitHub, LinkedIn, kaynak kodu bağlantısı),
    `ThemeToggle` (`<button aria-pressed>`; JS kapalıyken gizli, sistem teması geçerli).
 7. **UI bileşenleri.** `Section` (başlık + `id` çapası), `Tag`, `ExternalLink`,
    `Callout` (not/uyarı kutusu — profil dipnotları için).
-8. **Avatar / marka.** S3 kararına göre: monogram SVG (`public/favicon.svg` ile
-   aynı dil) veya EXIF'i temizlenmiş fotoğraf (`astro:assets`, `width/height` zorunlu).
+8. **Avatar / marka (S3: monogram).** "UE" monogramı inline SVG bileşeni
+   (`src/components/ui/Monogram.astro`, renkler token'lardan, `role="img"` +
+   `aria-label="Ulaşcan Ertürk"`) ve aynı tasarımla `public/favicon.svg`.
+   Fotoğraf kullanılmaz.
 9. **`404.astro`.** Kısa mesaj + ana sayfa ve projeler bağlantısı; `noindex`.
 10. **(Opsiyonel) Stil rehberi.** Token ve bileşen önizlemesi yalnızca
     geliştirme ortamında görünür (ör. `import.meta.env.DEV` kontrolü); üretim
