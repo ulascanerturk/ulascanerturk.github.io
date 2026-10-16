@@ -1,0 +1,41 @@
+---
+// Project facts as a description list (faz-3 §2 task 4): role, period, status.
+interface Item {
+  term: string;
+  value: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="project-meta">
+  {items.map((item) => (
+    <div class="project-meta__item">
+      <dt>{item.term}</dt>
+      <dd>{item.value}</dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+    margin: 0;
+  }
+
+  .project-meta dt {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .project-meta dd {
+    margin: 0;
+    font-weight: 600;
+  }
+</style>

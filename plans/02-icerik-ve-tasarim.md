@@ -59,7 +59,7 @@ olarak ("Bazı yetkinlikler beyana dayalıdır…") kullanılabilir — lead kar
 
 | Slug | Başlık | `kind` | Kaynak | Durum |
 |---|---|---|---|---|
-| `lockbox-mobile` | LockBox Mobile — Çevrimdışı Parola Kasası | `product` | `lockbox-mobile/docs/00-genel-bakis.md` (kamuya uygun kısımlar) + lead onayı; onay sonrası `ulascanerturk.md` §6'ya eklenir | Faz 3'te yazılır |
+| `lockbox-mobile` | Lockbox — Çevrimdışı Parola Kasası (mağaza adı "Lockbox - Password Vault"; lead kararı 2026-10-17) | `product` | `lockbox-mobile/docs/00-genel-bakis.md` (kamuya uygun kısımlar) + lead onayı; `ulascanerturk.md` §6 "Lockbox" | Faz 3'te yazıldı (2026-10-17) |
 | — | Ek projeler | — | Lead onayı | Yeni karar olmadan eklenmez; altyapı yeni `.md` dosyasıyla eklemeye hazırdır |
 
 Kapsam dışı (S1): Shifter Pro / Shifter Lite proje sayfaları (profilde

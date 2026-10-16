@@ -1,0 +1,49 @@
+---
+// Public project links (faz-3 §2 task 4), e.g. a store page once published.
+// Renders nothing when there are no links.
+import ExternalLink from '@/components/ui/ExternalLink.astro';
+
+interface Link {
+  label: string;
+  url: string;
+}
+
+interface Props {
+  title: string;
+  links: Link[];
+}
+
+const { title, links } = Astro.props;
+---
+
+{links.length > 0 && (
+  <section class="project-links" aria-labelledby="proje-baglantilari">
+    <h2 id="proje-baglantilari">{title}</h2>
+    <ul>
+      {links.map((link) => (
+        <li>
+          <ExternalLink href={link.url} class="project-links__link">
+            {link.label}
+          </ExternalLink>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .project-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+    margin-top: var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-links__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+</style>

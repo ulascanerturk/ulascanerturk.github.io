@@ -1,28 +1,41 @@
 ---
 // Profile page (faz-2 §2 task 6). Sections follow plans/02-icerik-ve-tasarim.md
 // §2–§3; data and text come from src/data/profile.ts (ulascanerturk.md).
-// "Öne çıkan projeler" (#projeler) is added in Faz 3 task 8.
+// "Öne çıkan projeler" (#projeler, faz-3 §2 task 8) lists the `featured` entries.
+import { getCollection } from 'astro:content';
+
 import EcosystemNote from '@/components/profile/EcosystemNote.astro';
 import EducationList from '@/components/profile/EducationList.astro';
 import ExperienceList from '@/components/profile/ExperienceList.astro';
 import FocusAreas from '@/components/profile/FocusAreas.astro';
 import LinkList from '@/components/profile/LinkList.astro';
 import ProfileHero from '@/components/profile/ProfileHero.astro';
+import ProjectCard from '@/components/projects/ProjectCard.astro';
 import SkillsGrid from '@/components/profile/SkillsGrid.astro';
 import WorkAreas from '@/components/profile/WorkAreas.astro';
 import Callout from '@/components/ui/Callout.astro';
 import Section from '@/components/ui/Section.astro';
 import { profile, profilePage } from '@/data/profile';
+import { projectsPage } from '@/data/projects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { formatDate } from '@/lib/date';
+import { isPublished, sortProjects } from '@/lib/projects';
 
-const { about, skills, experience, education, ecosystem, focusAreas, links, footnote } =
+const { about, skills, experience, projects, education, ecosystem, focusAreas, links, footnote } =
   profilePage;
 
 const heroActions = profilePage.hero.actions.flatMap((action) => {
+  if ('href' in action) return [{ label: action.label, href: action.href, external: false }];
   const link = profile.links.find((candidate) => candidate.kind === action.kind);
-  return link ? [{ label: action.label, href: link.url }] : [];
+  return link ? [{ label: action.label, href: link.url, external: true }] : [];
 });
+
+const featured = sortProjects(
+  await getCollection(
+    'projects',
+    ({ data }) => data.featured && isPublished(data, import.meta.env.PROD),
+  ),
+);
 ---
 
 <BaseLayout description={profilePage.description}>
@@ -53,6 +66,27 @@ const heroActions = profilePage.hero.actions.flatMap((action) => {
       note={profile.workAreas.note}
     />
     <Callout>{experience.note}</Callout>
+  </Section>
+
+  <Section id={projects.id} title={projects.title}>
+    <div class="featured-projects">
+      {featured.map((project) => (
+        <ProjectCard
+          title={project.data.title}
+          href={`/projeler/${project.id}/`}
+          summary={project.data.summary}
+          statusLabel={projectsPage.statusLabels[project.data.status]}
+          tech={project.data.tech}
+          techLabel={projectsPage.techLabel}
+          level={3}
+        />
+      ))}
+    </div>
+    <p>
+      <a href="/projeler/" class="featured-projects__all">
+        {projects.allLabel}
+      </a>
+    </p>
   </Section>
 
   <Section id={education.id} title={education.title}>
@@ -91,6 +125,18 @@ const heroActions = profilePage.hero.actions.flatMap((action) => {
 </BaseLayout>
 
 <style>
+  .featured-projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  .featured-projects__all {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+
   .profile-footnote {
     margin-top: var(--space-xl);
     padding-top: var(--space-s);

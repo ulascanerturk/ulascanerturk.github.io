@@ -276,9 +276,12 @@ export interface ProfileSectionText {
   title: string;
 }
 
+/** External actions resolve their URL from `profile.links` by `kind`; internal ones carry `href`. */
+export type HeroAction = { kind: LinkKind; label: string } | { href: string; label: string };
+
 export interface ProfilePageText {
   description: string;
-  hero: { actions: { kind: LinkKind; label: string }[] };
+  hero: { actions: HeroAction[] };
   about: ProfileSectionText;
   skills: ProfileSectionText & { intro: string };
   experience: ProfileSectionText & {
@@ -286,6 +289,7 @@ export interface ProfilePageText {
     workAreasTitle: string;
     note: string;
   };
+  projects: ProfileSectionText & { allLabel: string };
   education: ProfileSectionText & {
     groups: Record<EducationKind, string>;
     kindLabels: Record<EducationKind, string>;
@@ -298,14 +302,15 @@ export interface ProfilePageText {
 }
 
 // Page text for `/` (section titles, intros, labels). Order follows
-// plans/02-icerik-ve-tasarim.md §2–§3; "Öne çıkan projeler" (#projeler) is added
-// in Faz 3 task 8 (lead decision 2026-10-17).
+// plans/02-icerik-ve-tasarim.md §2–§3; "Öne çıkan projeler" (#projeler) since
+// Faz 3 task 8 — its cards come from the `featured` project entries.
 export const profilePage: ProfilePageText = {
   // kaynak: ulascanerturk.md §1, §2 — ≤ 160 karakter
   description:
     "Ulaşcan Ertürk — 2018'den bu yana web, mobil ve kurumsal uygulamalar geliştiren İstanbul merkezli yazılım geliştirici ve teknoloji girişimcisi.",
   hero: {
     actions: [
+      { href: '/projeler/', label: 'Projeleri gör' },
       { kind: 'github', label: 'GitHub profili' },
       { kind: 'linkedin', label: 'LinkedIn profili' },
     ],
@@ -326,6 +331,8 @@ export const profilePage: ProfilePageText = {
     // kaynak: ulascanerturk.md §5 not
     note: 'Şirket unvanları ve sorumluluklar zamanla değişebilir; güncel resmî unvan için ilgili kurumun kaydı esas alınmalıdır.',
   },
+  // kaynak: S1 kararı — öne çıkan projeler (ulascanerturk.md §6 Lockbox)
+  projects: { id: 'projeler', title: 'Öne çıkan projeler', allLabel: 'Tüm projeler' },
   education: {
     id: 'egitim',
     title: 'Eğitim',

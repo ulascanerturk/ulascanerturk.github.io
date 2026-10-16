@@ -36,9 +36,9 @@ export const site: SiteConfig = {
 
   nav: {
     label: 'Ana menü',
-    // "Projeler" (/projeler/) is added in Faz 3 task 6, when the route exists.
     items: [
       { label: 'Hakkımda', href: '/#hakkimda' },
+      { label: 'Projeler', href: '/projeler/' },
       { label: 'GitHub', href: 'https://github.com/ulascanerturk', external: true },
       { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ulascanerturk', external: true },
     ],
@@ -61,7 +61,9 @@ export const site: SiteConfig = {
   notFound: {
     title: 'Sayfa bulunamadı',
     message: 'Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.',
-    // "Projelere göz at" (/projeler/) is added in Faz 3 task 6.
-    links: [{ label: 'Ana sayfaya dön', href: '/' }],
+    links: [
+      { label: 'Ana sayfaya dön', href: '/' },
+      { label: 'Projelere göz at', href: '/projeler/' },
+    ],
   },
 };

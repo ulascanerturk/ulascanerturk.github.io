@@ -151,7 +151,7 @@ Dosya adı slug'dır (ASCII, küçük harf, tire; ç→c, ğ→g, ı→i, ö→o
 | Alan | Tip | Zorunlu | Not |
 |---|---|---|---|
 | `title` | string (1–80) | ✅ | |
-| `summary` | string (50–200) | ✅ | Liste kartı + meta description |
+| `summary` | string (50–160) | ✅ | Liste kartı + meta description (≤ 160 — kontrol listesi; Faz 3 lead onayı 2026-10-17) |
 | `kind` | `'product' \| 'open-source' \| 'client-work' \| 'focus-area'` | ✅ | |
 | `status` | `'active' \| 'completed' \| 'archived'` | ✅ | |
 | `role` | string | ✅ | Projedeki kamuya açık rol |
@@ -159,6 +159,7 @@ Dosya adı slug'dır (ASCII, küçük harf, tire; ç→c, ğ→g, ı→i, ö→o
 | `tech` | string[] | ✅ | Etiket olarak gösterilir |
 | `links` | `{ label, url }[]` | ⬜ | Yalnızca kamuya açık bağlantılar |
 | `cover` | image() | ⬜ | `src/assets/projects/` — EXIF temizlenmiş |
+| `coverAlt` | string | `cover` varsa ✅ | Kapak görselinin `alt` metni (Faz 3 lead onayı 2026-10-17) |
 | `featured` | boolean | ⬜ | Ana sayfada gösterim |
 | `order` | number | ⬜ | Liste sırası (küçük önce) |
 | `draft` | boolean | ⬜ | `true` ise derlemeye girmez |

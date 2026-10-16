@@ -1,28 +1,28 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
+> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 ## Current Phase
 
-**Faz 2 — Profil Sayfası: closed** (branch `feat/faz-2-profile-page`).
-Next unblocked phase: **Faz 3 — Proje Sayfaları** (Faz 4 waits for it).
-Overall: tasks 27/70 (+1 optional skipped, +1 deferred to Faz 3) · acceptance 22/47.
+**Faz 3 — Proje Sayfaları: closed** (branch `feat/faz-3-project-pages`).
+Next unblocked phase: **Faz 4 — SEO, Erişilebilirlik ve Performans** (Faz 2 and Faz 3 closed).
+Overall: tasks 36/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8) · acceptance 29/47.
 
 ## Open Questions
 
 | # | Question | Answer | Date | Decided by |
 |---|---|---|---|---|
-| S1 | Which projects get pages? | LockBox Mobile only (no macOS); Shifter Pro/Lite in profile experience | 2026-10-17 | lead |
+| S1 | Which projects get pages? | LockBox Mobile only (no macOS); Shifter Pro/Lite in profile experience. Faz 3: page title "Lockbox" (store name), status "geliştirme aşamasında", security at plan level | 2026-10-17 | lead |
 | S2 | Contact channels besides GitHub? | GitHub + LinkedIn; no e-mail/phone — LinkedIn URL in `ulascanerturk.md` §10 (commit 578d8e0), used in header/footer | 2026-10-17 | lead |
 | S3 | Profile image? | Monogram (UE) SVG; no photo | 2026-10-17 | lead |
 | S4 | English version? | Yes, after v1 (Faz 6, `/en/`) | 2026-10-17 | lead |
 | S5 | Custom domain? | No; `ulascanerturk.github.io` | 2026-10-17 | lead |
 | S6 | ADR-001 (Astro)? | Accepted | 2026-10-17 | lead |
 
-Pending lead inputs: LockBox Mobile publication status + text approval (Faz 3), robots.txt AI crawler
-policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10).
+Pending lead inputs: robots.txt AI crawler policy (Faz 4 task 5), Lighthouse CI in CI (Faz 4 task 10);
+Lockbox store links once the app is published (content update, not a phase task).
 
 ## Faz 0 — Proje Kurulumu   (plans/fazlar/faz-0-proje-kurulumu.md)
 Status: closed (2026-10-17)
@@ -81,7 +81,7 @@ Status: closed (2026-10-17, branch `feat/faz-2-profile-page`)
 - [x] 2. `src/data/profile.ts` — `Profile` + `profilePage`, `// kaynak: ulascanerturk.md §N` comment per field
 - [x] 3. Text draft + lead approval — first person (lead decision), approved 2026-10-17
 - [x] 4. Profile components — `src/components/profile/` (8 components)
-- [—] 5. Featured projects section — deferred to Faz 3 task 8 (lead decision 2026-10-17): no `#projeler` section and no "Projeleri gör" hero action until `/projeler/` exists (no broken internal link)
+- [—] 5. Featured projects section — deferred to Faz 3 task 8 (lead decision 2026-10-17): no `#projeler` section and no "Projeleri gör" hero action until `/projeler/` exists (no broken internal link) → **done in Faz 3 task 8**
 - [x] 6. `src/pages/index.astro` — sections in 02 §2 order with `id` anchors; meta description from the profile summary
 - [x] 7. Footnote — lead decision 2026-10-17: at the end of `/` (not in the footer): §11 self-declaration note + "Son güncelleme" (`<time>`, `formatDate`)
 ### Acceptance Criteria
@@ -99,28 +99,32 @@ Status: closed (2026-10-17, branch `feat/faz-2-profile-page`)
 - `Tag.astro` change (planned "only if needed") was not needed: `scrollWidth = 360` at 360 px.
 
 ## Faz 3 — Proje Sayfaları   (plans/fazlar/faz-3-proje-sayfalari.md)
-Status: not started (unblocked)
+Status: closed (2026-10-17, branch `feat/faz-3-project-pages`)
 ### Tasks
-- [ ] 1. LockBox Mobile facts from lead → `ulascanerturk.md` §6
-- [ ] 2. Collection schema — `src/content.config.ts`
-- [ ] 3. `src/lib/projects.ts`
-- [ ] 4. Project components
-- [ ] 5. `ProjectLayout.astro`
-- [ ] 6. Pages (`/projeler/`, `/projeler/[slug]/`) — also add "Projeler" to `site.nav.items` and "Projelere göz at" to `site.notFound.links` (deferred from Faz 1)
-- [ ] 7. `lockbox-mobile.md`
-- [ ] 8. Profile integration (featured) — also adds the `#projeler` section (between `#deneyim` and `#egitim`, `profilePage`) and the "Projeleri gör" hero action (deferred Faz 2 task 5)
-- [ ] 9. "How to add a project" guide in `references/content_schema.md`
+- [x] 1. Lockbox facts → `ulascanerturk.md` §6 "Lockbox — Çevrimdışı Parola Kasası" — status verified in the `lockbox-mobile` repo (iOS 1.0.0 (1) uploaded to App Store Connect / TestFlight 2026-10-16; not published; no remote) and confirmed by the lead; text approved 2026-10-17
+- [x] 2. Collection schema — `src/content.config.ts` (glob loader, zod 4 from `astro/zod`, `image()`; `summary` 50–160, `coverAlt` required with `cover` — approved deviations, plans/01-mimari.md §4.2 updated)
+- [x] 3. `src/lib/projects.ts` — `sortProjects`, `isPublished`, `formatPeriod` + approved additions `adjacentProjects`, `groupByKind`; enums shared with the schema
+- [x] 4. Project components — `ProjectCard` (only the title links), `ProjectMeta` (`<dl>`), `ProjectLinks` (hidden when empty)
+- [x] 5. `ProjectLayout.astro` — h1, summary, meta, tech, cover (`astro:assets`), `<article>` content, disclaimer Callout, links, prev/next nav + "Tüm projeler"
+- [x] 6. Pages — `/projeler/` (grouping by `kind` only with ≥ 2 kinds), `/projeler/[slug]/` (`getStaticPaths` + `render()`); "Projeler" in `site.nav.items`, "Projelere göz at" in `site.notFound.links`
+- [x] 7. `src/content/projects/lockbox-mobile.md` — title "Lockbox — Çevrimdışı Parola Kasası" (lead: store name), `kind: product`, `status: active`, `featured: true`, `order: 1`, no `links`, no cover; claims checked against the `lockbox-mobile` docs and Faz 2–6 commits
+- [x] 8. Profile integration — `#projeler` "Öne çıkan projeler" between `#deneyim` and `#egitim` (featured cards, h3, + "Tüm projeler"); hero action "Projeleri gör" first (internal link; `ProfileHero` `external` flag)
+- [x] 9. "How to Add a Project" guide in `references/content_schema.md`
 ### Acceptance Criteria
-- [ ] Adding a project requires only one `.md` file
-- [ ] LockBox Mobile text approved and added to `ulascanerturk.md` §6
-- [ ] Publication status correct; no store link unless published; no repo link
-- [ ] No confidential details, internal doc paths or unverified metrics
-- [ ] Images (if any) metadata-free, with alt and dimensions
-- [ ] Quality gate PASS (`all`)
-- [ ] Checklist: İçerik ve Gizlilik, Erişilebilirlik, SEO reviewed
+- [x] Adding a project requires only one `.md` file — verified 2026-10-17 by following the guide with a temporary second entry (`kind: open-source`, `links`, `period` 2024–2025): 5 pages built, `/projeler/` switched to kind groups, prev/next links appeared, link had `rel="noopener noreferrer"`, dist checks 0 errors; file deleted afterwards
+- [x] Lockbox text approved and added to `ulascanerturk.md` §6 — lead approval 2026-10-17 (plan texts A/B/C)
+- [x] Publication status correct; no store link; no repo link — `status: active` + "Geliştirme aşamasında; App Store ve Google Play yayını hazırlanıyor"; no `links`; dist grep: no apps.apple / play.google / repo URL
+- [x] No confidential details, internal doc paths or unverified metrics — dist grep for `docs/`, `.lockbox`, TestFlight, console, XChaCha/HKDF, metrics: 0 hits; performance/coverage targets left out (source path only in a YAML comment of the source file — not published, same path as in plans/02)
+- [x] Images (if any) metadata-free, with alt and dimensions — no images in v1; schema requires `coverAlt` with `cover`; `<Image>` sets width/height
+- [x] Quality gate PASS (`all`) — `test-lint all` 1st run 2026-10-17: check 0/0/0, lint 0, format OK, 47 tests, build 4 pages, invariants 0 hits, dist 0 errors / 0 warnings, audit 0, docs links OK
+- [x] Checklist: İçerik ve Gizlilik ✅ (§6 source + lead approval, §9/§11 clean, no invented metrics/clients), Erişilebilirlik ✅ (one h1 per page, h1→h2(→h3) without skips, title-only card links, 44 px targets, `<dl>` meta, tag lists labelled, 360 px `scrollWidth = 360` on all pages, dark theme checked), SEO ✅ (unique title + description ≤ 160 + canonical with trailing slash on `/projeler/` and `/projeler/lockbox-mobile/`; OG/JSON-LD/sitemap are Faz 4)
+### Notes
+- Plan deviations approved 2026-10-17: title "Lockbox" (plans/02 §4 updated), `summary` ≤ 160 + `coverAlt` (plans/01 §4.2 updated), extra lib helpers, `HeroAction` union (`href` | `kind`), body sections without "Öğrenimler".
+- Schema check (faz-3 §3): temporary entry without `summary` and with `status: live` → `InvalidContentEntryDataError` naming both fields; file deleted.
+- `src/data/projects.ts` (`projectsPage`) holds the project UI text; status label for `active` is "Aktif geliştirmede".
 
 ## Faz 4 — SEO, Erişilebilirlik ve Performans   (plans/fazlar/faz-4-seo-erisilebilirlik-performans.md)
-Status: not started (blocked by Faz 3; Faz 2 closed)
+Status: not started (unblocked — Faz 2 and Faz 3 closed)
 ### Tasks
 - [ ] 1. `Seo.astro`
 - [ ] 2. OG images
@@ -191,6 +195,7 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 | 2026-10-17 | not run | not run | 0 B (placeholder page) | Faz 0 dist check: 1 page, 0 errors |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script, 996 B raw) | Faz 1 dist check: 2 pages, 0 errors, 0 warnings; 360 px, keyboard, theme checks in browser (macOS) |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
+| 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 3 dist check: 4 pages, 0 errors, 0 warnings; one h1 per page; all internal links resolve; 360 px `scrollWidth = 360` on `/`, `/projeler/`, `/projeler/lockbox-mobile/`, `/404.html` (browser, dark theme) |
 
 ## Follow-ups
 
@@ -203,4 +208,6 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 - Faz 1 risk table: check rendering on Windows and Android (system font stack) — only macOS was checked — Faz 1.
 - Verify the site with JavaScript actually disabled in a browser (only simulated in Faz 1) — Faz 4 manual a11y audit.
 - Faz 0 phase doc acceptance checkboxes are still unticked in `plans/fazlar/faz-0-proje-kurulumu.md` (progress lives here) — Faz 1.
+- Lockbox: when the app is published, add the store `links`, update "Durum", `summary` and `ulascanerturk.md` §6 together (lead provides URLs) — Faz 3.
+- Project pages were not checked with a screen reader (only structure via dist checks) — Faz 4 manual a11y audit.
 - `site.description` (Faz 1, default meta for pages without their own — now only 404) is third person ("…geliştirir"); the profile text is first person (lead decision) — align when Faz 3/4 touches meta descriptions — Faz 2.

@@ -1,0 +1,52 @@
+---
+// Project detail pages (faz-3 §2 task 6): one static page per published entry.
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+import { projectsPage } from '@/data/projects';
+import ProjectLayout from '@/layouts/ProjectLayout.astro';
+import { adjacentProjects, formatPeriod, isPublished, sortProjects } from '@/lib/projects';
+
+export async function getStaticPaths() {
+  const projects = sortProjects(
+    await getCollection('projects', ({ data }) => isPublished(data, import.meta.env.PROD)),
+  );
+  return projects.map((project) => {
+    const { previous, next } = adjacentProjects(projects, project.id);
+    return { params: { slug: project.id }, props: { project, previous, next } };
+  });
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  previous?: CollectionEntry<'projects'>;
+  next?: CollectionEntry<'projects'>;
+}
+
+const { project, previous, next } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const { meta, statusLabels, ongoing } = projectsPage;
+
+const pagerLink = (entry?: CollectionEntry<'projects'>) =>
+  entry && { title: entry.data.title, href: `/projeler/${entry.id}/` };
+
+const metaItems = [
+  { term: meta.role, value: data.role },
+  ...(data.period ? [{ term: meta.period, value: formatPeriod(data.period, ongoing) }] : []),
+  { term: meta.status, value: statusLabels[data.status] },
+];
+---
+
+<ProjectLayout
+  title={data.title}
+  summary={data.summary}
+  meta={metaItems}
+  tech={data.tech}
+  cover={data.cover && data.coverAlt ? { src: data.cover, alt: data.coverAlt } : undefined}
+  disclaimer={data.disclaimer}
+  links={data.links ?? []}
+  previous={pagerLink(previous)}
+  next={pagerLink(next)}
+>
+  <Content />
+</ProjectLayout>

@@ -1,13 +1,14 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
+> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
 Tooling exists since Faz 0 (Astro skeleton, ESLint, Prettier, Vitest, CI). The design
 system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI components, 404);
-the profile page since Faz 2 (`src/data/profile.ts`, `src/components/profile/`).
-Project and SEO features are still planned.
+the profile page since Faz 2 (`src/data/profile.ts`, `src/components/profile/`);
+the project collection and pages since Faz 3 (`src/content.config.ts`, `src/content/projects/`,
+`src/components/projects/`, `ProjectLayout`). SEO features are still planned.
 
 ## Core Philosophy
 
@@ -63,6 +64,15 @@ Rules not tied to config are enforced from Faz 1 onward.
   a Vitest test against a fake DOM, next to the pure function they mirror
   (`src/lib/theme.ts` `themeScript` ↔ `resolveTheme`). Rationale: tested + size-checked, no FOUC,
   CSP-hashable (ADR-004, ADR-011).
+- Collection entries: pages call `getCollection('projects', ({ data }) => isPublished(data,
+  import.meta.env.PROD))`, sort with `sortProjects` and map entries to plain props; layouts and
+  components declare structural props and never import `astro:content` or `CollectionEntry`
+  (`ProjectLayout`, `ProjectCard`, Faz 3). Enums used by the schema live in `src/lib`
+  (`PROJECT_KINDS`, `PROJECT_STATUSES`) so helpers and schema share one source.
+- Library helpers never contain UI text: wording is passed in (`formatPeriod(period, ongoing)`).
+- Internal vs external actions: data marks an internal action with `href` and an external one with
+  `kind` (resolved from `profile.links`); components get `external: boolean` and choose `<a>` or
+  `ExternalLink` (ProfileHero, Faz 3).
 - Styling child components: pass `class` and spread the remaining props onto the root element
   (Astro passes the parent's scope attribute that way — see `ExternalLink`).
 - Theme selectors in scoped styles use `:global([data-theme='dark'])` /
@@ -91,7 +101,8 @@ Rules not tied to config are enforced from Faz 1 onward.
   - §7 — accelerator/program participations are in the Shifter context, not personal awards.
 - **Never published:** §9 (agent working preferences) and everything §11 excludes.
   `ulascanerturk.md` is never copied to `public/` or `dist/`.
-- **Decisions (2026-10-17):** projects = LockBox Mobile only (S1); contact = GitHub + LinkedIn,
+- **Decisions (2026-10-17):** projects = Lockbox (mobile) only (S1; page title uses the store name
+  "Lockbox", slug `lockbox-mobile`, status "geliştirme aşamasında", no store/repo link); contact = GitHub + LinkedIn,
   no e-mail/phone (S2); monogram avatar, no photo (S3); profile text in the first person (Faz 2).
 - **Images:** via `astro:assets` with width/height; metadata stripped
   (`exiftool -all= {file}`) and verified; usage rights confirmed; screenshots

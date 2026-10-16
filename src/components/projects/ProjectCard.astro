@@ -1,0 +1,70 @@
+---
+// Project card (faz-3 §2 task 4) for /projeler/ and the home page's featured
+// projects. Only the title is a link — not the whole card.
+import Tag from '@/components/ui/Tag.astro';
+
+interface Props {
+  title: string;
+  href: string;
+  summary: string;
+  statusLabel: string;
+  tech: string[];
+  techLabel: string;
+  /** h2 on /projeler/, h3 inside a home page section. */
+  level?: 2 | 3;
+}
+
+const { title, href, summary, statusLabel, tech, techLabel, level = 2 } = Astro.props;
+const Heading = `h${level}` as const;
+---
+
+<article class="project-card">
+  <Heading class="project-card__title">
+    <a href={href}>{title}</a>
+  </Heading>
+  <p class="project-card__status">{statusLabel}</p>
+  <p>{summary}</p>
+  <ul class="project-card__tech" aria-label={techLabel}>
+    {tech.map((item) => (
+      <li>
+        <Tag label={item} />
+      </li>
+    ))}
+  </ul>
+</article>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface);
+  }
+
+  .project-card__title {
+    font-size: var(--step-1);
+  }
+
+  .project-card__title a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+
+  .project-card__status {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .project-card__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+    margin-top: var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+</style>

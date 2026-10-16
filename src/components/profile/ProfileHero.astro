@@ -7,6 +7,8 @@ import Monogram from '@/components/ui/Monogram.astro';
 interface Action {
   label: string;
   href: string;
+  /** External actions (GitHub, LinkedIn) go through ExternalLink. */
+  external: boolean;
 }
 
 interface Props {
@@ -31,9 +33,15 @@ const { name, headline, location, tagline, actions } = Astro.props;
       <ul class="profile-hero__actions">
         {actions.map((action) => (
           <li>
-            <ExternalLink href={action.href} class="profile-hero__action">
-              {action.label}
-            </ExternalLink>
+            {action.external ? (
+              <ExternalLink href={action.href} class="profile-hero__action">
+                {action.label}
+              </ExternalLink>
+            ) : (
+              <a href={action.href} class="profile-hero__action">
+                {action.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>

@@ -1,13 +1,14 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 2 — feat/faz-2-profile-page)
+> Last updated: 2026-10-17 (Faz 3 — feat/faz-3-project-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
-Faz 2 state: design tokens, global styles, theme (inline script + `src/lib/theme.ts`),
+Faz 3 state: design tokens, global styles, theme (inline script + `src/lib/theme.ts`),
 `BaseLayout`, layout and UI components, `/404.html` and the monogram favicon exist (Faz 1);
-`/` is the profile page built from `src/data/profile.ts` with the profile components (Faz 2).
-Projects and SEO are planned.
+`/` is the profile page built from `src/data/profile.ts` with the profile components (Faz 2);
+the `projects` collection, `/projeler/`, `/projeler/{slug}/`, `ProjectLayout` and the project
+components exist (Faz 3). SEO is planned.
 
 ## Site Overview (`astro.config.mjs` ✅)
 
@@ -25,21 +26,20 @@ Projects and SEO are planned.
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name) | `profile`, `profilePage` (`src/data/profile.ts`); `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 7 → footnote ("Son güncelleme" `<time>`); hero actions resolved from `profile.links` by `kind` |
-| `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout | `getCollection('projects')` | [PLANNED — faz-3 §2 task 6] |
-| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` + `render()`; v1 slug: `lockbox-mobile` | [PLANNED — faz-3 §2 task 6] |
-| `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön"; projects link added in Faz 3 task 6 |
+| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name) | `profile`, `profilePage` (`src/data/profile.ts`); `getCollection('projects')` filtered by `featured` + `isPublished`, `sortProjects`; `projectsPage` labels; `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 8 (`#projeler`: ProjectCard h3 grid + "Tüm projeler" link) → footnote ("Son güncelleme" `<time>`); hero actions: `href` → internal link, `kind` → URL from `profile.links` (external) |
+| `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout (title/description from `projectsPage.list`) | `getCollection('projects', isPublished)`, `sortProjects`, `groupByKind` | ✅ h1 + intro + auto-fit card grid (`minmax(min(100%, 18rem), 1fr)` — one card spans the width); with ≥ 2 kinds: Section per kind (`id` = kind, h2) and h3 cards, otherwise h2 cards |
+| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` (published, sorted; `adjacentProjects` → prev/next props) + `render()`; meta items built with `formatPeriod` + `statusLabels`; v1 slug: `lockbox-mobile` | ✅ |
+| `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at" |
 | `/sitemap-index.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | [PLANNED — faz-4 §2 task 4] |
 | `/en/`, `/en/projects/`, `/en/projects/{slug}/` | i18n routes | — | `profile.en.ts`, English entries | [PLANNED — faz-6 §2.1] |
 
 Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
-`#yetkinlikler`, `#deneyim`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`.
+`#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`.
 `#odak-alanlari` is an addition to plans/02-icerik-ve-tasarim.md §2 (lead approval 2026-10-17).
-`#projeler` [PLANNED — faz-3 task 8] goes between `#deneyim` and `#egitim`, with the
-"Projeleri gör" hero action (deferred from Faz 2 task 5).
-Header nav (✅ `site.nav`): Hakkımda (`/#hakkimda`) · GitHub · LinkedIn · theme toggle.
-Projeler (`/projeler/`) is added in Faz 3 task 6 — the route does not exist yet and would
-be a broken internal link (lead decision 2026-10-17).
+`#projeler` (Faz 3 task 8) sits between `#deneyim` and `#egitim`; the hero's first action is
+"Projeleri gör" (`/projeler/`).
+Header nav (✅ `site.nav`): Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`, `aria-current="page"`
+only on `/projeler/` itself) · GitHub · LinkedIn · theme toggle.
 
 ## Layouts
 
@@ -53,9 +53,15 @@ be a broken internal link (lead decision 2026-10-17).
 - Body: SkipLink → SiteHeader → `<main id="icerik" tabindex="-1">` (slot) → SiteFooter.
 - Imports `src/styles/global.css`; main width `min(100% - 2rem, var(--container))`, `p` max `--measure`.
 
-### ProjectLayout.astro [PLANNED — faz-3 §2 task 5]
-- Extends BaseLayout: title, ProjectMeta, cover (optional), `<article>` content,
-  `disclaimer` Callout, "Tüm projeler" back link, previous/next navigation.
+### ProjectLayout.astro ✅ (`src/layouts/ProjectLayout.astro`)
+- Props (structural — no `astro:content` import): `title`, `summary` (→ BaseLayout `description`),
+  `meta: { term, value }[]`, `tech[]`, `cover?: { src: ImageMetadata; alt }`, `disclaimer?`,
+  `links: { label, url }[]`, `previous?` / `next?: { title, href }`; default slot = rendered Markdown.
+- Reads labels from `projectsPage` (like BaseLayout reads `site`).
+- Structure: `<article>` → `<header>` (only `<h1>`, summary, ProjectMeta, tech Tag list with
+  `aria-label`) → cover (`astro:assets` `<Image>`, eager) → content (body `##` = h2) → disclaimer
+  Callout → ProjectLinks; then `<nav aria-label="Proje gezinmesi">` with `rel="prev"` / `rel="next"`
+  links (label + title, only when they exist) and "Tüm projeler" (`/projeler/`).
 
 ## Components
 
@@ -66,11 +72,11 @@ be a broken internal link (lead decision 2026-10-17).
 | SiteFooter | `src/components/layout/SiteFooter.astro` | `label`, `copyrightHolder`, `links: FooterLink[]` | BaseLayout | ✅ © build year, GitHub, LinkedIn, Kaynak kodu |
 | ThemeToggle | `src/components/layout/ThemeToggle.astro` | `label` | SiteHeader | ✅ `<button data-theme-toggle aria-pressed>`, moon/sun icon by `data-theme`; hidden when `:root` has no `data-theme` (JS off) |
 | Section | `src/components/ui/Section.astro` | `id`, `title`, `level?: 2 \| 3` (default 2) | `/` (7 sections) | ✅ `<section id aria-labelledby>`; heading id `{id}-baslik` |
-| Tag | `src/components/ui/Tag.astro` | `label` | SkillsGrid (Faz 3: project tech) | ✅ `nowrap`; longest skill tag fits at 360 px (checked Faz 2) |
-| ExternalLink | `src/components/ui/ExternalLink.astro` | `href`, `newTab?`, `newTabHint?`, other `<a>` attrs (no `rel`/`target`) | SiteHeader, SiteFooter, ProfileHero, ExperienceList, LinkList | ✅ always `rel="noopener noreferrer"`; new tab only when `newTab` (hint read by screen readers) |
-| Callout | `src/components/ui/Callout.astro` | `variant?: 'note' \| 'warning'`, `title?` | `/` (experience note), ExperienceList, WorkAreas, EducationList, EcosystemNote | ✅ `role="note"`, accent / warning border |
+| Tag | `src/components/ui/Tag.astro` | `label` | SkillsGrid, ProjectCard, ProjectLayout | ✅ `nowrap`; longest skill tag fits at 360 px (checked Faz 2) |
+| ExternalLink | `src/components/ui/ExternalLink.astro` | `href`, `newTab?`, `newTabHint?`, other `<a>` attrs (no `rel`/`target`) | SiteHeader, SiteFooter, ProfileHero, ExperienceList, LinkList, ProjectLinks | ✅ always `rel="noopener noreferrer"`; new tab only when `newTab` (hint read by screen readers) |
+| Callout | `src/components/ui/Callout.astro` | `variant?: 'note' \| 'warning'`, `title?` | `/` (experience note), ExperienceList, WorkAreas, EducationList, EcosystemNote, ProjectLayout (disclaimer) | ✅ `role="note"`, accent / warning border |
 | Monogram | `src/components/ui/Monogram.astro` | `label?` (→ `role="img"` + `aria-label`; absent → `aria-hidden`), `size?` (64) | SiteHeader, ProfileHero (both decorative — the name is next to it) | ✅ same drawing as `public/favicon.svg` |
-| ProfileHero | `src/components/profile/ProfileHero.astro` | `name`, `headline`, `location`, `tagline`, `actions: { label, href }[]` | `/` | ✅ `<header>` in main: decorative Monogram (88), the page's only `<h1>`, headline, location, tagline, action links (ExternalLink, 44 px, outlined) |
+| ProfileHero | `src/components/profile/ProfileHero.astro` | `name`, `headline`, `location`, `tagline`, `actions: { label, href, external }[]` | `/` | ✅ `<header>` in main: decorative Monogram (88), the page's only `<h1>`, headline, location, tagline, action links (internal `<a>` or ExternalLink by `external`; 44 px, outlined) |
 | SkillsGrid | `src/components/profile/SkillsGrid.astro` | `groups: { category, items[], note? }[]` | `/` | ✅ auto-fill grid; `<h3>` per category, `<ul>` of Tag, muted note (Java) |
 | ExperienceList | `src/components/profile/ExperienceList.astro` | `items: { organization, role?, url?, highlights[], note?, products?[] }[]`, `problemsLabel` | `/` | ✅ `<article>` per organization, `<h3>` (linked when `url`), highlights list, products as surface boxes with `<h4>` + description + problems list (Shifter Pro/Lite, S1), optional per-entry Callout |
 | WorkAreas | `src/components/profile/WorkAreas.astro` | `title`, `items[]`, `note` | `/` (inside `#deneyim`) | ✅ `<h3>`, list, §6 note as Callout |
@@ -78,9 +84,9 @@ be a broken internal link (lead decision 2026-10-17).
 | EcosystemNote | `src/components/profile/EcosystemNote.astro` | `context`, `programs[]`, `note` | `/` | ✅ `<h3>` context ("Shifter girişimi bağlamında…"), list, §7 note as Callout |
 | FocusAreas | `src/components/profile/FocusAreas.astro` | `items: { title, description }[]` | `/` | ✅ `<dl>` grid of surface cards (`dt` bold, `dd` muted) |
 | LinkList | `src/components/profile/LinkList.astro` | `links: { label, url }[]` | `/` | ✅ auto-fill grid of ExternalLink (44 px) |
-| ProjectCard | `src/components/projects/ProjectCard.astro` | project data (linked title, summary, status, tech) | `/projeler/`, `/` featured | [PLANNED — faz-3 task 4] |
-| ProjectMeta | `src/components/projects/ProjectMeta.astro` | role, period, status (`<dl>`) | ProjectLayout | [PLANNED — faz-3 task 4] |
-| ProjectLinks | `src/components/projects/ProjectLinks.astro` | links | ProjectLayout | [PLANNED — faz-3 task 4] |
+| ProjectCard | `src/components/projects/ProjectCard.astro` | `title`, `href`, `summary`, `statusLabel`, `tech[]`, `techLabel`, `level?: 2 \| 3` (default 2) | `/projeler/` (h2, h3 when grouped), `/` `#projeler` (h3) | ✅ `<article>` surface card; only the title is a link (44 px); muted status; summary; tech Tag `<ul aria-label>` |
+| ProjectMeta | `src/components/projects/ProjectMeta.astro` | `items: { term, value }[]` | ProjectLayout | ✅ `<dl>` (`dt` muted, `dd` bold), wraps; Rol · Dönem (only with `period`) · Durum |
+| ProjectLinks | `src/components/projects/ProjectLinks.astro` | `title`, `links: { label, url }[]` | ProjectLayout | ✅ renders nothing when empty; `<section aria-labelledby>` + h2 + ExternalLink list (44 px) |
 | Seo | `src/components/Seo.astro` [REVIEW NEEDED — folder not fixed in plans] | title, description, canonical, OG, Twitter, JSON-LD | BaseLayout | [PLANNED — faz-4 task 1] |
 
 ## Styles and Theme ✅ (faz-1 §2 tasks 1–3, plans/02-icerik-ve-tasarim.md §5)
@@ -136,9 +142,9 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 |---|---|---|---|
 | `slugify` (`src/lib/slug.ts`) | `(input: string): string` — explicit Turkish map (ı İ ğ ş ç ö ü), NFKD accent strip, lowercase, non-alphanumerics → single `-`, trimmed | `src/lib/slug.test.ts` (5 tests) | ✅ |
 | `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
-| `sortProjects`, `isPublished`, `formatPeriod` | project helpers | `src/lib/projects.test.ts` | [PLANNED — faz-3 task 3] |
+| `sortProjects`, `isPublished`, `formatPeriod`, `adjacentProjects`, `groupByKind`, `PROJECT_KINDS`, `PROJECT_STATUSES` (`src/lib/projects.ts`) | `sortProjects<T>(list): T[]` — `order` asc (missing last) → status (active → completed → archived) → title (`localeCompare` `tr`), non-mutating; `isPublished(data, production): boolean` — drops `draft: true` only in production (pages pass `import.meta.env.PROD`); `formatPeriod({ start, end? }, ongoing)` → `2019 – 2021` · `2020` · `2019 – {ongoing}`; `adjacentProjects(sorted, id)` → `{ previous?, next? }`; `groupByKind(list)` → `{ kind, items }[]` in kind order, empty groups omitted. Enums shared with `src/content.config.ts` | `src/lib/projects.test.ts` (13 tests) | ✅ |
 | `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (4 tests) | ✅ |
-| profile structural tests (data in `src/data/profile.ts`) | — | `src/lib/profile.test.ts` (11 tests: no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn, one degree = Uluslararası İlişkiler, Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda`, description ≤ 160, ISO `lastUpdated`) | ✅ |
+| profile structural tests (data in `src/data/profile.ts`) | — | `src/lib/profile.test.ts` (11 tests: no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn (hero `kind` actions exist in `links`, `href` actions are internal paths), one degree = Uluslararası İlişkiler, Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda` and `projeler`, description ≤ 160, ISO `lastUpdated`) | ✅ |
 
 ## Public Assets
 
@@ -158,6 +164,7 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
 | `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |
 | `.prettierignore` ✅ | generated output, lockfile, `plans/`, `references/`, `.claude/`, `.agents/`, root `*.md` |
+| `src/content.config.ts` ✅ | `projects` collection: `glob` loader (`astro/loaders`), zod schema (`astro/zod`) with `image()`; schema in `references/content_schema.md` |
 | `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts` |
 | `.nvmrc` ✅ / `package.json#engines` ✅ | `24` / `node >=22.22.0` |
 | `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test |

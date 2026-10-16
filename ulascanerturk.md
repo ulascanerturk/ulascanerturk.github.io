@@ -114,6 +114,14 @@ Başlıca problem alanları:
 - Web ve mobil kullanıcı deneyimi.
 - SaaS ürün mimarisi, kullanıcı edinimi ve abonelik modeli.
 
+### Lockbox — Çevrimdışı Parola Kasası
+
+Ulaşcan Ertürk'ün bireysel proje olarak geliştirdiği; parolaları yalnızca cihazda ve uçtan uca şifreli olarak saklayan iOS ve Android uygulamasıdır (mağaza adı: "Lockbox - Password Vault"). Uygulamanın sunucusu, kullanıcı hesabı ve telemetrisi yoktur; ağ isteği yapmaz.
+
+- Parola üretme, kaydetme ve kopyalama; ana parola ve isteğe bağlı biyometri ile kilit açma; otomatik kilit; panonun otomatik temizlenmesi; şifreli yedek dışa/içe aktarma.
+- Teknoloji: Expo, React Native, TypeScript; Argon2id ile anahtar türetme, AEAD şifreleme, iOS Keychain / Android Keystore.
+- Durum: Geliştirme aşamasında; App Store ve Google Play yayını hazırlanıyor. Kaynak kodu kamuya açık değildir.
+
 ### Diğer yazılım çalışma alanları
 
 - Rezervasyon ve randevu yönetimi uygulamaları.

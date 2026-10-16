@@ -1,0 +1,164 @@
+---
+// Project detail shell (faz-3 §2 task 5): title, facts, optional cover, the
+// Markdown content, disclaimer, public links, back link and previous/next
+// navigation. The page maps the collection entry to these props.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+import ProjectLinks from '@/components/projects/ProjectLinks.astro';
+import ProjectMeta from '@/components/projects/ProjectMeta.astro';
+import Callout from '@/components/ui/Callout.astro';
+import Tag from '@/components/ui/Tag.astro';
+import { projectsPage } from '@/data/projects';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+interface PagerLink {
+  title: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  summary: string;
+  meta: { term: string; value: string }[];
+  tech: string[];
+  cover?: { src: ImageMetadata; alt: string };
+  disclaimer?: string;
+  links: { label: string; url: string }[];
+  previous?: PagerLink;
+  next?: PagerLink;
+}
+
+const { title, summary, meta, tech, cover, disclaimer, links, previous, next } = Astro.props;
+const { techLabel, linksTitle, backLink, pager } = projectsPage;
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="project">
+    <header class="project__header">
+      <h1>{title}</h1>
+      <p class="project__summary">{summary}</p>
+      <ProjectMeta items={meta} />
+      <ul class="project__tech" aria-label={techLabel}>
+        {tech.map((item) => (
+          <li>
+            <Tag label={item} />
+          </li>
+        ))}
+      </ul>
+    </header>
+
+    {cover && <Image src={cover.src} alt={cover.alt} class="project__cover" loading="eager" />}
+
+    <div class="project__content">
+      <slot />
+    </div>
+
+    {disclaimer && <Callout>{disclaimer}</Callout>}
+
+    <ProjectLinks title={linksTitle} links={links} />
+  </article>
+
+  <nav class="project-pager" aria-label={pager.label}>
+    <ul>
+      {previous && (
+        <li>
+          <a href={previous.href} rel="prev">
+            <span class="project-pager__label">{pager.previous}</span>
+            {previous.title}
+          </a>
+        </li>
+      )}
+      {next && (
+        <li>
+          <a href={next.href} rel="next">
+            <span class="project-pager__label">{pager.next}</span>
+            {next.title}
+          </a>
+        </li>
+      )}
+      <li>
+        <a href="/projeler/">{backLink}</a>
+      </li>
+    </ul>
+  </nav>
+</BaseLayout>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+
+  .project__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project__summary {
+    font-size: var(--step-1);
+    line-height: var(--line-height-heading);
+  }
+
+  .project__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .project__cover {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-m);
+  }
+
+  .project__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+
+  .project__content :global(h2:not(:first-child)) {
+    margin-top: var(--space-m);
+  }
+
+  .project__content :global(ul) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    max-width: var(--measure);
+    padding-inline-start: var(--space-m);
+  }
+
+  .project-pager {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .project-pager ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-l);
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-pager a {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--tap-target);
+  }
+
+  .project-pager__label {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+</style>

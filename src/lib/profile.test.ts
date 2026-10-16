@@ -60,7 +60,10 @@ describe('profile data', () => {
     const kinds = profile.links.map((link) => link.kind);
     expect(kinds).toContain('github');
     expect(kinds).toContain('linkedin');
-    for (const action of profilePage.hero.actions) expect(kinds).toContain(action.kind);
+    for (const action of profilePage.hero.actions) {
+      if ('kind' in action) expect(kinds).toContain(action.kind);
+      else expect(action.href).toMatch(/^\/[a-z0-9/-]*\/$/);
+    }
   });
 
   it('keeps International Relations as the only degree (ulascanerturk.md §3)', () => {
@@ -84,6 +87,7 @@ describe('profile data', () => {
       profilePage.about,
       profilePage.skills,
       profilePage.experience,
+      profilePage.projects,
       profilePage.education,
       profilePage.ecosystem,
       profilePage.focusAreas,
