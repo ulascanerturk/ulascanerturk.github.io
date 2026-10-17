@@ -45,12 +45,12 @@ v1 Türkçe yayınından sonra);
 
 - ✅ `check:dist` her iki dil için; `lang="en"` İngilizce sayfalarda.
 - ✅ Tüm `hreflang` çiftleri karşılıklı ve geçerli (`check:dist` + testler).
-- ⏳ Dependabot yapılandırması GitHub'da tanındı (Insights → Dependency graph) — push sonrası lead.
+- ✅ Dependabot yapılandırması GitHub'da tanındı — "Dependabot Updates" iş akışı aktif; `npm` ve `github-actions` ilk güncelleme işleri başarılı (2026-10-17).
 
 ## 4. Kabul Kriterleri
 
-- [ ] İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var.
+- [x] İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var. *(2026-10-17, canlı doğrulama)*
 - [x] Çeviriler lead tarafından onaylandı. *(2026-10-17)*
-- [ ] Dependabot etkin.
+- [x] Dependabot etkin. *(2026-10-17)*
 - [x] Bakım rehberi `references/` içinde. *(2026-10-17)*
 - [x] Kalite kapısı `all` kapsamında PASS. *(2026-10-17, iki dalda)*

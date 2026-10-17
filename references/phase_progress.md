@@ -1,6 +1,6 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 6 — chore/faz-6-maintenance)
+> Last updated: 2026-10-17 (Faz 6 — docs/faz-6-live-verification)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -9,11 +9,12 @@
 **Faz 5 — Yayın ve Dağıtım: acceptance criteria met** (2026-10-17) — site live at `https://ulascanerturk.github.io/`;
 task 7 partly open (OG preview — lead); optional tasks 8–9 with the lead.
 Faz 4: acceptance criteria met; task 9 VoiceOver still open (lead approved starting Faz 5 with it open, 2026-10-17).
-**Faz 6 — İngilizce Sürüm ve Bakım: implemented** (2026-10-17) — (a) English version on
-`feat/faz-6-english-version` (tasks 1–6), (b) maintenance on `chore/faz-6-maintenance` (tasks 7–9),
-both squash-merged into local `main`. **Two acceptance criteria wait for the lead's push:** English
-version live (live check) and Dependabot recognized by GitHub. Faz 4 task 9 and Faz 5 task 7 are still open (lead).
-Overall: tasks 64/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 and Faz 5 task 7 partial) · acceptance 45/47.
+**Faz 6 — İngilizce Sürüm ve Bakım: acceptance criteria met** (2026-10-17) — English version live
+under `/en/`, Dependabot active, maintenance guides in `references/`. All phases (0–6) have met their
+acceptance criteria; still open with the lead: Faz 4 task 9 (VoiceOver), Faz 5 task 7 (OG preview /
+Rich Results), optional Faz 5 tasks 8–9. Ongoing work: maintenance (`references/methodology.md` →
+Maintenance) and content updates.
+Overall: tasks 64/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 and Faz 5 task 7 partial) · acceptance 47/47.
 
 ## Open Questions
 
@@ -187,8 +188,9 @@ Status: acceptance criteria met (2026-10-17; branch `chore/faz-5-deploy-pipeline
   invariants a–j 0 hits, docs links OK, actionlint skipped (not installed).
 
 ## Faz 6 — İngilizce Sürüm ve Bakım   (plans/fazlar/faz-6-ingilizce-surum-ve-bakim.md)
-Status: implemented, 2 acceptance criteria pending the lead's push — (a) English version (branch
-`feat/faz-6-english-version`, 2026-10-17); (b) maintenance (branch `chore/faz-6-maintenance`, 2026-10-17).
+Status: acceptance criteria met (2026-10-17) — (a) English version (branch `feat/faz-6-english-version`
+→ 5482a4a); (b) maintenance (branch `chore/faz-6-maintenance` → 50e5550); pushed by the lead, deploy run
+38986997754 green; live verification on `docs/faz-6-live-verification`.
 Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17); ADR-006 accepted with the plan.
 ### Tasks
 - [x] 1. Astro i18n config — `astro.config.mjs` `i18n` (`defaultLocale: 'tr'`, `locales: ['tr', 'en']`, `prefixDefaultLocale: false`); Turkish URLs unchanged
@@ -201,9 +203,9 @@ Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17); ADR-
 - [x] 8. Content update guide — `references/content_schema.md` → How to Update the Profile (source → TR → EN → approvals → derived images → gate → live check); How to Add a Project has the English step since (a)
 - [x] 9. Quarterly maintenance checklist — `references/methodology.md` → Maintenance → Quarterly Checklist (links with lychee, Lighthouse/axe, dependencies, content consistency, live check, record); lychee 0.24.2 installed (Homebrew, lead approval) and the command verified
 ### Acceptance Criteria
-- [ ] English version live; every Turkish page has a counterpart — built and verified locally: 3 TR ↔ 3 EN pages, every pair reciprocal (`check:dist`), 404 bilingual; **open: live check after the lead's push**
+- [x] English version live; every Turkish page has a counterpart — live 2026-10-17: `/en/`, `/en/projects/`, `/en/projects/lockbox-mobile/` 200 (`text/html; charset=utf-8`), `/en` → 301 `/en/`, `http://` → 301 `https://`; `/olmayan-sayfa/` 404 with the bilingual page; sitemap 6 URLs, each with `tr` + `en` `xhtml:link`; live HTML byte-identical to the local build and `check:dist` on the downloaded live site 7 pages / 0 errors (reciprocal hreflang, `lang`, `og:locale`, JSON-LD, CSP); `/og/default-en.png` 200; live Lighthouse 100/100/100/100 on the 3 English pages
 - [x] Translations approved by lead — 2026-10-17
-- [ ] Dependabot enabled — config in the repo; **open: after the push, Insights → Dependency graph → Dependabot shows both ecosystems without errors (lead)**
+- [x] Dependabot enabled — 2026-10-17 after the push: workflow "Dependabot Updates" (`dynamic/dependabot/dependabot-updates`) active; first update jobs `npm_and_yarn` (run 38987004066) and `github_actions` (run 38987004186) completed **success** (no config error); no pull requests (dependencies current). Dependency graph GraphQL listing still empty right after the push (indexing) — check *Insights → Dependency graph* at the first quarterly run
 - [x] Maintenance guide in `references/` — methodology.md → Maintenance; content_schema.md → How to Update the Profile
 - [x] Quality gate PASS (`all`) — English branch 2nd run 2026-10-17; maintenance branch 1st run 2026-10-17: check 0/0/0, lint 0, format OK, 100 tests, build 7 pages, dist 0 errors (478 B gzip), invariants 0, audit 0, docs links OK, actionlint skipped (not installed; no workflow change)
 ### Notes
@@ -224,6 +226,7 @@ Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17); ADR-
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
 | 2026-10-17 | 100/100/100/100 (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1, local Chrome 155 | 0 violations (axe-core 4.14.0, 4 pages × 2 themes) | 478 B gzip (theme script only) | Faz 4 `check:dist`: 4 pages, 0 errors; CSP enforced, no console violations |
 | 2026-10-17 | 100/100/100/100 live (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1 against `https://ulascanerturk.github.io` | not run (unchanged since Faz 4) | 478 B gzip | Faz 5 live verification: all sitemap URLs 200, custom 404, HTTPS redirect, JSON-LD valid |
+| 2026-10-17 | 100/100/100/100 live on `/en/`, `/en/projects/`, `/en/projects/lockbox-mobile/` (median of 3, LHCI 0.15.1, LCP ≈ 0.8 s) | not run (live HTML identical to the audited build) | 478 B gzip | Faz 6 live verification: deploy run 38986997754 green; `check:dist` on the live HTML 7 pages, 0 errors |
 | 2026-10-17 | not run (no page change) | not run | 478 B gzip | Faz 6 (b) maintenance gate: 7 pages, 0 errors; lychee 32 unique links, 0 errors (LinkedIn 999 accepted) |
 | 2026-10-17 | 100/100/100/100 on `/`, `/en/`, `/projeler/`, `/en/projects/`, `/projeler/lockbox-mobile/`, `/en/projects/lockbox-mobile/`; 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1, local | 0 violations (axe-core 4.14.0, 7 pages × 2 themes) | 478 B gzip | Faz 6 (a) `check:dist`: 7 pages, 0 errors; hreflang pairs reciprocal; sitemap 6 URLs with alternates |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 3 dist check: 4 pages, 0 errors, 0 warnings; one h1 per page; all internal links resolve; 360 px `scrollWidth = 360` on `/`, `/projeler/`, `/projeler/lockbox-mobile/`, `/404.html` (browser, dark theme) |
@@ -231,8 +234,9 @@ Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17); ADR-
 ## Follow-ups
 
 - Confirm ADR-007 ("Önerildi") with the lead when analytics comes up — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2; ADR-006 in Faz 6).
-- After the lead's push: live check of `/en/`, `/en/projects/`, `/en/projects/lockbox-mobile/` (200, hreflang, sitemap 6 URLs) and the LinkedIn Post Inspector for the English share image — Faz 6 acceptance "English version live".
-- After the lead's push: Insights → Dependency graph → Dependabot lists `npm` and `github-actions` without config errors — Faz 6 acceptance "Dependabot enabled"; optionally enable Dependabot security updates (Settings → Code security) — lead.
+- LinkedIn Post Inspector for `/en/` (English share image) together with the Faz 5 task 7 OG preview — lead.
+- Optionally enable Dependabot security updates (Settings → Code security; disabled on 2026-10-17) — lead.
+- GitHub notice in deploy run 38986997754: the `ubuntu-latest` runner label moves to Ubuntu 26 from 2026-10-19 (actions/runner-images#14748). `ci.yml` and `deploy.yml` use `ubuntu-latest`; watch the first runs after that date (Node 24 via `setup-node` / `withastro/action`, so no change is expected) — Faz 6.
 - First quarterly maintenance run: January 2027 (methodology.md → Maintenance → Quarterly Checklist) — lead.
 - Lockbox store links (when published) must be added to both `lockbox-mobile.md` and `en/lockbox-mobile.md` — Faz 6.
 - `ulascanerturk.md` stays Turkish-only; English site text is maintained as a translation in `profile.en.ts` — revisit if an English source document is wanted — Faz 6.
