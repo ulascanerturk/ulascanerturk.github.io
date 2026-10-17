@@ -3,7 +3,7 @@
 # Lead approval: 2026-10-17 (ADR-014). Update the app's store privacy answers together with this page.
 title: 'Privacy Policy — Lockbox - Password Vault'
 description: 'Privacy policy of the Lockbox - Password Vault app for iOS and Android: no data is collected, transmitted or shared; your vault stays encrypted on your device.'
-updated: '2026-10-17'
+updated: '2026-10-18'
 ---
 
 This policy describes how the **Lockbox - Password Vault** app ("Lockbox", "the app") for iOS,
@@ -48,9 +48,9 @@ recovered. If you forget the unlock secret you chose, your data cannot be recove
 - **Face ID / Touch ID / fingerprint (optional):** used only to unlock your vault. Biometric
   matching is performed by the operating system; Lockbox never receives your face or fingerprint
   data, only whether the check succeeded.
-- **Screen-capture detection (Android 14 and later):** lets the app warn you when a screenshot is
-  taken. On iOS the system screenshot notice is used for the same warning. Nothing is recorded or
-  sent.
+- **Screen protection (Android):** the secure-window flag prevents app content from appearing in
+  screenshots or recordings. On iOS, the system screenshot notice can warn you after a capture.
+  Lockbox does not record or send captured content.
 - **Vibration:** used for haptic feedback.
 
 ## Clipboard

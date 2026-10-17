@@ -3,7 +3,7 @@
 # Lead onayı: 2026-10-17 (ADR-014). Bu sayfa değişirse mağaza gizlilik beyanları da güncellenir.
 title: 'Gizlilik Politikası — Lockbox - Password Vault'
 description: 'iOS ve Android için Lockbox - Password Vault gizlilik politikası: hiçbir veri toplanmaz, iletilmez veya paylaşılmaz; kasanız cihazınızda şifreli kalır.'
-updated: '2026-10-17'
+updated: '2026-10-18'
 ---
 
 Bu politika, iOS, iPadOS ve Android için **Lockbox - Password Vault** uygulamasının ("Lockbox",
@@ -48,9 +48,9 @@ bilgisini unutursanız verileriniz kurtarılamaz.
 - **Face ID / Touch ID / parmak izi (isteğe bağlı):** yalnızca kasanın kilidini açmak için
   kullanılır. Biyometrik eşleştirmeyi işletim sistemi yapar; Lockbox yüz veya parmak izi verinizi
   hiçbir zaman almaz, yalnızca doğrulamanın başarılı olup olmadığını öğrenir.
-- **Ekran görüntüsü algılama (Android 14 ve üzeri):** ekran görüntüsü alındığında sizi uyarmak
-  içindir. iOS'ta aynı uyarı için sistemin ekran görüntüsü bildirimi kullanılır. Hiçbir şey
-  kaydedilmez veya gönderilmez.
+- **Ekran koruması (Android):** güvenli pencere işareti uygulama içeriğinin ekran görüntüsü veya
+  kaydında görünmesini engeller. iOS'ta ekran görüntüsü alındığında sistem bildirimiyle uyarı
+  gösterilebilir. Lockbox görüntü içeriği kaydetmez veya göndermez.
 - **Titreşim:** dokunsal geri bildirim için kullanılır.
 
 ## Pano
