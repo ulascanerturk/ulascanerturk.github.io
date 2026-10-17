@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
   alternatePaths,
+  docTranslationProblems,
   localeFromPath,
+  PROJECT_DOC_KEYS,
+  projectDocPath,
   projectPath,
   routePath,
+  splitDocEntryId,
   splitEntryId,
   translatePath,
   translationProblems,
@@ -18,6 +22,22 @@ describe('routes', () => {
     expect(routePath('projects', 'en')).toBe('/en/projects/');
     expect(projectPath('lockbox-mobile', 'tr')).toBe('/projeler/lockbox-mobile/');
     expect(projectPath('lockbox-mobile', 'en')).toBe('/en/projects/lockbox-mobile/');
+  });
+
+  it('puts project documents below the project page with localized segments (ADR-014)', () => {
+    expect(PROJECT_DOC_KEYS).toEqual(['privacy', 'support', 'security']);
+    expect(projectDocPath('lockbox-mobile', 'privacy', 'tr')).toBe(
+      '/projeler/lockbox-mobile/gizlilik/',
+    );
+    expect(projectDocPath('lockbox-mobile', 'privacy', 'en')).toBe(
+      '/en/projects/lockbox-mobile/privacy/',
+    );
+    expect(projectDocPath('lockbox-mobile', 'support', 'tr')).toBe(
+      '/projeler/lockbox-mobile/destek/',
+    );
+    expect(projectDocPath('lockbox-mobile', 'security', 'tr')).toBe(
+      '/projeler/lockbox-mobile/guvenlik/',
+    );
   });
 
   it('detects the locale from the path', () => {
@@ -35,6 +55,9 @@ describe('translatePath', () => {
       ['/', '/en/'],
       ['/projeler/', '/en/projects/'],
       ['/projeler/lockbox-mobile/', '/en/projects/lockbox-mobile/'],
+      ['/projeler/lockbox-mobile/gizlilik/', '/en/projects/lockbox-mobile/privacy/'],
+      ['/projeler/lockbox-mobile/destek/', '/en/projects/lockbox-mobile/support/'],
+      ['/projeler/lockbox-mobile/guvenlik/', '/en/projects/lockbox-mobile/security/'],
     ] as const;
     for (const [tr, en] of pairs) {
       expect(translatePath(tr, 'en')).toBe(en);
@@ -45,7 +68,18 @@ describe('translatePath', () => {
   });
 
   it('returns undefined for paths that are not localized routes', () => {
-    for (const path of ['/404.html', '/projeler/a/b/', '/projeler/x', '/en/projeler/', '/og/']) {
+    for (const path of [
+      '/404.html',
+      '/projeler/a/b/',
+      '/projeler/x',
+      '/en/projeler/',
+      '/og/',
+      '/projeler/lockbox-mobile/privacy/',
+      '/en/projects/lockbox-mobile/gizlilik/',
+      '/projeler/lockbox-mobile/gizlilik',
+      '/projeler/lockbox-mobile/gizlilik/x/',
+      '/projeler/Lockbox/gizlilik/',
+    ]) {
       expect(translatePath(path, 'en')).toBeUndefined();
     }
   });
@@ -103,6 +137,64 @@ describe('project entries', () => {
     ).toEqual([
       'project "a" (en): status differs from the tr version',
       'project "a" (en): order differs from the tr version',
+    ]);
+  });
+});
+
+describe('project documents', () => {
+  it('splits document ids into locale, project slug and document', () => {
+    expect(splitDocEntryId('lockbox-mobile/privacy')).toEqual({
+      locale: 'tr',
+      slug: 'lockbox-mobile',
+      doc: 'privacy',
+    });
+    expect(splitDocEntryId('en/lockbox-mobile/security')).toEqual({
+      locale: 'en',
+      slug: 'lockbox-mobile',
+      doc: 'security',
+    });
+    for (const id of [
+      'tr/lockbox-mobile/privacy',
+      'de/lockbox-mobile/privacy',
+      'lockbox-mobile/gizlilik',
+      'lockbox-mobile',
+      'en/lockbox-mobile/privacy/x',
+      'Lockbox/privacy',
+    ]) {
+      expect(() => splitDocEntryId(id)).toThrow();
+    }
+  });
+
+  const updated = '2026-10-17';
+
+  it('accepts complete translations with the same date', () => {
+    expect(
+      docTranslationProblems(
+        [
+          { id: 'a/privacy', data: { updated } },
+          { id: 'en/a/privacy', data: { updated } },
+        ],
+        ['a'],
+      ),
+    ).toEqual([]);
+  });
+
+  it('reports missing translations, differing dates and unknown projects', () => {
+    expect(
+      docTranslationProblems(
+        [
+          { id: 'a/privacy', data: { updated } },
+          { id: 'en/a/privacy', data: { updated: '2026-10-18' } },
+          { id: 'a/support', data: { updated } },
+          { id: 'en/b/security', data: { updated } },
+        ],
+        ['a'],
+      ),
+    ).toEqual([
+      'document "a/privacy" (en): updated differs from the tr version',
+      'document "a/support" has no en version',
+      'document "b/security" has no published project',
+      'document "b/security" has no tr version',
     ]);
   });
 });

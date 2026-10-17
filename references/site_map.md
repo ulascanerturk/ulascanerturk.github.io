@@ -1,6 +1,6 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 6 — docs/faz-6-live-verification)
+> Last updated: 2026-10-17 (ADR-014 project documents — content/projects/lockbox-legal-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -37,8 +37,10 @@ hreflang alternates, per-locale data, `HomeLayout` / `ProjectListLayout` and `sr
 | `/en/projects/` | `src/pages/en/projects/index.astro` | ProjectListLayout | `loadProjects('en')` | ✅ |
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` = `projectPaths('tr')`; `render(project.entry)`; other props from `projectLayoutProps` (meta via `formatPeriod` + `statusLabels`, `projectJsonLd`, `ogImage` from the cover via `getImage` 1200 px JPEG or the locale default); slug: `lockbox-mobile` | ✅ |
 | `/en/projects/{slug}/` | `src/pages/en/projects/[slug].astro` | ProjectLayout | same with `'en'` (entries in `src/content/projects/en/`) | ✅ |
+| `/projeler/{slug}/{gizlilik\|destek\|guvenlik}/` | `src/pages/projeler/[slug]/[doc].astro` | ProjectDocLayout | `getStaticPaths` = `projectDocPaths('tr')` (`src/pages/_shared/projectDocs.ts`); `render(entry)`; props from `projectDocLayoutProps`; Lockbox: `gizlilik`, `destek`, `guvenlik` (ADR-014) | ✅ store URLs — never rename |
+| `/en/projects/{slug}/{privacy\|support\|security}/` | `src/pages/en/projects/[slug]/[doc].astro` | ProjectDocLayout | same with `'en'` (entries in `src/content/project-docs/en/`) | ✅ store URLs — never rename |
 | `/404.html` | `src/pages/404.astro` | BaseLayout (`locale="tr"`, `noindex`, no canonical, no hreflang) | `siteText.tr.notFound` + `siteText.en.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at"; then a `<div lang="en">` with "Page not found." + "Go to the English home page" (`/en/`) — GitHub Pages serves one 404 for every locale |
-| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 6 URLs, each with `xhtml:link` alternates for `tr` and `en` |
+| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 12 URLs, each with `xhtml:link` alternates for `tr` and `en` |
 | `/robots.txt` | `public/robots.txt` | — | static | ✅ `User-agent: *` `Allow: /` (AI crawlers included — lead decision) + `Sitemap:` line |
 
 Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
@@ -92,13 +94,24 @@ other locale (`translatePath`), or to its home page when there is none (404).
 ### ProjectLayout.astro ✅ (`src/layouts/ProjectLayout.astro`)
 - Props (structural — no `astro:content` import): `locale`, `title`, `summary` (→ BaseLayout `description`),
   `meta: { term, value }[]`, `tech[]`, `cover?: { src: ImageMetadata; alt }`, `disclaimer?`,
-  `links: { label, url }[]`, `previous?` / `next?: { title, href }`, `ogImage?`, `jsonLd?`
+  `links: { label, url }[]`, `docs?: { label, href }[]` (ADR-014), `previous?` / `next?: { title, href }`, `ogImage?`, `jsonLd?`
   (passed to BaseLayout with `ogType="article"`); default slot = rendered Markdown.
 - Reads labels from `projectsPage[locale]` (like BaseLayout reads `siteText`).
 - Structure: `<article>` → `<header>` (only `<h1>`, summary, ProjectMeta, tech Tag list with
   `aria-label`) → cover (`astro:assets` `<Picture>` AVIF/WebP, widths 480/768/1536 capped at the source, `sizes` 48rem, eager + `fetchpriority=high`) → content (body `##` = h2) → disclaimer
-  Callout → ProjectLinks; then `<nav aria-label="Proje gezinmesi">` with `rel="prev"` / `rel="next"`
+  Callout → ProjectLinks → ProjectDocLinks; then `<nav aria-label="Proje gezinmesi">` with `rel="prev"` / `rel="next"`
   links (label + title, only when they exist) and "Tüm projeler" / "All projects" (`routePath('projects', locale)`).
+
+### ProjectDocLayout.astro ✅ (`src/layouts/ProjectDocLayout.astro`, ADR-014)
+- Props: `locale`, `title`, `description`, `updated` (ISO), `project: { title, href }`,
+  `contact: ProjectContact`, `otherLanguage: { href, lang }`; default slot = rendered Markdown.
+- Reads labels from `projectDocsText[locale]` (`src/data/projectDocs.ts`).
+- Structure: `<article>` → `<header>` (only `<h1>`, "Yürürlük tarihi" / "Effective date" `<time>`
+  via `formatDate`, link to the other language with `lang` + `hreflang` — Google Play takes one
+  URL) → content → `<section aria-labelledby="iletisim">` h2 "İletişim" / "Contact" with
+  developer name + `mailto:` link (only place on the site with an e-mail — methodology → Documented
+  Exceptions) → `<nav>` back link "{project} sayfasına dön" / "Back to {project}". No JSON-LD;
+  default share image.
 
 ### Page helpers (`src/pages/_shared/projects.ts`, Faz 6)
 Not a route (`_` prefix); page layer, so it may use `astro:content` / `astro:assets`.
@@ -107,7 +120,17 @@ Not a route (`_` prefix); page layer, so it may use `astro:content` / `astro:ass
   `splitEntryId(id).locale`, `sortProjects`; returns `{ slug, href, entry }[]`.
 - `projectSummaries(list)` — plain card props for HomeLayout / ProjectListLayout.
 - `projectPaths(locale)` — `getStaticPaths` result with `adjacentProjects` prev/next.
-- `projectLayoutProps(props, locale, siteUrl)` — every ProjectLayout prop except the Markdown.
+- `projectLayoutProps(props, locale, siteUrl)` — every ProjectLayout prop except the Markdown;
+  `docs` = `projectDocLinks(slug, locale)` (ADR-014).
+
+### Page helpers (`src/pages/_shared/projectDocs.ts`, ADR-014)
+- `loadProjectDocs(locale)` (internal) — `getCollection('projectDocs')` + `loadProjects(locale)`;
+  throws on `docTranslationProblems` or a project without `projectContacts` → **build fails**.
+- `projectDocLinks(slug, locale)` — `{ label, href }[]` in `PROJECT_DOC_KEYS` order for the project page.
+- `projectDocPaths(locale)` — `getStaticPaths` result, params `{ slug, doc: localized segment }`.
+- `projectDocLayoutProps(props, locale)` — every ProjectDocLayout prop except the Markdown.
+- Imports `loadProjects` from `projects.ts`, which imports `projectDocLinks` back (cycle of
+  functions only — nothing runs at module load).
 
 ## Components
 
@@ -132,6 +155,7 @@ Not a route (`_` prefix); page layer, so it may use `astro:content` / `astro:ass
 | LinkList | `src/components/profile/LinkList.astro` | `links: { label, url }[]` | `/` | ✅ auto-fill grid of ExternalLink (44 px) |
 | ProjectCard | `src/components/projects/ProjectCard.astro` | `title`, `href`, `summary`, `statusLabel`, `tech[]`, `techLabel`, `level?: 2 \| 3` (default 2) | `/projeler/` (h2, h3 when grouped), `/` `#projeler` (h3) | ✅ `<article>` surface card; only the title is a link (44 px); muted status; summary; tech Tag `<ul aria-label>` |
 | ProjectMeta | `src/components/projects/ProjectMeta.astro` | `items: { term, value }[]` | ProjectLayout | ✅ `<dl>` (`dt` muted, `dd` bold), wraps; Rol · Dönem (only with `period`) · Durum |
+| ProjectDocLinks | `src/components/projects/ProjectDocLinks.astro` | `title`, `links: { label, href }[]` | ProjectLayout (`docs` prop) | ✅ renders nothing when empty; `<section aria-labelledby="proje-belgeleri">` + h2 "Gizlilik ve destek" / "Privacy and support" + internal links (44 px) — ADR-014 |
 | ProjectLinks | `src/components/projects/ProjectLinks.astro` | `title`, `links: { label, url }[]` | ProjectLayout | ✅ renders nothing when empty; `<section aria-labelledby>` + h2 + ExternalLink list (44 px) |
 | Seo | `src/components/layout/Seo.astro` | `title` (full), `description`, `canonical?`, `noindex?`, `siteName`, `locale`, `alternateLocales?: string[]`, `alternates?: { hreflang, href }[]`, `type`, `image: { url, width, height, alt }`, `jsonLd?` | BaseLayout | ✅ `<title>`, description, canonical, robots, `<link rel="alternate" hreflang>` (Faz 6); `og:type/site_name/locale/locale:alternate/title/description/url/image(+width/height/alt)`; `twitter:card` `summary_large_image` + title/description/image/alt; JSON-LD via `serializeJsonLd` |
 
@@ -191,7 +215,7 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
 | `sortProjects`, `isPublished`, `formatPeriod`, `adjacentProjects`, `groupByKind`, `PROJECT_KINDS`, `PROJECT_STATUSES` (`src/lib/projects.ts`) | `sortProjects<T>(list): T[]` — `order` asc (missing last) → status (active → completed → archived) → title (`localeCompare` `tr`), non-mutating; `isPublished(data, production): boolean` — drops `draft: true` only in production (pages pass `import.meta.env.PROD`); `formatPeriod({ start, end? }, ongoing)` → `2019 – 2021` · `2020` · `2019 – {ongoing}`; `adjacentProjects(sorted, id)` → `{ previous?, next? }`; `groupByKind(list)` → `{ kind, items }[]` in kind order, empty groups omitted. Enums shared with `src/content.config.ts` | `src/lib/projects.test.ts` (13 tests) | ✅ |
 | `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" / "October 17, 2026" (`en-US`) (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (5 tests) | ✅ |
-| `LOCALES`, `Locale`, `DEFAULT_LOCALE`, `LOCALE_META`, `isLocale`, `routePath`, `projectPath`, `localeFromPath`, `translatePath`, `alternatePaths`, `splitEntryId`, `translationProblems`, `TRANSLATION_INVARIANT_FIELDS` (`src/lib/i18n.ts`, Faz 6) | route map `home` (`/` ↔ `/en/`), `projects` (`/projeler/` ↔ `/en/projects/`), project `{projects}{slug}/`; `LOCALE_META` = `lang`, `ogLocale` (`tr_TR`/`en_US`), `dateLocale` (`tr-TR`/`en-US`); `translatePath(path, target)` → same page in `target` or `undefined` (not a localized route, e.g. `/404.html`); `alternatePaths(path)` → all locales or `[]`; `splitEntryId('en/x')` → `{ locale: 'en', slug: 'x' }` (root = `tr`; throws on other shapes); `translationProblems(entries)` → missing locale versions + differing `kind/status/featured/order/period`. Also imported by `astro.config.mjs` | `src/lib/i18n.test.ts` (9 tests) | ✅ |
+| `LOCALES`, `Locale`, `DEFAULT_LOCALE`, `LOCALE_META`, `isLocale`, `routePath`, `projectPath`, `localeFromPath`, `translatePath`, `alternatePaths`, `splitEntryId`, `translationProblems`, `TRANSLATION_INVARIANT_FIELDS` (`src/lib/i18n.ts`, Faz 6); `PROJECT_DOCS`, `ProjectDocKey`, `PROJECT_DOC_KEYS`, `isProjectDocKey`, `projectDocPath`, `splitDocEntryId`, `docTranslationProblems` (ADR-014) | route map `home` (`/` ↔ `/en/`), `projects` (`/projeler/` ↔ `/en/projects/`), project `{projects}{slug}/`; `LOCALE_META` = `lang`, `ogLocale` (`tr_TR`/`en_US`), `dateLocale` (`tr-TR`/`en-US`); `translatePath(path, target)` → same page in `target` or `undefined` (not a localized route, e.g. `/404.html`); `alternatePaths(path)` → all locales or `[]`; `splitEntryId('en/x')` → `{ locale: 'en', slug: 'x' }` (root = `tr`; throws on other shapes); `translationProblems(entries)` → missing locale versions + differing `kind/status/featured/order/period`. Also imported by `astro.config.mjs`. ADR-014: `PROJECT_DOCS` = `privacy` (gizlilik/privacy), `support` (destek/support), `security` (guvenlik/security); `projectDocPath(slug, doc, locale)` → `{project}{segment}/`; `translatePath` maps `{projects}{slug}/{segment}/` (segment of the source locale only, else `undefined`); `splitDocEntryId('en/x/privacy')` → `{ locale, slug, doc }`; `docTranslationProblems(docs, projectSlugs)` → missing locale / differing `updated` / unknown project | `src/lib/i18n.test.ts` (13 tests) | ✅ |
 | `absoluteUrl`, `pageTitle`, `personId`, `personJsonLd`, `profilePageJsonLd`, `projectJsonLd`, `findForbiddenKeys`, `serializeJsonLd`, `FORBIDDEN_JSON_LD_KEYS` (`src/lib/seo.ts`) | `absoluteUrl(path, site: string \| URL)`; `pageTitle(title?, siteName, separator)`; JSON-LD builders (ProfilePage → Person, CreativeWork with `author` → `{home}#person`); `findForbiddenKeys(value)` deep scan; `serializeJsonLd` escapes `<` | `src/lib/seo.test.ts` (9 tests) | ✅ |
 | profile structural tests (data in `src/data/profile.{tr,en}.ts`) | — | `src/lib/profile.test.ts` (24 tests: 11 per locale via `describe.each(LOCALES)` — no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn (hero `kind` actions exist in `links`, `href` action = the locale's project list), one degree = Uluslararası İlişkiler / International Relations (also in the education note), Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda` / `about`, description ≤ 160, ISO `lastUpdated`; + 2 translation parity tests: same name/since/lastUpdated, link URLs+kinds, organizations+URLs, education kinds, list lengths, hero action kinds) | ✅ |
 
@@ -210,12 +234,12 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | File | Key settings |
 |---|---|
 | `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base`; `i18n` (Faz 6); `integrations: [sitemap({ filter, serialize })]`; `markdown.syntaxHighlight: false`; `security.csp.directives` (ADR-011); imports `./src/lib/i18n.ts` (works — config is loaded through Vite) |
-| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 7 URLs (TR + EN pages + 404), 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
+| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 9 URLs (TR + EN pages incl. the Lockbox privacy pages + 404), 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
 | `tsconfig.json` ✅ | extends `astro/tsconfigs/strict`; `noUncheckedIndexedAccess`; `paths` `@/*` → `./src/*`; include `.astro/types.d.ts`, `**/*`; exclude `dist` |
 | `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
 | `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |
 | `.prettierignore` ✅ | generated output, lockfile, `plans/`, `references/`, `.claude/`, `.agents/`, root `*.md` |
-| `src/content.config.ts` ✅ | `projects` collection: `glob` loader (`astro/loaders`), zod schema (`astro/zod`) with `image()`; schema in `references/content_schema.md` |
+| `src/content.config.ts` ✅ | `projects` collection: `glob` loader (`astro/loaders`), zod schema (`astro/zod`) with `image()`; `projectDocs` collection (ADR-014); schemas in `references/content_schema.md` |
 | `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts`, `scripts/**/*.test.ts` |
 | `.nvmrc` ✅ / `package.json#engines` ✅ | `24` / `node >=22.22.0` |
 | `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test, `check:dist` (`node scripts/check-dist.mjs`), `lhci` (`lhci autorun`), `images` (`node scripts/render-images.mjs`) |

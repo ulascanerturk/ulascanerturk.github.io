@@ -171,6 +171,36 @@ Problem · Çözüm · Teknolojiler · Rolüm · Durum (`##` = h2; "Öğrenimler
 Schema check (faz-3 §3): an entry without `summary` and with `status: live` fails `astro build`
 with `InvalidContentEntryDataError` (verified 2026-10-17 with a temporary file, then deleted).
 
+### projectDocs (`src/content/project-docs`, glob loader) ✅ (`src/content.config.ts`, ADR-014)
+
+Store-required documents below a project page. `id` = `{slug}/{doc}` (Turkish) or
+`en/{slug}/{doc}` (English); `doc` ∈ `privacy` · `support` · `security` (`PROJECT_DOCS`,
+`src/lib/i18n.ts`; parsed by `splitDocEntryId`, which throws on any other shape).
+`loadProjectDocs` (`src/pages/_shared/projectDocs.ts`) fails the build when a document has no
+translation, its `updated` differs between the languages, its project is not published, or the
+project has no `projectContacts` entry (`docTranslationProblems`).
+
+| Field | Type | Constraints | Required | Notes |
+|---|---|---|---|---|
+| `title` | string | 1–80 | ✅ | `<h1>` + `<title>`; contains the document name and the store app name |
+| `description` | string | **50–160** | ✅ | meta description |
+| `updated` | ISO date string (`z.iso.date()`) | quote it in YAML (`'2026-10-17'`) — an unquoted date parses as a `Date` and fails | ✅ | "Yürürlük tarihi" / "Effective date"; identical in both languages |
+
+Body: Markdown (`##` = h2, `###` = h3); internal links as absolute paths. No contact block in the
+body — `ProjectDocLayout` renders "İletişim" / "Contact" from `src/data/projectDocs.ts`.
+
+| Document id | URL | Source | Approved |
+|---|---|---|---|
+| `lockbox-mobile/privacy` · `en/lockbox-mobile/privacy` | `/projeler/lockbox-mobile/gizlilik/` · `/en/projects/lockbox-mobile/privacy/` | lockbox-mobile `docs/yayin/ortak-hazirlik.md` §2 (claims checked against the app 2026-10-17: Settings → Security → Reset vault; clipboard clearing can be turned off; the only outgoing link is the policy itself) + "This website" section (GitHub Pages, no cookies, theme in `localStorage`) | ✅ 2026-10-17 |
+| `lockbox-mobile/support` · `en/lockbox-mobile/support` | `/projeler/lockbox-mobile/destek/` · `/en/projects/lockbox-mobile/support/` | `ortak-hazirlik.md` §3 (FAQ) | ✅ 2026-10-17 |
+| `lockbox-mobile/security` · `en/lockbox-mobile/security` | `/projeler/lockbox-mobile/guvenlik/` · `/en/projects/lockbox-mobile/security/` | `ortak-hazirlik.md` §4 + lockbox-mobile `SECURITY.md` | ✅ 2026-10-17 |
+
+These URLs are entered in App Store Connect / Play Console and hard-coded in the app
+(`PRIVACY_POLICY_URLS`) — never rename the slug or the segments. The documents name the
+algorithms (XChaCha20-Poly1305, Argon2id) like the store listing does; that is wider than the
+project page's "plan-level security" limit and is limited to these documents (lead, ADR-014).
+A change in the app's data handling updates these pages first, then the store privacy answers.
+
 ## Project Entries
 
 | Slug | Title | kind | status | featured | draft | Source | Approved |
@@ -207,7 +237,8 @@ gaps; no store link unless published; no repository link (no public remote).
   private e-mail and phone, address detail, full birth date, family, political ties,
   health, finance, ID/account numbers, server IP/SSH details, credentials, client
   contracts, commercial/technical information without sharing permission.
-- No approved exceptions (see `references/methodology.md` → Documented Exceptions).
+- One approved exception: the public Lockbox support address on the project documents only
+  (ADR-014; `references/methodology.md` → Documented Exceptions).
 
 ## How to Add a Project ✅ (plans/fazlar/faz-3-proje-sayfalari.md §2 task 9)
 

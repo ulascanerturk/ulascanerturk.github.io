@@ -5,6 +5,7 @@ import { getImage } from 'astro:assets';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 import { projectsPage } from '@/data/projects';
+import { projectDocLinks } from '@/pages/_shared/projectDocs';
 import { site } from '@/data/site';
 import {
   LOCALE_META,
@@ -127,6 +128,7 @@ export async function projectLayoutProps(
     cover,
     disclaimer: data.disclaimer,
     links: data.links ?? [],
+    docs: await projectDocLinks(project.slug, locale),
     previous: pagerLink(previous),
     next: pagerLink(next),
     ogImage,

@@ -1,6 +1,6 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 6 — docs/faz-6-live-verification)
+> Last updated: 2026-10-17 (content — Lockbox store documents, ADR-014, content/projects/lockbox-legal-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -29,6 +29,11 @@ Overall: tasks 64/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Fa
 
 Decided in Faz 4 (lead, 2026-10-17): robots.txt allows all crawlers incl. AI crawlers; Lighthouse CI local
 only (not in CI); JSON-LD without `worksFor`; CSP via Astro `security.csp` (ADR-011).
+Content update (2026-10-17, ADR-014, `content/projects/lockbox-legal-pages`): Lockbox privacy policy,
+support and security pages in TR + EN below the project page (`/projeler/lockbox-mobile/{gizlilik,destek,guvenlik}/`,
+`/en/projects/lockbox-mobile/{privacy,support,security}/`) for the App Store / Google Play listings; S2 exception —
+public support address on these pages only (lead). Gate: check 0, lint 0, Vitest 104, build 13 pages,
+`check:dist` 0 errors. Not a phase task.
 Pending lead inputs: VoiceOver check (Faz 4 task 9); Lockbox store links once the app is published
 (content update, not a phase task).
 
@@ -238,6 +243,7 @@ Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17); ADR-
 - Optionally enable Dependabot security updates (Settings → Code security; disabled on 2026-10-17) — lead.
 - GitHub notice in deploy run 38986997754: the `ubuntu-latest` runner label moves to Ubuntu 26 from 2026-10-19 (actions/runner-images#14748). `ci.yml` and `deploy.yml` use `ubuntu-latest`; watch the first runs after that date (Node 24 via `setup-node` / `withastro/action`, so no change is expected) — Faz 6.
 - First quarterly maintenance run: January 2027 (methodology.md → Maintenance → Quarterly Checklist) — lead.
+- Lockbox store documents (ADR-014): the URLs are stored in App Store Connect / Play Console and in the app (`PRIVACY_POLICY_URLS`) — never rename `lockbox-mobile` or the segments; a change in the app's data handling updates the privacy pages first (both languages, same `updated`), then the store answers — content/projects/lockbox-legal-pages.
 - Lockbox store links (when published) must be added to both `lockbox-mobile.md` and `en/lockbox-mobile.md` — Faz 6.
 - `ulascanerturk.md` stays Turkish-only; English site text is maintained as a translation in `profile.en.ts` — revisit if an English source document is wanted — Faz 6.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.

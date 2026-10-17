@@ -1,0 +1,24 @@
+---
+// Turkish project documents (/projeler/{slug}/{gizlilik|destek|guvenlik}/) — ADR-014.
+import { render } from 'astro:content';
+
+import ProjectDocLayout from '@/layouts/ProjectDocLayout.astro';
+import {
+  projectDocLayoutProps,
+  projectDocPaths,
+  type ProjectDocPageProps,
+} from '@/pages/_shared/projectDocs';
+
+export function getStaticPaths() {
+  return projectDocPaths('tr');
+}
+
+type Props = ProjectDocPageProps;
+
+const { Content } = await render(Astro.props.entry);
+const props = projectDocLayoutProps(Astro.props, 'tr');
+---
+
+<ProjectDocLayout {...props}>
+  <Content />
+</ProjectDocLayout>

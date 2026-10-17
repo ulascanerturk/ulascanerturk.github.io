@@ -140,6 +140,7 @@ Rules not tied to config are enforced from Faz 1 onward.
 | Rule | Exception | Location | Reason | Approved |
 |---|---|---|---|---|
 | Tokens only (no hex outside `tokens.css`) | Hard-coded light-theme hex colors | `scripts/images/*.html` (share image + touch icon sources), `public/favicon.svg` | Self-contained image sources rendered to PNG; they mirror `tokens.css` | Faz 1 (favicon), Faz 4 plan approval 2026-10-17 |
+| Invariant 1 / S2 (no e-mail) — `test-lint` §6 a, b | Public app-support address `ulascanerturk@gmail.com` + `mailto:` | `src/data/projectDocs.ts › projectContacts` → rendered only by `ProjectDocLayout` on the six Lockbox document pages (`/projeler/lockbox-mobile/{gizlilik,destek,guvenlik}/`, `/en/projects/lockbox-mobile/{privacy,support,security}/`) | App Store / Google Play require a public privacy and support contact (ADR-014). Profile, header/footer and JSON-LD still carry no e-mail (`profile.test.ts`). Any other hit is still a FAIL | lead, 2026-10-17 |
 
 ## Versions (verified 2026-10-17 — npm registry, nodejs.org dist index)
 

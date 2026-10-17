@@ -1,0 +1,122 @@
+---
+// Project document shell (ADR-014): privacy policy, support and security pages that the store
+// listings link to. Title, effective date, a link to the other language (Google Play accepts a
+// single policy URL), the Markdown body, the contact section and a back link to the project.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { ProjectContact } from '@/data/projectDocs';
+import { projectDocsText } from '@/data/projectDocs';
+import { formatDate } from '@/lib/date';
+import { LOCALE_META, type Locale } from '@/lib/i18n';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  /** ISO date (`YYYY-MM-DD`). */
+  updated: string;
+  project: { title: string; href: string };
+  contact: ProjectContact;
+  otherLanguage: { href: string; lang: string };
+}
+
+const { locale, title, description, updated, project, contact, otherLanguage } = Astro.props;
+const text = projectDocsText[locale];
+---
+
+<BaseLayout locale={locale} title={title} description={description}>
+  <article class="doc">
+    <header class="doc__header">
+      <h1>{title}</h1>
+      <p class="doc__meta">
+        <span>
+          {text.updatedLabel}:
+          <time datetime={updated}>{formatDate(updated, LOCALE_META[locale].dateLocale)}</time>
+        </span>
+        <a href={otherLanguage.href} hreflang={otherLanguage.lang} lang={otherLanguage.lang}>
+          {text.otherLanguage}
+        </a>
+      </p>
+    </header>
+
+    <div class="doc__content">
+      <slot />
+    </div>
+
+    <section class="doc__contact" aria-labelledby="iletisim">
+      <h2 id="iletisim">{text.contactTitle}</h2>
+      <p>
+        {contact.developer} — <a href={`mailto:${contact.email}`}>{contact.email}</a>
+      </p>
+    </section>
+  </article>
+
+  <nav class="doc-back" aria-label={project.title}>
+    <a href={project.href}>{text.backLink.replace('{project}', project.title)}</a>
+  </nav>
+</BaseLayout>
+
+<style>
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+
+  .doc__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .doc__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-m);
+    color: var(--color-text-muted);
+  }
+
+  .doc__meta a,
+  .doc-back a,
+  .doc__contact a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+
+  .doc__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+
+  .doc__content :global(h2:not(:first-child)) {
+    margin-top: var(--space-m);
+  }
+
+  .doc__content :global(ul),
+  .doc__content :global(ol) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    max-width: var(--measure);
+    padding-inline-start: var(--space-m);
+  }
+
+  .doc__contact {
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .doc__contact a {
+    overflow-wrap: anywhere;
+  }
+
+  .doc-back {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--color-border);
+  }
+</style>

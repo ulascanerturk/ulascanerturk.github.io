@@ -42,4 +42,18 @@ const projects = defineCollection({
       }),
 });
 
-export const collections = { projects };
+// Project documents (ADR-014): privacy policy, support and security pages published below a
+// project page for the App Store / Google Play listings. Path = `{slug}/{doc}.md` (Turkish)
+// or `en/{slug}/{doc}.md`; ids are checked by `splitDocEntryId` in the page helpers.
+const projectDocs = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/project-docs' }),
+  schema: z.object({
+    title: z.string().min(1).max(80),
+    // Meta description (≤ 160, kontrol-listesi "SEO ve Paylaşım").
+    description: z.string().min(50).max(160),
+    // Effective / last-updated date shown on the page; identical in every language.
+    updated: z.iso.date(),
+  }),
+});
+
+export const collections = { projects, projectDocs };

@@ -40,6 +40,28 @@ export function projectPath(slug: string, locale: Locale): string {
   return `${ROUTES.projects[locale]}${slug}/`;
 }
 
+/**
+ * Project documents published below a project page (ADR-014): the store-required privacy
+ * policy, support and security pages. The key is the language-neutral file name in
+ * `src/content/project-docs/`; the values are the localized URL segments.
+ */
+export const PROJECT_DOCS = {
+  privacy: { tr: 'gizlilik', en: 'privacy' },
+  support: { tr: 'destek', en: 'support' },
+  security: { tr: 'guvenlik', en: 'security' },
+} as const satisfies Record<string, Record<Locale, string>>;
+
+export type ProjectDocKey = keyof typeof PROJECT_DOCS;
+export const PROJECT_DOC_KEYS = Object.keys(PROJECT_DOCS) as ProjectDocKey[];
+
+export function isProjectDocKey(value: unknown): value is ProjectDocKey {
+  return (PROJECT_DOC_KEYS as readonly unknown[]).includes(value);
+}
+
+export function projectDocPath(slug: string, doc: ProjectDocKey, locale: Locale): string {
+  return `${projectPath(slug, locale)}${PROJECT_DOCS[doc][locale]}/`;
+}
+
 /** Locale of a URL path: `/en/` and everything below it is English. */
 export function localeFromPath(pathname: string): Locale {
   return pathname === '/en/' || pathname.startsWith('/en/') ? 'en' : DEFAULT_LOCALE;
@@ -59,8 +81,12 @@ export function translatePath(pathname: string, target: Locale): string | undefi
   if (!pathname.startsWith(projects)) return undefined;
   const rest = pathname.slice(projects.length);
   if (rest === '') return ROUTES.projects[target];
-  const slug = rest.endsWith('/') ? rest.slice(0, -1) : undefined;
-  return slug !== undefined && SLUG.test(slug) ? projectPath(slug, target) : undefined;
+  if (!rest.endsWith('/')) return undefined;
+  const [slug = '', segment, ...extra] = rest.slice(0, -1).split('/');
+  if (!SLUG.test(slug) || extra.length > 0) return undefined;
+  if (segment === undefined) return projectPath(slug, target);
+  const doc = PROJECT_DOC_KEYS.find((key) => PROJECT_DOCS[key][source] === segment);
+  return doc && projectDocPath(slug, doc, target);
 }
 
 /** Every locale's version of a localized path (empty for other paths). */
@@ -126,6 +152,71 @@ export function translationProblems(entries: readonly TranslatableEntry[]): stri
             `project "${slug}" (${locale}): ${field} differs from the ${DEFAULT_LOCALE} version`,
           );
         }
+      }
+    }
+  }
+  return problems;
+}
+
+/**
+ * Locale, project slug and document of a project document entry id:
+ * `lockbox-mobile/privacy` (Turkish) or `en/lockbox-mobile/privacy` (English,
+ * `src/content/project-docs/en/`). The file name is the language-neutral document key.
+ */
+export function splitDocEntryId(id: string): { locale: Locale; slug: string; doc: ProjectDocKey } {
+  const parts = id.split('/');
+  const locale = parts.length === 3 ? parts[0] : DEFAULT_LOCALE;
+  const [slug, doc] = parts.slice(-2);
+  if (
+    (parts.length === 2 || (parts.length === 3 && locale !== DEFAULT_LOCALE && isLocale(locale))) &&
+    slug !== undefined &&
+    SLUG.test(slug) &&
+    isProjectDocKey(doc)
+  ) {
+    return { locale: locale as Locale, slug, doc };
+  }
+  throw new Error(
+    `Unexpected project document id "${id}" (expected "{slug}/{doc}" or "{locale}/{slug}/{doc}", doc ∈ ${PROJECT_DOC_KEYS.join(', ')})`,
+  );
+}
+
+interface TranslatableDoc {
+  id: string;
+  data: { updated: string };
+}
+
+/**
+ * Checks that every project document exists in every locale with the same `updated` date
+ * (a policy change must reach both languages) and belongs to a known project. Pages throw on
+ * any problem, so an incomplete translation fails the build.
+ */
+export function docTranslationProblems(
+  docs: readonly TranslatableDoc[],
+  projectSlugs: readonly string[],
+): string[] {
+  const byKey = new Map<string, Map<Locale, TranslatableDoc>>();
+  for (const entry of docs) {
+    const { locale, slug, doc } = splitDocEntryId(entry.id);
+    const key = `${slug}/${doc}`;
+    const versions = byKey.get(key) ?? new Map<Locale, TranslatableDoc>();
+    versions.set(locale, entry);
+    byKey.set(key, versions);
+  }
+
+  const problems: string[] = [];
+  for (const [key, versions] of byKey) {
+    const slug = key.split('/')[0] as string;
+    if (!projectSlugs.includes(slug)) problems.push(`document "${key}" has no published project`);
+    for (const locale of LOCALES) {
+      if (!versions.has(locale)) problems.push(`document "${key}" has no ${locale} version`);
+    }
+    const reference = versions.get(DEFAULT_LOCALE);
+    if (!reference) continue;
+    for (const [locale, entry] of versions) {
+      if (entry.data.updated !== reference.data.updated) {
+        problems.push(
+          `document "${key}" (${locale}): updated differs from the ${DEFAULT_LOCALE} version`,
+        );
       }
     }
   }

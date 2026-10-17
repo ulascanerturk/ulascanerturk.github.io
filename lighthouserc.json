@@ -6,9 +6,11 @@
         "http://localhost/",
         "http://localhost/projeler/",
         "http://localhost/projeler/lockbox-mobile/",
+        "http://localhost/projeler/lockbox-mobile/gizlilik/",
         "http://localhost/en/",
         "http://localhost/en/projects/",
         "http://localhost/en/projects/lockbox-mobile/",
+        "http://localhost/en/projects/lockbox-mobile/privacy/",
         "http://localhost/404.html"
       ],
       "numberOfRuns": 3

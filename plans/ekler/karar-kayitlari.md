@@ -209,3 +209,38 @@
 - **Sonuçlar:** Büyük bir geliştirme bağımlılık ağacı (lighthouse 12.6.1);
   CI'da kullanılmasa da `npm ci` ile kurulur (kurulum süresi maliyeti). Yerel
   Chrome gerekir. CI'a alınması gerekirse ayrı bir job + yeni karar.
+
+## ADR-014 — Proje belgeleri: gizlilik, destek ve güvenlik sayfaları
+
+- **Durum:** Kabul edildi (2026-10-17, lead — "lockbox-legal-pages" planı onayı)
+- **Bağlam:** Lockbox App Store ve Google Play'de yayımlanacak. İki mağaza da herkese açık
+  bir gizlilik politikası URL'si (TR + EN), Apple ayrıca gerçek iletişim bilgisine götüren bir
+  destek URL'si ister; Play herkese açık bir geliştirici e-postası gösterir. Uygulama
+  reposundaki plan ayrı bir `lockbox-site` reposu öngörüyordu; lead sayfaların bu sitede,
+  proje sayfasının altında yayımlanmasına karar verdi. S2 ("e-posta yok") bu sayfalar için
+  uygulanamaz.
+- **Karar:**
+  - Yeni içerik koleksiyonu `projectDocs` (`src/content/project-docs/{slug}/{doc}.md`, İngilizce
+    `en/{slug}/{doc}.md`); `doc` ∈ `privacy`, `support`, `security`. Şema: `title`,
+    `description` (50–160), `updated` (ISO tarih, iki dilde aynı).
+  - URL'ler proje sayfasının altında, dile göre segment: `/projeler/{slug}/{gizlilik|destek|guvenlik}/`
+    ↔ `/en/projects/{slug}/{privacy|support|security}/` (`PROJECT_DOCS`, `src/lib/i18n.ts`).
+    `translatePath` bu sayfaları da eşler; hreflang, sitemap ve dil bağlantısı ek kod gerektirmez.
+    **Bu URL'ler mağaza kayıtlarına ve uygulamanın içine yazılır; değiştirilmez.**
+  - `ProjectDocLayout`: tek h1, yürürlük tarihi, diğer dile bağlantı (Play tek URL alır),
+    Markdown gövde, iletişim bölümü, proje sayfasına dönüş. Proje sayfası "Gizlilik ve destek"
+    bölümünde belgelere bağlanır.
+  - **S2 istisnası:** proje iletişimi (`src/data/projectDocs.ts › projectContacts`) yalnızca bu
+    belgelerde `mailto:` ile yayımlanır — Lockbox için geliştirici adı "Ulaşcan Ertürk" ve
+    `ulascanerturk@gmail.com` (lead, 2026-10-17). Profil sayfası, başlık/altbilgi ve JSON-LD
+    e-posta içermemeye devam eder (`profile.test.ts`).
+  - Eksik çeviri, iki dil arasında farklı `updated`, yayımlanmamış projeye ait belge veya
+    iletişimi tanımsız proje derlemeyi durdurur (`docTranslationProblems`, `_shared/projectDocs.ts`).
+- **Alternatifler:** Ayrı `lockbox-site` reposu (ikinci bir site ve bakım yükü; lead tercih
+  etmedi). Proje Markdown'ına bölüm eklemek (mağazalar ayrı, başlığında "Privacy Policy" geçen
+  bir sayfa ister). Dil bağımsız tek segment (`/privacy/` iki dilde): Türkçe URL kuralına aykırı.
+- **Sonuçlar:** Yeni bağımlılık yok, istemci JS değişmez, CSP değişmez (`mailto:` bağlantısı CSP
+  gerektirmez). Metnin kaynağı uygulama reposundaki `docs/yayin/ortak-hazirlik.md` kontrol
+  listesidir; uygulamanın veri davranışı değişirse önce bu sayfalar, sonra mağaza beyanları
+  güncellenir. Herkese açık e-posta adresi spam alabilir; adres değişirse yalnızca
+  `projectContacts` ve mağaza konsolları güncellenir.

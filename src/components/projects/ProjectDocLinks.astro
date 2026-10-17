@@ -1,0 +1,47 @@
+---
+// Links to a project's documents (ADR-014): privacy policy, support, security.
+// Internal pages, so plain links; renders nothing when the project has none.
+interface Link {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  links: Link[];
+}
+
+const { title, links } = Astro.props;
+---
+
+{links.length > 0 && (
+  <section class="project-docs" aria-labelledby="proje-belgeleri">
+    <h2 id="proje-belgeleri">{title}</h2>
+    <ul>
+      {links.map((link) => (
+        <li>
+          <a href={link.href} class="project-docs__link">
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .project-docs ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+    margin-top: var(--space-2xs);
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-docs__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+</style>
