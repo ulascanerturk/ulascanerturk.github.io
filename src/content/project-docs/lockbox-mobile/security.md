@@ -31,5 +31,5 @@ Güvenlik düzeltmeleri yalnızca App Store ve Google Play'de yayımlanan son s�
 ## Güvenlik modeli
 
 Kasa cihazda XChaCha20-Poly1305 ile şifrelenir; anahtar seçilen altı haneli PIN'den veya isteğe
-bağlı ana paroladan Argon2id ile türetilir ve cihaza bağlıdır. Uygulamanın sunucusu, hesap sistemi ve ağ erişimi yoktur. Cihazda nelerin
-saklandığı [Gizlilik Politikası](/projeler/lockbox-mobile/gizlilik/)'nda anlatılır.
+bağlı ana paroladan Argon2id ile türetilir ve cihaza bağlıdır. Uygulamanın sunucusu, hesap
+sistemi ve ağ erişimi yoktur. Cihazda nelerin saklandığı [Gizlilik Politikası](/projeler/lockbox-mobile/gizlilik/)'nda anlatılır.
