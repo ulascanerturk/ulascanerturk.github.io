@@ -30,7 +30,7 @@ Only the latest version published on the App Store and Google Play receives secu
 
 ## Security model
 
-The vault is encrypted on the device with XChaCha20-Poly1305; the key is derived from the master
-password with Argon2id and bound to the device. The app has no server, no account and no network
-access. Details of what is stored on the device are in the
+The vault is encrypted on the device with XChaCha20-Poly1305; the key is derived from the chosen
+six-digit PIN or optional master password with Argon2id and bound to the device. The app has no
+server, no account and no network access. Details of what is stored on the device are in the
 [Privacy Policy](/en/projects/lockbox-mobile/privacy/).
