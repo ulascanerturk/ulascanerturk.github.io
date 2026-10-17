@@ -150,7 +150,7 @@ Rules not tied to config are enforced from Faz 1 onward.
 
 ## Git Conventions
 
-- Repository: `main`; remote `origin` = `github.com/ulascanerturk/ulascanerturk.github.io` (created by the lead — Faz 5 task 3).
+- Repository: `main`; remote `origin` = `github.com/ulascanerturk/ulascanerturk.github.io` (created by the lead 2026-10-17 — Faz 5 task 3).
 - Branches: `{type}/faz-{N}-{desc}` for phase work, `{type}/{domain}/{desc}` otherwise (`git-start`).
   Types: feat · fix · refactor · test · chore · content · perf · docs · release.
 - Conventional Commits; scope = domain from the branch; English, imperative, ≤ 72 chars.
@@ -231,6 +231,6 @@ every route in `sitemap-0.xml` → `200`; `/olmayan-sayfa/` → `404` with the c
 ## Known Gaps / Review Needed
 
 - `@axe-core/cli` 4.14's ChromeDriver supports Chrome 152; local Chrome is 155 — see Testing Conventions for the axe fallback.
-- `actionlint` and `exiftool` are not installed locally: workflow syntax is verified on the first push (Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
+- `actionlint` and `exiftool` are not installed locally: workflow changes are verified by their first GitHub run (first deploy run green, Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
 - [REVIEW NEEDED] ADR-006 and ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan).
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

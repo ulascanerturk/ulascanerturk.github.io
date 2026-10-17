@@ -190,8 +190,9 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `.github/workflows/ci.yml` ✅ | `pull_request`; push with `branches-ignore: main`; `workflow_call` (called by deploy.yml on `main`) | `contents: read`; env `ASTRO_TELEMETRY_DISABLED=1`; concurrency per ref (cancel in progress) | `quality-gate`: npm ci → check → lint `--max-warnings 0` → format:check → test → build → `check:dist` (Faz 4); Lighthouse CI not in CI (lead decision, ADR-013) | `actions/checkout@v7`, `actions/setup-node@v7` (`node-version-file: .nvmrc`, npm cache) |
 | `.github/workflows/deploy.yml` ✅ | push to `main` (Faz 5 task 2) + `workflow_dispatch` | top level `contents: read`; `quality-gate` job `contents: read`; `deploy` job `pages: write`, `id-token: write`; env `ASTRO_TELEMETRY_DISABLED=1`; `concurrency: pages` (no cancel) | `quality-gate` (`uses: ./.github/workflows/ci.yml`) → `build` (withastro/action, Node 24) → `deploy` (environment `github-pages`) — no deploy if the gate fails | `actions/checkout@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` |
 
-Workflow syntax not yet validated by actionlint (not installed); YAML parses (Ruby `YAML.load_file`). First real
-run on the lead's first push (Faz 5 task 6). The site is built twice per deploy (gate + `withastro/action`) — accepted
+Workflow syntax verified by the first GitHub run (deploy run 38984069624, 2026-10-17: quality-gate → build → deploy
+green); actionlint still not installed locally. Repo `ulascanerturk/ulascanerturk.github.io` (public), Pages source
+GitHub Actions, HTTPS enforced, ruleset `main` (no deletion, no force push). The site is built twice per deploy (gate + `withastro/action`) — accepted
 to keep ADR-002's action; release and rollback steps: `references/methodology.md` → Release and Rollback.
 
 ## Known Issues / Gotchas

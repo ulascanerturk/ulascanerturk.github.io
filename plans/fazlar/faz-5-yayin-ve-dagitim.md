@@ -21,23 +21,23 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
    Yayın, `ci.yml`'yi `workflow_call` ile çalıştıran `quality-gate` işine bağlıdır
    (`ci.yml` `main` push'larında kendiliğinden çalışmaz); kapı geçmezse yayın yapılmaz.
    `pages: write` / `id-token: write` yalnızca `deploy` işinde (lead onayı 2026-10-17).
-3. **Uzak depo (lead).** GitHub'da `ulascanerturk/ulascanerturk.github.io`
+3. ✅ **Uzak depo (lead).** GitHub'da `ulascanerturk/ulascanerturk.github.io`
    **public** deposu oluşturulur (README/.gitignore eklenmeden).
    ```bash
    gh repo create ulascanerturk/ulascanerturk.github.io --public --source=. --remote=origin
    ```
-4. **Pages ayarı (lead).** *Settings → Pages → Build and deployment → Source:
+4. ✅ **Pages ayarı (lead).** *Settings → Pages → Build and deployment → Source:
    GitHub Actions*. (Alternatif: `gh api` ile; lead tercihine bağlı.)
-5. **Dal koruması (öneri, lead).** `main` için kural seti: force-push ve dal silme
+5. ✅ **Dal koruması (öneri, lead).** `main` için kural seti: force-push ve dal silme
    engellenir. Tek geliştirici akışında yerel squash merge sonrası doğrudan push
    yapıldığı için "PR zorunlu" ve "zorunlu status check" kuralları **açılmaz**:
    yeni commit'in henüz durumu olmadığından zorunlu kontrol push'u reddeder. CI
    kapısı bunun yerine deploy iş akışındadır (görev 2; lead onayı 2026-10-17).
-6. **İlk push (lead).** `git push -u origin main` → CI ve deploy iş akışları izlenir.
-7. **Canlı doğrulama.**
-   - Tüm sayfalar 200; `/olmayan-sayfa/` → özel 404.
-   - HTTPS zorunlu (*Enforce HTTPS* açık).
-   - Canlı URL üzerinde Lighthouse ve JSON-LD doğrulaması (Faz 4 testlerinin tekrarı).
+6. ✅ **İlk push (lead).** `git push -u origin main` → CI ve deploy iş akışları izlenir.
+7. **Canlı doğrulama.** (ajan kısmı tamamlandı; OG önizlemesi lead'de açık)
+   - ✅ Tüm sayfalar 200; `/olmayan-sayfa/` → özel 404.
+   - ✅ HTTPS zorunlu (*Enforce HTTPS* açık).
+   - ✅ Canlı URL üzerinde Lighthouse ve JSON-LD doğrulaması (Faz 4 testlerinin tekrarı).
    - OG önizlemesi (LinkedIn Post Inspector vb.) — lead.
 8. **Arama motoru kaydı (opsiyonel, lead).** Google Search Console / Bing
    Webmaster doğrulaması — doğrulama dosyası/meta etiketi eklenmesi gerekirse
@@ -50,19 +50,19 @@ GitHub Actions → Pages dağıtım hattını doğrulamak.
 
 ## 3. Testler
 
-- CI iş akışı ilk push'ta yeşil.
-- Deploy iş akışı yeşil; Pages ortam URL'si `https://ulascanerturk.github.io/`.
-- `curl -sI https://ulascanerturk.github.io/` → `200`, `content-type: text/html`.
-- `curl -s https://ulascanerturk.github.io/sitemap-index.xml` geçerli XML.
+- ✅ CI iş akışı ilk push'ta yeşil (deploy içindeki `quality-gate`).
+- ✅ Deploy iş akışı yeşil; Pages ortam URL'si `https://ulascanerturk.github.io/`.
+- ✅ `curl -sI https://ulascanerturk.github.io/` → `200`, `content-type: text/html`.
+- ✅ `curl -s https://ulascanerturk.github.io/sitemap-index.xml` geçerli XML.
 
 ## 4. Kabul Kriterleri
 
-- [ ] Site canlı ve tüm sayfalar erişilebilir.
-- [ ] `main`'e push otomatik yayın üretiyor; manuel adım gerekmiyor.
-- [ ] Canlı Lighthouse eşikleri sağlanıyor.
+- [x] Site canlı ve tüm sayfalar erişilebilir.
+- [x] `main`'e push otomatik yayın üretiyor; manuel adım gerekmiyor.
+- [x] Canlı Lighthouse eşikleri sağlanıyor.
 - [x] Geri alma prosedürü belgelendi.
 - [x] Depoda sır, `.env`, `dist/` yok (`git ls-files` kontrolü).
-- [ ] Kontrol listesi: Dağıtım bölümü gözden geçirildi.
+- [x] Kontrol listesi: Dağıtım bölümü gözden geçirildi.
 
 ## 5. Riskler
 

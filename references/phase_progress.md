@@ -6,10 +6,11 @@
 
 ## Current Phase
 
-**Faz 5 — Yayın ve Dağıtım: in progress** (branch `chore/faz-5-deploy-pipeline`) — repo-side tasks done
-(1, 2, 10); remote, Pages setting, ruleset and first push are with the lead (3–6), then live verification (7).
-Faz 4: acceptance criteria met; task 9 VoiceOver still open — lead approved starting Faz 5 with it open (2026-10-17).
-Overall: tasks 51/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 partial) · acceptance 38/47.
+**Faz 5 — Yayın ve Dağıtım: acceptance criteria met** (2026-10-17) — site live at `https://ulascanerturk.github.io/`;
+task 7 partly open (OG preview — lead); optional tasks 8–9 with the lead.
+Faz 4: acceptance criteria met; task 9 VoiceOver still open (lead approved starting Faz 5 with it open, 2026-10-17).
+Next phase: **Faz 6 — İngilizce Sürüm ve Bakım**.
+Overall: tasks 55/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 and Faz 5 task 7 partial) · acceptance 42/47.
 
 ## Open Questions
 
@@ -47,7 +48,7 @@ Status: closed (2026-10-17)
 - [x] `references/` exists with four map files — this run
 - [x] `.nvmrc` and `engines` show the verified Node LTS — `.nvmrc` 24; `engines >=22.22.0` (lead-approved deviation: Astro minimum, keeps local Node 22 working)
 - [x] All quality-gate commands pass with zero errors/warnings — `test-lint all` PASS 2026-10-17 (2nd run, after fix: prettier, defineConfig, telemetry env)
-- [x] CI workflow syntax valid — actionlint not installed; YAML parses, permissions explicit; **verify on first push in Faz 5**
+- [x] CI workflow syntax valid — actionlint not installed; YAML parses, permissions explicit; verified by the first GitHub run in Faz 5 (run 38984069624, green)
 - [x] `dist/`, `.astro/`, `node_modules/` not committed — ignored by `.gitignore`, absent from the change set
 - [x] Checklist: Genel ✅ (plan-only changes + approved fixes; new deps covered by ADR-010; audit 0 vulnerabilities; references updated), Dağıtım ✅ (explicit permissions; actions from GitHub/withastro on major tags; no build output)
 
@@ -156,25 +157,25 @@ Status: acceptance criteria met (2026-10-17, branch `feat/faz-4-seo-a11y-perf`) 
 - Temporary verification files (cover entry + image) were created and deleted; nothing left in `src/`.
 
 ## Faz 5 — Yayın ve Dağıtım   (plans/fazlar/faz-5-yayin-ve-dagitim.md)
-Status: in progress (2026-10-17, branch `chore/faz-5-deploy-pipeline`) — started with Faz 4 task 9 open (lead decision)
+Status: acceptance criteria met (2026-10-17; branch `chore/faz-5-deploy-pipeline` → 0b56ab1, live verification on `docs/faz-5-live-verification`) — task 7 OG preview and optional 8–9 with the lead
 ### Tasks
 - [x] 1. Domain — no custom domain (S5); no `CNAME` in the repo or `public/` (checked 2026-10-17)
 - [x] 2. Deploy on push to `main` — `deploy.yml` `push: branches: [main]` + `workflow_dispatch`; `quality-gate` job calls `ci.yml` (`workflow_call`) and `build` needs it; `pages`/`id-token` write only on the `deploy` job (approved plan deviation)
-- [ ] 3. Create public remote repo (lead) — `gh` installed, not logged in
-- [ ] 4. Pages source: GitHub Actions (lead)
-- [ ] 5. Branch protection (lead, optional) — ruleset text changed: block force push + deletion only, no required status checks / PRs (approved 2026-10-17)
-- [ ] 6. First push (lead)
-- [ ] 7. Live verification
+- [x] 3. Public remote repo (lead) — `ulascanerturk/ulascanerturk.github.io`, PUBLIC, remote `origin`
+- [x] 4. Pages source: GitHub Actions (lead, `gh api … /pages -f build_type=workflow` on the empty repo — worked) — `html_url` `https://ulascanerturk.github.io/`, `https_enforced: true`, no `cname`
+- [x] 5. Branch protection (lead) — ruleset `main` (active, `~DEFAULT_BRANCH`): `deletion` + `non_fast_forward` only; no required status checks / PRs (approved 2026-10-17)
+- [x] 6. First push (lead) — `git push -u origin main` (0b56ab1); deploy run 38984069624 green: quality-gate 36 s → build → deploy; deployment `github-pages` @ 0b56ab1
+- [~] 7. Live verification — done: `/`, `/projeler/`, `/projeler/lockbox-mobile/` 200 (`content-type: text/html; charset=utf-8`); `/olmayan-sayfa/` 404 with the custom page (noindex); `http://` → 301 `https://`; `/projeler` → 301 `/projeler/`; robots, favicons, OG image 200; `sitemap-index.xml` valid XML (xmllint) → 3 URLs; `ulascanerturk.md` 404; JSON-LD (ProfilePage, CreativeWork) parses, schema.org, no forbidden keys; canonical/`og:url` = live URL; CSP meta present; Lighthouse live 100/100/100/100. **Open: OG preview (LinkedIn Post Inspector) and Google Rich Results Test — lead**
 - [ ] 8. Search console registration (optional, lead)
 - [ ] 9. GitHub profile website link (optional, lead)
 - [x] 10. Rollback procedure — `references/methodology.md` → Release and Rollback (re-run last good deploy, `git revert` + push, no force push)
 ### Acceptance Criteria
-- [ ] Site live, all pages reachable
-- [ ] Push to `main` deploys automatically
-- [ ] Live Lighthouse thresholds met
+- [x] Site live, all pages reachable — every sitemap URL 200, custom 404 (Task 7)
+- [x] Push to `main` deploys automatically — run 38984069624 triggered by `push`, no manual step
+- [x] Live Lighthouse thresholds met — LHCI 0.15.1 against the live URLs, 3 runs each: 100/100/100/100 on `/`, `/projeler/`, `/projeler/lockbox-mobile/`; `/404.html` 100/100/100 (SEO excluded: noindex); LCP ≈ 0.8 s
 - [x] Rollback procedure documented — methodology.md → Release and Rollback
-- [x] No secrets, `.env` or `dist/` in the repo — `git ls-files` (113 files): no `.env*`, `dist/`, `.astro/`, `node_modules/`, keys, `CNAME`; secret grep (test-lint 6f) 0 hits — re-check on the remote after the first push
-- [ ] Checklist: Dağıtım reviewed — repo side ✅ (no build output, explicit least-privilege permissions, actions from GitHub/withastro on major tags); live verification after the first push pending
+- [x] No secrets, `.env` or `dist/` in the repo — `git ls-files` (113 files): no `.env*`, `dist/`, `.astro/`, `node_modules/`, keys, `CNAME`; secret grep (test-lint 6f) 0 hits; remote `origin/main` = local `main` (0b56ab1), remote tree 113 files, same check clean
+- [x] Checklist: Dağıtım reviewed — no build output, explicit least-privilege permissions, actions from GitHub/withastro on major tags, live verification after the first push ✅
 ### Notes
 - Gap found while planning: `ci.yml` ignores pushes to `main` and feature branches are never pushed, so CI would never run;
   `withastro/action` only builds. Fix (lead-approved): deploy is gated by `ci.yml` via `workflow_call`.
@@ -209,12 +210,12 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 | 2026-10-17 | not run | not run | 480 B gzip (theme script, 996 B raw) | Faz 1 dist check: 2 pages, 0 errors, 0 warnings; 360 px, keyboard, theme checks in browser (macOS) |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
 | 2026-10-17 | 100/100/100/100 (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1, local Chrome 155 | 0 violations (axe-core 4.14.0, 4 pages × 2 themes) | 478 B gzip (theme script only) | Faz 4 `check:dist`: 4 pages, 0 errors; CSP enforced, no console violations |
+| 2026-10-17 | 100/100/100/100 live (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1 against `https://ulascanerturk.github.io` | not run (unchanged since Faz 4) | 478 B gzip | Faz 5 live verification: all sitemap URLs 200, custom 404, HTTPS redirect, JSON-LD valid |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 3 dist check: 4 pages, 0 errors, 0 warnings; one h1 per page; all internal links resolve; 360 px `scrollWidth = 360` on `/`, `/projeler/`, `/projeler/lockbox-mobile/`, `/404.html` (browser, dark theme) |
 
 ## Follow-ups
 
 - Confirm ADR-006 and ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2).
-- Verify CI/deploy workflow syntax on the first push (actionlint not installed locally) — Faz 0. Now also the `workflow_call` gate in `deploy.yml` — Faz 5.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
@@ -225,4 +226,5 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 - VoiceOver check of `/` and `/projeler/lockbox-mobile/` (Faz 4 task 9) — lead.
 - `site.description` (Faz 1, default meta for pages without their own — since Faz 4 no page uses it; 404 passes its message) is third person ("…geliştirir"); the profile text is first person (lead decision) — align when Faz 3/4 touches meta descriptions — Faz 2.
 - `plans/01-mimari.md` §2 folder tree / §6.1 scripts do not yet show `src/components/layout/Seo.astro`, `scripts/images/`, `scripts/render-images.mjs`, `lighthouserc.json` and `npm run images` [PLAN DRIFT — cosmetic] — Faz 4.
-- Faz 5: run Google Rich Results Test / Schema.org validator and the social share debuggers on the live URLs; re-run Lighthouse on the live site — Faz 4 §3.
+- Google Rich Results Test and the LinkedIn Post Inspector on the live URLs (Lighthouse re-run on the live site done in Faz 5) — lead, Faz 4 §3 / Faz 5 task 7.
+- Optional: Search Console / Bing Webmaster verification (Faz 5 task 8 — a verification file or meta tag is a separate small task) and the GitHub profile "Website" field (task 9) — lead.
