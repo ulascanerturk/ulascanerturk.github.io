@@ -29,7 +29,7 @@ const text = projectDocsText[locale];
       <h1>{title}</h1>
       <p class="doc__meta">
         <span>
-          {text.updatedLabel}:
+          {`${text.updatedLabel}: `}
           <time datetime={updated}>{formatDate(updated, LOCALE_META[locale].dateLocale)}</time>
         </span>
         <a href={otherLanguage.href} hreflang={otherLanguage.lang} lang={otherLanguage.lang}>

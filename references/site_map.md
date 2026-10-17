@@ -268,3 +268,6 @@ to keep ADR-002's action; release and rollback steps: `references/methodology.md
   CSP is not applied in `astro dev` — verify with `build` + `preview`; never add `style="…"` attributes or
   inline scripts without checking the built CSP (Astro hashes `<script>`/`<style>` it renders, not attributes).
 - Repository name must be exactly `ulascanerturk.github.io`, otherwise the site is served under `/{repo}/`.
+- Astro drops the line-break whitespace between a text expression and the next element
+  (`{label}:` + newline + `<time>` renders "label:October…"); put the space inside the expression
+  (`{`${label}: `}`) — fixed in `ProjectDocLayout` on fix/layout/doc-date-spacing.
