@@ -22,8 +22,8 @@ Lockbox şunları **yalnızca cihazınızda** saklar:
 
 - **Kasanız:** oluşturduğunuz servis adları, parolalar, parola geçmişi (bir kaydın son 5 parolası),
   oluşturulma tarihleri, parola kuralları ve uygulama ayarları. Kasa XChaCha20-Poly1305 ile
-  şifrelenir. Anahtar, seçtiğiniz altı haneli PIN'den veya isteğe bağlı ana parolanızdan (Argon2id) ve
-  bu cihazdan hiç çıkmayan rastgele bir sırdan türetilir.
+  şifrelenir. Anahtar, seçtiğiniz altı haneli PIN'den veya isteğe bağlı ana parolanızdan
+  (Argon2id) ve bu cihazdan hiç çıkmayan rastgele bir sırdan türetilir.
 - **Güvenlik anahtarları ve tercihler:** rastgele bir cihaz sırrı; biyometrik kilit açmayı
   etkinleştirirseniz cihazınızın biyometrisiyle korunan kasa anahtarı; gizli olmayan tercihler
   (biyometrik kilit açma açık/kapalı, otomatik kilit süresi, yanlış deneme sayacı ve yedek
@@ -95,11 +95,11 @@ Lockbox çocuklara yönelik değildir ve çocuklar dahil kimseden veri toplamaz.
 
 ## Güvenlik
 
-Lockbox, kasanızı cihazınızda yalnızca seçtiğiniz PIN'i veya ana parolayı bilen (ya da etkinleştirdiyseniz kayıtlı
-biyometrinize sahip) kişinin açabileceği şekilde tasarlanmıştır. Hiçbir saklama yöntemi kusursuz
+Lockbox, kasanızı cihazınızda yalnızca seçtiğiniz PIN'i veya ana parolayı bilen (ya da
+etkinleştirdiyseniz kayıtlı biyometrinize sahip) kişinin açabileceği şekilde tasarlanmıştır. Hiçbir saklama yöntemi kusursuz
 değildir. Kolay tahmin edilemeyen bir PIN veya güçlü bir ana parola seçin, cihazınızın işletim
-sistemini güncel tutun ve şifreli yedek alın. Güvenlik açığı bildirmek için [Güvenlik sayfasına](/projeler/lockbox-mobile/guvenlik/)
-bakın.
+sistemini güncel tutun ve şifreli yedek alın. Güvenlik açığı bildirmek için
+[Güvenlik sayfasına](/projeler/lockbox-mobile/guvenlik/) bakın.
 
 ## Hukuki dayanak (GDPR / KVKK)
 
