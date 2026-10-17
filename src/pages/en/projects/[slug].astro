@@ -1,0 +1,22 @@
+---
+// English project pages (/en/projects/{slug}/) (faz-3 §2 task 6, faz-6 §2.1 task 4): one static page per published entry.
+// Share image = cover (1200 px JPEG) or the site default; JSON-LD CreativeWork (faz-4 §2 tasks 2–3).
+import { render } from 'astro:content';
+
+import ProjectLayout from '@/layouts/ProjectLayout.astro';
+import { site } from '@/data/site';
+import { projectLayoutProps, projectPaths, type ProjectPageProps } from '@/pages/_shared/projects';
+
+export function getStaticPaths() {
+  return projectPaths('en');
+}
+
+type Props = ProjectPageProps;
+
+const { Content } = await render(Astro.props.project.entry);
+const props = await projectLayoutProps(Astro.props, 'en', Astro.site ?? site.url);
+---
+
+<ProjectLayout {...props}>
+  <Content />
+</ProjectLayout>

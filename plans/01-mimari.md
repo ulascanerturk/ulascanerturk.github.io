@@ -14,7 +14,7 @@
 | Stil | Native CSS + custom properties (token'lar), Astro scoped style; CSS framework yok | ADR-003 |
 | İstemci JS | Framework yok; yalnızca tema geçişi için küçük inline script | ADR-004 |
 | İçerik | Astro content collections (`projects`) + tipli `src/data/profile.ts` | ADR-005 |
-| Dil | `tr-TR` birincil; `en` Faz 6'da (v1 sonrası, S4) | ADR-006 |
+| Dil | `tr-TR` birincil (öneksiz URL'ler); `en` `/en/` altında (Faz 6, S4) | ADR-006 |
 | Analitik | Yok (v1) | ADR-007 |
 | Çalışma ortamı | Node.js güncel LTS (`.nvmrc`), npm | ADR-008 |
 | Yazı tipi | Sistem font yığını (harici font isteği yok) | ADR-009 |
@@ -51,20 +51,28 @@ ulascanerturk.github.io/
 │   │   ├── projects/           # ProjectCard, ProjectMeta, ProjectLinks
 │   │   └── ui/                 # Section, Tag, ExternalLink, Callout
 │   ├── content/
-│   │   └── projects/           # *.md — her proje bir dosya
+│   │   └── projects/           # *.md — her proje bir dosya (Türkçe)
+│   │       └── en/             # *.md — aynı slug ile İngilizce karşılık (Faz 6)
 │   ├── content.config.ts       # Koleksiyon şemaları (zod)
 │   ├── data/
-│   │   ├── profile.ts          # Profil verisi (ulascanerturk.md'den türetilir)
-│   │   └── site.ts             # Site meta verisi (ad, URL, varsayılan açıklama, nav)
+│   │   ├── profile.ts          # Profil tipleri + `profiles: Record<Locale, …>` (Faz 6)
+│   │   ├── profile.tr.ts       # Profil verisi (ulascanerturk.md'den türetilir)
+│   │   ├── profile.en.ts       # İngilizce çevirisi (Faz 6, lead onaylı)
+│   │   ├── projects.ts         # Proje sayfası arayüz metinleri (dil başına)
+│   │   └── site.ts             # Site meta verisi + dil başına arayüz metni ve nav
 │   ├── layouts/
-│   │   ├── BaseLayout.astro    # <html>, <head> (Seo), header/footer, skip link
+│   │   ├── BaseLayout.astro    # <html lang>, <head> (Seo, hreflang), header/footer, skip link
+│   │   ├── HomeLayout.astro    # Profil sayfası gövdesi (/ ve /en/, Faz 6)
+│   │   ├── ProjectListLayout.astro # Proje listesi gövdesi (Faz 6)
 │   │   └── ProjectLayout.astro # Proje detay sayfası iskeleti
-│   ├── lib/                    # Saf TS yardımcıları (slug, tarih, sıralama) + testleri
+│   ├── lib/                    # Saf TS yardımcıları (slug, tarih, sıralama, i18n) + testleri
 │   ├── pages/
+│   │   ├── _shared/            # Sayfa katmanı yardımcıları (route değil; Faz 6)
 │   │   ├── index.astro         # Profil (ana sayfa)
 │   │   ├── projeler/
 │   │   │   ├── index.astro     # Proje listesi
 │   │   │   └── [slug].astro    # Proje detayları (getStaticPaths)
+│   │   ├── en/                 # İngilizce sürüm: index, projects/index, projects/[slug] (Faz 6)
 │   │   └── 404.astro
 │   └── styles/
 │       ├── tokens.css          # Renk, tipografi, boşluk, radius, gölge token'ları
@@ -89,7 +97,7 @@ src/pages  ──►  src/layouts  ──►  src/components  ──►  src/lib
 
 | Katman | Yollar | Import edebilir | Import edemez |
 |---|---|---|---|
-| Sayfa | `src/pages/**` | layouts, components, data, lib, `astro:content` | — |
+| Sayfa | `src/pages/**` (`_shared/` dahil) | layouts, components, data, lib, `astro:content` | — |
 | Layout | `src/layouts/**` | components, data, lib | pages |
 | Bileşen | `src/components/**` | diğer components, lib | pages, layouts, `astro:content` (veri prop ile gelir) |
 | Veri | `src/data/**`, `src/content/**` | lib (yalnızca tipler) | pages, layouts, components |
@@ -98,7 +106,8 @@ src/pages  ──►  src/layouts  ──►  src/components  ──►  src/lib
 Kurallar:
 
 - Bileşenler veriyi **prop** olarak alır; koleksiyon sorgusu (`getCollection`)
-  yalnızca sayfalarda yapılır. Böylece bileşenler test edilebilir ve yeniden
+  yalnızca sayfalarda yapılır (iki dilin ortak sorgu ve prop eşlemesi
+  `src/pages/_shared/` altında — `_` öneki route üretmez; Faz 6). Böylece bileşenler test edilebilir ve yeniden
   kullanılabilir kalır.
 - `src/lib` saf TypeScript'tir; Vitest ile birim testi yazılır.
 - Kullanıcıya görünen metinler bileşen içine gömülmez; `src/data/*` veya içerik
@@ -108,9 +117,11 @@ Kurallar:
 
 ## 4. İçerik Modeli
 
-### 4.1 Profil (`src/data/profile.ts`)
+### 4.1 Profil (`src/data/profile.ts` + `profile.{tr,en}.ts`)
 
-`ulascanerturk.md` belgesinden elle türetilen, tipli bir nesne. Alanlar
+`ulascanerturk.md` belgesinden elle türetilen, tipli bir nesne. Faz 6'dan itibaren
+dil başına bir dosya (`profile.tr.ts`, `profile.en.ts`) aynı `Profile` tipini doldurur;
+`profile.ts` tipleri ve `profiles: Record<Locale, …>` kaydını tutar. Alanlar
 (ayrıntı: [`02-icerik-ve-tasarim.md` §3](02-icerik-ve-tasarim.md)):
 
 ```ts
@@ -147,6 +158,8 @@ bileşenler bunları prop olarak alır (Faz 2, lead onayı 2026-10-17).
 
 `src/content.config.ts` içinde `glob` loader ve zod şeması ile tanımlanır.
 Dosya adı slug'dır (ASCII, küçük harf, tire; ç→c, ğ→g, ı→i, ö→o, ş→s, ü→u).
+İngilizce karşılık aynı slug ile `src/content/projects/en/` altındadır (Faz 6); şema
+aynıdır, yayımlanmış her projenin iki dili de olmalıdır (aksi halde derleme hatası).
 
 | Alan | Tip | Zorunlu | Not |
 |---|---|---|---|
@@ -177,11 +190,14 @@ Gövde bölümleri (önerilen): **Problem**, **Çözüm**, **Rolüm**, **Teknolo
 | `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | 3 |
 | `/404.html` | `src/pages/404.astro` | 1 |
 | `/sitemap-index.xml` | `@astrojs/sitemap` | 4 |
-| `/en/…` | İngilizce sürüm (S4) | 6 |
+| `/en/` | `src/pages/en/index.astro` | 6 |
+| `/en/projects/` | `src/pages/en/projects/index.astro` | 6 |
+| `/en/projects/{slug}/` | `src/pages/en/projects/[slug].astro` | 6 |
 
 `astro.config.mjs`: `site: 'https://ulascanerturk.github.io'`, `base` tanımlanmaz
 (kullanıcı sitesi kökte yayınlanır), `trailingSlash: 'always'`,
-`build.format: 'directory'`.
+`build.format: 'directory'`, `i18n` (`defaultLocale: 'tr'`, `prefixDefaultLocale: false`).
+Dil karşılıkları (`hreflang`, sitemap) `src/lib/i18n.ts` rota haritasından üretilir (ADR-006).
 
 ## 6. Derleme, Kalite Kapısı ve Dağıtım Hattı
 

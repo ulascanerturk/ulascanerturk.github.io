@@ -1,8 +1,9 @@
-// Structural tests for the profile data (faz-2 §3). The data lives in
-// src/data/profile.ts; the tests sit in src/lib with the other unit tests.
+// Structural tests for the profile data (faz-2 §3; both locales since faz-6 §3). The data
+// lives in src/data/profile.{tr,en}.ts; the tests sit in src/lib with the other unit tests.
 import { describe, expect, it } from 'vitest';
 
-import { profile, profilePage } from '@/data/profile';
+import { profiles } from '@/data/profile';
+import { LOCALES } from '@/lib/i18n';
 
 /** Every string value in a nested object, with its path for readable failures. */
 function collectStrings(value: unknown, path = ''): [string, string][] {
@@ -17,16 +18,24 @@ function collectStrings(value: unknown, path = ''): [string, string][] {
   return [];
 }
 
-const strings = [
-  ...collectStrings(profile, 'profile'),
-  ...collectStrings(profilePage, 'profilePage'),
-];
-
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
 // Ten or more digits separated only by phone-style punctuation.
 const PHONE = /(?:\+?\d[\s().-]*){10,}/;
 
-describe('profile data', () => {
+/** Wording that must survive translation (ulascanerturk.md §3, §7; Değişmez Kural 2). */
+const WORDING = {
+  tr: { degree: 'Uluslararası İlişkiler', aboutId: 'hakkimda', projectsHref: '/projeler/' },
+  en: { degree: 'International Relations', aboutId: 'about', projectsHref: '/en/projects/' },
+} as const;
+
+describe.each(LOCALES)('profile data (%s)', (locale) => {
+  const { profile, page: profilePage } = profiles[locale];
+  const wording = WORDING[locale];
+  const strings = [
+    ...collectStrings(profile, 'profile'),
+    ...collectStrings(profilePage, 'profilePage'),
+  ];
+
   it('has no empty or whitespace-only text', () => {
     const empty = strings.filter(([, text]) => text.trim() === '').map(([path]) => path);
     expect(empty).toEqual([]);
@@ -56,20 +65,21 @@ describe('profile data', () => {
     expect(hits).toEqual([]);
   });
 
-  it('links GitHub and LinkedIn (S2)', () => {
+  it('links GitHub and LinkedIn (S2) and its own project list', () => {
     const kinds = profile.links.map((link) => link.kind);
     expect(kinds).toContain('github');
     expect(kinds).toContain('linkedin');
     for (const action of profilePage.hero.actions) {
       if ('kind' in action) expect(kinds).toContain(action.kind);
-      else expect(action.href).toMatch(/^\/[a-z0-9/-]*\/$/);
+      else expect(action.href).toBe(wording.projectsHref);
     }
   });
 
   it('keeps International Relations as the only degree (ulascanerturk.md §3)', () => {
     const degrees = profile.education.filter((item) => item.kind === 'degree');
     expect(degrees).toHaveLength(1);
-    expect(degrees[0]?.program).toContain('Uluslararası İlişkiler');
+    expect(degrees[0]?.program).toContain(wording.degree);
+    expect(profilePage.education.note).toContain(wording.degree);
   });
 
   it('keeps ecosystem programs in the Shifter context (ulascanerturk.md §7)', () => {
@@ -82,7 +92,7 @@ describe('profile data', () => {
     expect(profile.summary[0]).toContain(String(profile.since));
   });
 
-  it('uses unique ASCII section anchors, including the nav anchor #hakkimda', () => {
+  it('uses unique ASCII section anchors, including the nav anchor', () => {
     const ids = [
       profilePage.about,
       profilePage.skills,
@@ -95,7 +105,7 @@ describe('profile data', () => {
     ].map((section) => section.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-    expect(ids).toContain('hakkimda');
+    expect(profilePage.about.id).toBe(wording.aboutId);
   });
 
   it('keeps the meta description within 160 characters', () => {
@@ -104,5 +114,44 @@ describe('profile data', () => {
 
   it('stores lastUpdated as an ISO date', () => {
     expect(profile.lastUpdated).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+// A translation must not drop, add or reorder facts (faz-6 §2.1 task 2).
+describe('translations', () => {
+  const tr = profiles.tr.profile;
+  const en = profiles.en.profile;
+
+  it('share the language-neutral facts', () => {
+    expect(en.name).toBe(tr.name);
+    expect(en.since).toBe(tr.since);
+    expect(en.lastUpdated).toBe(tr.lastUpdated);
+    expect(en.links.map(({ url, kind }) => [url, kind])).toEqual(
+      tr.links.map(({ url, kind }) => [url, kind]),
+    );
+    expect(en.experience.map(({ organization, url }) => [organization, url])).toEqual(
+      tr.experience.map(({ organization, url }) => [organization, url]),
+    );
+    expect(en.education.map(({ kind }) => kind)).toEqual(tr.education.map(({ kind }) => kind));
+  });
+
+  it('have the same list shapes', () => {
+    const shape = (profile: typeof tr) => ({
+      summary: profile.summary.length,
+      skills: profile.skills.map((group) => [group.items.length, group.note !== undefined]),
+      experience: profile.experience.map((item) => [
+        item.highlights.length,
+        item.role !== undefined,
+        item.note !== undefined,
+        item.products?.map((product) => product.problems.length),
+      ]),
+      workAreas: profile.workAreas.items.length,
+      programs: profile.ecosystem.programs.length,
+      focusAreas: profile.focusAreas.length,
+    });
+    expect(shape(en)).toEqual(shape(tr));
+    expect(profiles.en.page.hero.actions.map((action) => 'kind' in action && action.kind)).toEqual(
+      profiles.tr.page.hero.actions.map((action) => 'kind' in action && action.kind),
+    );
   });
 });

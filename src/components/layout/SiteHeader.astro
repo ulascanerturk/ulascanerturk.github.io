@@ -9,15 +9,27 @@ interface NavItem {
   external?: boolean;
 }
 
+interface LanguageLink {
+  label: string;
+  href: string;
+  /** Language of the target page (`lang` + `hreflang`). */
+  lang: string;
+}
+
 interface Props {
   siteName: string;
+  /** Home page of the current locale. */
+  homeHref: string;
   navLabel: string;
   items: NavItem[];
   currentPath: string;
   themeToggleLabel: string;
+  /** Same page in the other language (faz-6 §2.1 task 5). */
+  languageLink: LanguageLink;
 }
 
-const { siteName, navLabel, items, currentPath, themeToggleLabel } = Astro.props;
+const { siteName, homeHref, navLabel, items, currentPath, themeToggleLabel, languageLink } =
+  Astro.props;
 
 // Only real pages are "current"; in-page anchors such as /#hakkimda are not.
 const currentFor = (href: string) =>
@@ -26,7 +38,7 @@ const currentFor = (href: string) =>
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a href="/" class="site-header__brand" aria-current={currentFor('/')}>
+    <a href={homeHref} class="site-header__brand" aria-current={currentFor(homeHref)}>
       <Monogram size={36} />
       <span>{siteName}</span>
     </a>
@@ -45,6 +57,16 @@ const currentFor = (href: string) =>
             )}
           </li>
         ))}
+        <li>
+          <a
+            href={languageLink.href}
+            class="site-header__link"
+            lang={languageLink.lang}
+            hreflang={languageLink.lang}
+          >
+            {languageLink.label}
+          </a>
+        </li>
       </ul>
       <ThemeToggle label={themeToggleLabel} />
     </nav>

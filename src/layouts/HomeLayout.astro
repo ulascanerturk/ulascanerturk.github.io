@@ -1,0 +1,179 @@
+---
+// Profile page body for `/` and `/en/` (faz-2 §2 task 6; shared by both locales since
+// faz-6 §2.1 task 4). Sections follow plans/02-icerik-ve-tasarim.md §2–§3; data and text
+// come from src/data/profile.{tr,en}.ts (ulascanerturk.md). The page passes the
+// `featured` project cards (faz-3 §2 task 8). JSON-LD: ProfilePage → Person, public
+// fields only (faz-4 §2 task 3).
+import EcosystemNote from '@/components/profile/EcosystemNote.astro';
+import EducationList from '@/components/profile/EducationList.astro';
+import ExperienceList from '@/components/profile/ExperienceList.astro';
+import FocusAreas from '@/components/profile/FocusAreas.astro';
+import LinkList from '@/components/profile/LinkList.astro';
+import ProfileHero from '@/components/profile/ProfileHero.astro';
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import SkillsGrid from '@/components/profile/SkillsGrid.astro';
+import WorkAreas from '@/components/profile/WorkAreas.astro';
+import Callout from '@/components/ui/Callout.astro';
+import Section from '@/components/ui/Section.astro';
+import { profiles } from '@/data/profile';
+import { projectsPage } from '@/data/projects';
+import { site, siteText } from '@/data/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { formatDate } from '@/lib/date';
+import { LOCALE_META, routePath, type Locale } from '@/lib/i18n';
+import type { ProjectStatus } from '@/lib/projects';
+import { absoluteUrl, profilePageJsonLd } from '@/lib/seo';
+
+interface FeaturedProject {
+  href: string;
+  data: { title: string; summary: string; status: ProjectStatus; tech: string[] };
+}
+
+interface Props {
+  locale: Locale;
+  featured: FeaturedProject[];
+}
+
+const { locale, featured } = Astro.props;
+const { profile, page } = profiles[locale];
+const { statusLabels, techLabel } = projectsPage[locale];
+const { about, skills, experience, projects, education, ecosystem, focusAreas, links, footnote } =
+  page;
+
+const heroActions = page.hero.actions.flatMap((action) => {
+  if ('href' in action) return [{ label: action.label, href: action.href, external: false }];
+  const link = profile.links.find((candidate) => candidate.kind === action.kind);
+  return link ? [{ label: action.label, href: link.url, external: true }] : [];
+});
+
+const siteUrl = Astro.site ?? site.url;
+const pageUrl = absoluteUrl(routePath('home', locale), siteUrl);
+// The person is the same in every language: its node id is always the root home page.
+const personUrl = absoluteUrl(routePath('home', 'tr'), siteUrl);
+const jsonLd = profilePageJsonLd({
+  url: pageUrl,
+  name: site.name,
+  inLanguage: LOCALE_META[locale].lang,
+  dateModified: profile.lastUpdated,
+  person: {
+    name: profile.name,
+    url: personUrl,
+    jobTitle: siteText[locale].jsonLd.jobTitle,
+    description: page.description,
+    knowsAbout: profile.focusAreas.map((area) => area.title),
+    sameAs: profile.links
+      .filter((link) => link.kind === 'github' || link.kind === 'linkedin')
+      .map((link) => link.url),
+  },
+});
+---
+
+<BaseLayout locale={locale} title={page.title} description={page.description} jsonLd={jsonLd}>
+  <ProfileHero
+    name={profile.name}
+    headline={profile.headline}
+    location={profile.location}
+    tagline={profile.tagline}
+    actions={heroActions}
+  />
+
+  <Section id={about.id} title={about.title}>
+    {profile.summary.map((paragraph) => (
+      <p>{paragraph}</p>
+    ))}
+  </Section>
+
+  <Section id={skills.id} title={skills.title}>
+    <p>{skills.intro}</p>
+    <SkillsGrid groups={profile.skills} />
+  </Section>
+
+  <Section id={experience.id} title={experience.title}>
+    <ExperienceList items={profile.experience} problemsLabel={experience.problemsLabel} />
+    <WorkAreas
+      title={experience.workAreasTitle}
+      items={profile.workAreas.items}
+      note={profile.workAreas.note}
+    />
+    <Callout>{experience.note}</Callout>
+  </Section>
+
+  <Section id={projects.id} title={projects.title}>
+    <div class="featured-projects">
+      {featured.map((project) => (
+        <ProjectCard
+          title={project.data.title}
+          href={project.href}
+          summary={project.data.summary}
+          statusLabel={statusLabels[project.data.status]}
+          tech={project.data.tech}
+          techLabel={techLabel}
+          level={3}
+        />
+      ))}
+    </div>
+    <p>
+      <a href={routePath('projects', locale)} class="featured-projects__all">
+        {projects.allLabel}
+      </a>
+    </p>
+  </Section>
+
+  <Section id={education.id} title={education.title}>
+    <EducationList
+      items={profile.education}
+      groups={education.groups}
+      kindLabels={education.kindLabels}
+      note={education.note}
+    />
+  </Section>
+
+  <Section id={ecosystem.id} title={ecosystem.title}>
+    <p>{ecosystem.intro}</p>
+    <EcosystemNote
+      context={profile.ecosystem.context}
+      programs={profile.ecosystem.programs}
+      note={profile.ecosystem.note}
+    />
+  </Section>
+
+  <Section id={focusAreas.id} title={focusAreas.title}>
+    <FocusAreas items={profile.focusAreas} />
+  </Section>
+
+  <Section id={links.id} title={links.title}>
+    <LinkList links={profile.links} />
+  </Section>
+
+  <div class="profile-footnote">
+    <p>{footnote.text}</p>
+    <p>
+      {footnote.updatedLabel}
+      <time datetime={profile.lastUpdated}>
+        {formatDate(profile.lastUpdated, LOCALE_META[locale].dateLocale)}
+      </time>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .featured-projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  .featured-projects__all {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target);
+  }
+
+  .profile-footnote {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+</style>

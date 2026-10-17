@@ -1,0 +1,13 @@
+---
+// English profile page (/en/) (faz-2 §2 task 6, faz-6 §2.1 task 4). Body: HomeLayout; this page
+// only loads the `featured` project cards of its locale.
+import HomeLayout from '@/layouts/HomeLayout.astro';
+import { loadProjects, projectSummaries } from '@/pages/_shared/projects';
+
+const locale = 'en';
+const featured = projectSummaries(
+  (await loadProjects(locale)).filter((project) => project.entry.data.featured),
+);
+---
+
+<HomeLayout locale={locale} featured={featured} />

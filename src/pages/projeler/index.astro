@@ -1,57 +1,10 @@
 ---
-// Project list (faz-3 §2 task 6). Grouped by `kind` only once a second kind
-// exists; with a single kind the cards are listed directly.
-import { getCollection } from 'astro:content';
+// Turkish project list (/projeler/) (faz-3 §2 task 6, faz-6 §2.1 task 4). Body: ProjectListLayout.
+import ProjectListLayout from '@/layouts/ProjectListLayout.astro';
+import { loadProjects, projectSummaries } from '@/pages/_shared/projects';
 
-import ProjectCard from '@/components/projects/ProjectCard.astro';
-import Section from '@/components/ui/Section.astro';
-import { projectsPage } from '@/data/projects';
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import { groupByKind, isPublished, sortProjects } from '@/lib/projects';
-
-const { list, kindLabels, statusLabels, techLabel } = projectsPage;
-
-const projects = sortProjects(
-  await getCollection('projects', ({ data }) => isPublished(data, import.meta.env.PROD)),
-);
-const groups = groupByKind(projects);
-const grouped = groups.length > 1;
+const locale = 'tr';
+const projects = projectSummaries(await loadProjects(locale));
 ---
 
-<BaseLayout title={list.title} description={list.description}>
-  <h1>{list.title}</h1>
-  <p>{list.intro}</p>
-
-  {groups.map((group) => {
-    const cards = (
-      <div class="project-grid">
-        {group.items.map((project) => (
-          <ProjectCard
-            title={project.data.title}
-            href={`/projeler/${project.id}/`}
-            summary={project.data.summary}
-            statusLabel={statusLabels[project.data.status]}
-            tech={project.data.tech}
-            techLabel={techLabel}
-            level={grouped ? 3 : 2}
-          />
-        ))}
-      </div>
-    );
-    return grouped ? (
-      <Section id={group.kind} title={kindLabels[group.kind]}>
-        {cards}
-      </Section>
-    ) : (
-      cards
-    );
-  })}
-</BaseLayout>
-
-<style>
-  .project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: var(--space-m);
-  }
-</style>
+<ProjectListLayout locale={locale} projects={projects} />

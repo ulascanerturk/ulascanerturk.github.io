@@ -16,6 +16,10 @@ describe('formatDate', () => {
     expect(formatDate('2026-10-17', 'en-GB')).toBe('17 October 2026');
   });
 
+  it('formats the English pages’ date (LOCALE_META.en.dateLocale)', () => {
+    expect(formatDate('2026-10-17', 'en-US')).toBe('October 17, 2026');
+  });
+
   it('rejects values that are not ISO calendar dates', () => {
     expect(() => formatDate('17.10.2026')).toThrow(RangeError);
     expect(() => formatDate('2026-13-01')).toThrow(RangeError);

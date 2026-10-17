@@ -1,80 +1,22 @@
 ---
-// Project detail pages (faz-3 §2 task 6): one static page per published entry.
+// Turkish project pages (/projeler/{slug}/) (faz-3 §2 task 6, faz-6 §2.1 task 4): one static page per published entry.
 // Share image = cover (1200 px JPEG) or the site default; JSON-LD CreativeWork (faz-4 §2 tasks 2–3).
-import { getImage } from 'astro:assets';
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 
-import { projectsPage } from '@/data/projects';
-import { site } from '@/data/site';
 import ProjectLayout from '@/layouts/ProjectLayout.astro';
-import { adjacentProjects, formatPeriod, isPublished, sortProjects } from '@/lib/projects';
-import { absoluteUrl, projectJsonLd } from '@/lib/seo';
+import { site } from '@/data/site';
+import { projectLayoutProps, projectPaths, type ProjectPageProps } from '@/pages/_shared/projects';
 
-export async function getStaticPaths() {
-  const projects = sortProjects(
-    await getCollection('projects', ({ data }) => isPublished(data, import.meta.env.PROD)),
-  );
-  return projects.map((project) => {
-    const { previous, next } = adjacentProjects(projects, project.id);
-    return { params: { slug: project.id }, props: { project, previous, next } };
-  });
+export function getStaticPaths() {
+  return projectPaths('tr');
 }
 
-interface Props {
-  project: CollectionEntry<'projects'>;
-  previous?: CollectionEntry<'projects'>;
-  next?: CollectionEntry<'projects'>;
-}
+type Props = ProjectPageProps;
 
-const { project, previous, next } = Astro.props;
-const { data } = project;
-const { Content } = await render(project);
-const { meta, statusLabels, ongoing } = projectsPage;
-
-const pagerLink = (entry?: CollectionEntry<'projects'>) =>
-  entry && { title: entry.data.title, href: `/projeler/${entry.id}/` };
-
-const siteUrl = Astro.site ?? site.url;
-const jsonLd = projectJsonLd({
-  name: data.title,
-  description: data.summary,
-  url: absoluteUrl(Astro.url.pathname, siteUrl),
-  inLanguage: site.lang,
-  keywords: data.tech,
-  startYear: data.period?.start,
-  author: { name: site.name, url: absoluteUrl('/', siteUrl) },
-});
-
-const cover = data.cover && data.coverAlt ? { src: data.cover, alt: data.coverAlt } : undefined;
-const shareImage =
-  cover &&
-  (await getImage({ src: cover.src, width: Math.min(1200, cover.src.width), format: 'jpeg' }));
-const ogImage = shareImage && {
-  src: shareImage.src,
-  width: Number(shareImage.attributes.width),
-  height: Number(shareImage.attributes.height),
-  alt: cover.alt,
-};
-
-const metaItems = [
-  { term: meta.role, value: data.role },
-  ...(data.period ? [{ term: meta.period, value: formatPeriod(data.period, ongoing) }] : []),
-  { term: meta.status, value: statusLabels[data.status] },
-];
+const { Content } = await render(Astro.props.project.entry);
+const props = await projectLayoutProps(Astro.props, 'tr', Astro.site ?? site.url);
 ---
 
-<ProjectLayout
-  title={data.title}
-  summary={data.summary}
-  meta={metaItems}
-  tech={data.tech}
-  cover={cover}
-  disclaimer={data.disclaimer}
-  links={data.links ?? []}
-  previous={pagerLink(previous)}
-  next={pagerLink(next)}
-  ogImage={ogImage}
-  jsonLd={jsonLd}
->
+<ProjectLayout {...props}>
   <Content />
 </ProjectLayout>

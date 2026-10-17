@@ -1,12 +1,14 @@
 ---
-// Not-found page (faz-1 §2 task 9). Served by GitHub Pages as /404.html; noindex.
+// Not-found page (faz-1 §2 task 9). Served by GitHub Pages as /404.html for every
+// locale, so it is Turkish with a short English part (`lang="en"`, faz-6 §2.1 task 4); noindex.
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { site } from '@/data/site';
+import { siteText } from '@/data/site';
 
-const { title, message, links } = site.notFound;
+const { title, message, links } = siteText.tr.notFound;
+const english = siteText.en.notFound;
 ---
 
-<BaseLayout title={title} description={message} noindex>
+<BaseLayout locale="tr" title={title} description={message} noindex>
   <h1>{title}</h1>
   <p>{message}</p>
   <ul class="not-found__links">
@@ -16,6 +18,19 @@ const { title, message, links } = site.notFound;
       </li>
     ))}
   </ul>
+
+  <div lang="en" class="not-found__alternate">
+    <p>
+      <strong>{english.title}.</strong> {english.message}
+    </p>
+    <ul class="not-found__links">
+      {english.links.map((link) => (
+        <li>
+          <a href={link.href}>{link.label}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
 </BaseLayout>
 
 <style>
@@ -31,5 +46,11 @@ const { title, message, links } = site.notFound;
     display: inline-flex;
     align-items: center;
     min-height: var(--tap-target);
+  }
+
+  .not-found__alternate {
+    margin-top: var(--space-l);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--color-border);
   }
 </style>

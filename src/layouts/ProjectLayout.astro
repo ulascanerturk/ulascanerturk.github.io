@@ -13,6 +13,7 @@ import Callout from '@/components/ui/Callout.astro';
 import Tag from '@/components/ui/Tag.astro';
 import { projectsPage } from '@/data/projects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { routePath, type Locale } from '@/lib/i18n';
 import type { JsonLd } from '@/lib/seo';
 
 interface PagerLink {
@@ -21,6 +22,7 @@ interface PagerLink {
 }
 
 interface Props {
+  locale: Locale;
   title: string;
   summary: string;
   meta: { term: string; value: string }[];
@@ -35,9 +37,21 @@ interface Props {
   jsonLd?: JsonLd;
 }
 
-const { title, summary, meta, tech, cover, disclaimer, links, previous, next, ogImage, jsonLd } =
-  Astro.props;
-const { techLabel, linksTitle, backLink, pager } = projectsPage;
+const {
+  locale,
+  title,
+  summary,
+  meta,
+  tech,
+  cover,
+  disclaimer,
+  links,
+  previous,
+  next,
+  ogImage,
+  jsonLd,
+} = Astro.props;
+const { techLabel, linksTitle, backLink, pager } = projectsPage[locale];
 
 // Main column is at most var(--container) = 48rem; never upscale the source.
 // 1×/2× of that column plus a small-screen size, capped at the source width.
@@ -46,7 +60,14 @@ const coverWidths = cover && [
 ];
 ---
 
-<BaseLayout title={title} description={summary} ogType="article" image={ogImage} jsonLd={jsonLd}>
+<BaseLayout
+  locale={locale}
+  title={title}
+  description={summary}
+  ogType="article"
+  image={ogImage}
+  jsonLd={jsonLd}
+>
   <article class="project">
     <header class="project__header">
       <h1>{title}</h1>
@@ -102,7 +123,7 @@ const coverWidths = cover && [
         </li>
       )}
       <li>
-        <a href="/projeler/">{backLink}</a>
+        <a href={routePath('projects', locale)}>{backLink}</a>
       </li>
     </ul>
   </nav>

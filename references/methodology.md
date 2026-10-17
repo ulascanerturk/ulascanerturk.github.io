@@ -1,6 +1,6 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 5 — chore/faz-5-deploy-pipeline)
+> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -9,7 +9,8 @@ system and page shell exist since Faz 1 (tokens, theme, BaseLayout, layout/UI co
 the profile page since Faz 2 (`src/data/profile.ts`, `src/components/profile/`);
 the project collection and pages since Faz 3 (`src/content.config.ts`, `src/content/projects/`,
 `src/components/projects/`, `ProjectLayout`); SEO, sharing, CSP and the dist/Lighthouse/axe checks since
-Faz 4 (`Seo.astro`, `src/lib/seo.ts`, `scripts/check-dist.mjs`, `lighthouserc.json`).
+Faz 4 (`Seo.astro`, `src/lib/seo.ts`, `scripts/check-dist.mjs`, `lighthouserc.json`); the English
+version under `/en/` since Faz 6 (`src/lib/i18n.ts`, per-locale data, `HomeLayout`, `ProjectListLayout`).
 
 ## Core Philosophy
 
@@ -38,7 +39,7 @@ From `plans/01-mimari.md` §3. Enforced by review and `test-lint` §6 manual rev
 
 | Layer | Paths | May import | Must not import |
 |---|---|---|---|
-| Page | `src/pages/**` | layouts, components, data, lib, `astro:content` | — |
+| Page | `src/pages/**` (incl. `src/pages/_shared/`) | layouts, components, data, lib, `astro:content`, `astro:assets` | — |
 | Layout | `src/layouts/**` | components, data, lib | pages |
 | Component | `src/components/**` | other components, lib | pages, layouts, `astro:content` |
 | Data | `src/data/**`, `src/content/**` | lib (types only) | pages, layouts, components |
@@ -60,7 +61,21 @@ Rules not tied to config are enforced from Faz 1 onward.
   Components declare their own structural prop interfaces instead of importing data types.
 - Page-level text (section titles, `id` anchors, intros, labels, notes, meta description) sits
   next to the page's facts in the same data file as a separate `{name}Page` object
-  (`profile` + `profilePage` in `src/data/profile.ts`, Faz 2) — one file per language in Faz 6.
+  (`profile` + `profilePage` in `src/data/profile.{tr,en}.ts`, Faz 2 / Faz 6).
+- **Languages (Faz 6, ADR-006).** `src/lib/i18n.ts` is the single route map (`routePath`,
+  `projectPath`, `translatePath`, `alternatePaths`, `LOCALE_META`); never hard-code `/projeler/` or
+  `/en/…` in layouts or pages — data files hold nav hrefs per locale. Text is keyed by `Locale`
+  (`Record<Locale, …>` or one file per locale with the same type), so a missing translation is a
+  type error; list parity is a Vitest test. Every page passes `locale` to its layout and
+  `BaseLayout`, which sets `<html lang>`, `og:locale`, hreflang and the language link. Text in
+  another language inside a page carries `lang` (404's English part). Project entries: Turkish at
+  the collection root, English in `en/`; `loadProjects` fails the build on a missing translation.
+  `astro.config.mjs` imports `src/lib/i18n.ts` (sitemap alternates) — keep that module free of
+  path aliases and `astro:*` imports.
+- **Shared page logic (Faz 6).** Pages of the two locales share their bodies through layouts
+  (`HomeLayout`, `ProjectListLayout`, `ProjectLayout`) and their collection code through
+  `src/pages/_shared/*.ts` (the `_` prefix keeps it out of routing; it is page layer, so it may use
+  `astro:content` / `astro:assets`). Page files only pick the locale, load data and render a layout.
 - Inline scripts that cannot be bundled live as a static string in `src/lib` and are executed by
   a Vitest test against a fake DOM, next to the pure function they mirror
   (`src/lib/theme.ts` `themeScript` ↔ `resolveTheme`). Rationale: tested + size-checked, no FOUC,
@@ -109,6 +124,10 @@ Rules not tied to config are enforced from Faz 1 onward.
   - §7 — accelerator/program participations are in the Shifter context, not personal awards.
 - **Never published:** §9 (agent working preferences) and everything §11 excludes.
   `ulascanerturk.md` is never copied to `public/` or `dist/`.
+- **Translations (Faz 6):** English is a translation of the Turkish data — no new facts; the §3/§5/§6/§7
+  distinctions are kept in English ("bachelor's degree" vs "training program", "in the context of
+  the Shifter startup", "listed as Technology Officer…", "not an independent published product");
+  every English text change needs lead approval like Turkish (approved 2026-10-17).
 - **Decisions (2026-10-17):** projects = Lockbox (mobile) only (S1; page title uses the store name
   "Lockbox", slug `lockbox-mobile`, status "geliştirme aşamasında", no store/repo link); contact = GitHub + LinkedIn,
   no e-mail/phone (S2); monogram avatar, no photo (S3); profile text in the first person (Faz 2).
@@ -171,10 +190,14 @@ Rules not tied to config are enforced from Faz 1 onward.
   Per page: `lang`, non-empty `<title>`, description present and ≤ 160, exactly one `<h1>`, no skipped
   heading level, `<img>` alt + width/height, internal links resolve in `dist/`, `target=_blank` has
   `noopener`, canonical = `{site}{path}` (none on noindex pages), `og:type/title/description/url/image/
-  image:alt/locale=tr_TR` + `twitter:card=summary_large_image` on indexable pages, `og:image` exists in
+  image:alt/locale` + `twitter:card=summary_large_image` on indexable pages, `og:image` exists in
   `dist/`, JSON-LD parses / schema.org context / no forbidden keys, CSP meta with `default-src 'self'`,
-  client JS ≤ 10 KB gzip. Site: unique titles and descriptions, sitemap lists every indexable page and
-  no noindex page and nothing unbuilt, robots.txt has the `Sitemap:` line. The tokenizer searches raw
+  client JS ≤ 10 KB gzip. Languages (Faz 6): `lang` = `en` under `/en/`, else `tr`; `og:locale`
+  matches `lang` (`OG_LOCALES`, mirror of `LOCALE_META`); indexable pages have hreflang alternates
+  incl. themselves and `x-default`, every target built, `og:locale:alternate` present; noindex pages
+  have none. Site: unique titles and descriptions (site-wide, across languages), reciprocal hreflang
+  pairs whose targets declare that `lang`, sitemap lists every indexable page and no noindex page and
+  nothing unbuilt, robots.txt has the `Sitemap:` line. The tokenizer searches raw
   text case-insensitively without `toLowerCase()` ("İ" changes string length).
 - Lighthouse ≥ 0.95 (mobile, every category; 404 without SEO because of `noindex`) via `npm run lhci`
   at phase close / on request — local only (ADR-013).
@@ -232,5 +255,7 @@ every route in `sitemap-0.xml` → `200`; `/olmayan-sayfa/` → `404` with the c
 
 - `@axe-core/cli` 4.14's ChromeDriver supports Chrome 152; local Chrome is 155 — see Testing Conventions for the axe fallback.
 - `actionlint` and `exiftool` are not installed locally: workflow changes are verified by their first GitHub run (first deploy run green, Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
-- [REVIEW NEEDED] ADR-006 and ADR-007 are "Önerildi"; confirm with the lead when the relevant phase starts (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan).
+- [REVIEW NEEDED] ADR-007 is "Önerildi"; confirm with the lead when analytics is discussed (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan; ADR-006 with the Faz 6 plan).
+- The browser pane's screenshot tool injects inline styles that the CSP blocks — "Applying inline style violates…" console errors after a screenshot are not from the site. Check the console in a fresh tab without screenshots (Faz 6).
+- `localhost:4321` may be taken by another local project (IPv4) while `astro preview` binds IPv6 — use `npx astro preview --port 4329` for browser checks (Faz 6).
 - [PLAN DRIFT — plans/fazlar/faz-0-proje-kurulumu.md §3 task 2 says "DOCS-ONLY"; the skill's mode name is "PLANS-ONLY"] naming only.

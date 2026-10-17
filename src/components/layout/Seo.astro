@@ -1,6 +1,7 @@
 ---
 // Head metadata (faz-4 §2 task 1): title, description, canonical, robots,
-// Open Graph, Twitter Card and JSON-LD. BaseLayout resolves every value
+// Open Graph, Twitter Card and JSON-LD; language alternates (hreflang,
+// og:locale:alternate) since faz-6 §2.1 task 5. BaseLayout resolves every value
 // (absolute URLs included) and passes it in as props.
 import { serializeJsonLd, type JsonLd } from '@/lib/seo';
 
@@ -14,6 +15,10 @@ interface Props {
   siteName: string;
   /** Open Graph locale, e.g. `tr_TR`. */
   locale: string;
+  /** Open Graph locales of the page's translations. */
+  alternateLocales?: string[];
+  /** Absolute URLs of every language version (this page included) plus `x-default`. */
+  alternates?: { hreflang: string; href: string }[];
   type: 'website' | 'article';
   /** Share image with an absolute URL. */
   image: { url: string; width: number; height: number; alt: string };
@@ -27,6 +32,8 @@ const {
   noindex = false,
   siteName,
   locale,
+  alternateLocales = [],
+  alternates = [],
   type,
   image,
   jsonLd,
@@ -37,10 +44,16 @@ const {
 <meta name="description" content={description} />
 {canonical && <link rel="canonical" href={canonical} />}
 {noindex && <meta name="robots" content="noindex" />}
+{alternates.map((alternate) => (
+  <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+))}
 
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content={locale} />
+{alternateLocales.map((alternate) => (
+  <meta property="og:locale:alternate" content={alternate} />
+))}
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 {canonical && <meta property="og:url" content={canonical} />}

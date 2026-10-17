@@ -1,5 +1,6 @@
 // Built-output checks (faz-4 §2 task 7): accessibility, SEO, sharing, privacy and
-// budget rules for every HTML page in dist/. No dependencies — a small tokenizer is
+// budget rules for every HTML page in dist/; per-language `lang`/`og:locale` and
+// reciprocal hreflang alternates since faz-6 §3. No dependencies — a small tokenizer is
 // enough for the HTML Astro generates. Pure functions are exported for
 // scripts/check-dist.test.ts; the CLI runs when the file is executed directly.
 //
@@ -31,6 +32,14 @@ export const FORBIDDEN_JSON_LD_KEYS = [
   'sibling',
   'relatedTo',
 ];
+// Mirror of LOCALE_META in src/lib/i18n.ts: `<html lang>` → og:locale. English pages live
+// under /en/, everything else is Turkish.
+export const OG_LOCALES = { tr: 'tr_TR', en: 'en_US' };
+
+/** Language a page at this URL path must declare. */
+export function expectedLang(path) {
+  return path === '/en/' || path.startsWith('/en/') ? 'en' : 'tr';
+}
 
 const RAW_TEXT = new Set(['script', 'style', 'title']);
 const VOID_TAG_END = /\s*\/?>$/;
@@ -125,6 +134,8 @@ export function parsePage(html) {
     /** @type {Record<string, string>} */
     httpEquiv: {},
     canonical: undefined,
+    /** @type {{ hreflang: string, href: string }[]} */
+    alternates: [],
     headings: [],
     images: [],
     anchors: [],
@@ -141,6 +152,12 @@ export function parsePage(html) {
         page.httpEquiv[attrs['http-equiv'].toLowerCase()] = attrs.content ?? '';
     } else if (name === 'link' && (attrs.rel ?? '').split(/\s+/).includes('canonical')) {
       page.canonical = attrs.href;
+    } else if (
+      name === 'link' &&
+      attrs.hreflang &&
+      (attrs.rel ?? '').split(/\s+/).includes('alternate')
+    ) {
+      page.alternates.push({ hreflang: attrs.hreflang, href: attrs.href ?? '' });
     } else if (/^h[1-6]$/.test(name)) page.headings.push(Number(name[1]));
     else if (name === 'img') page.images.push(attrs);
     else if (name === 'a') page.anchors.push(attrs);
@@ -163,6 +180,30 @@ export function findForbiddenKeys(value) {
 }
 
 /**
+ * hreflang on an indexable page (faz-6 §3): every page has its language versions, itself
+ * included, plus `x-default`; every target is built; `og:locale:alternate` names the others.
+ * Reciprocity across pages is checked in `checkSite`.
+ */
+function checkAlternates(page, ctx, add) {
+  if (page.alternates.length === 0) {
+    add('no hreflang alternates');
+    return;
+  }
+  if (!page.alternates.some((a) => a.hreflang === page.lang && a.href === page.canonical))
+    add('hreflang alternates do not include the page itself');
+  if (!page.alternates.some((a) => a.hreflang === 'x-default')) add('no hreflang x-default');
+  for (const { hreflang, href } of page.alternates) {
+    if (!href.startsWith(`${new URL(ctx.site).origin}/`) || !ctx.exists(new URL(href).pathname))
+      add(`hreflang ${hreflang} target missing in dist (${href})`);
+  }
+  if (
+    page.alternates.some((a) => a.hreflang !== 'x-default' && a.hreflang !== page.lang) &&
+    !page.property['og:locale:alternate']
+  )
+    add('missing og:locale:alternate');
+}
+
+/**
  * Checks one page. `path` is the public URL path ("/projeler/"); `ctx.exists(urlPath)`
  * tells whether a URL path resolves to a file in dist; `ctx.readAsset(urlPath)`
  * returns a local script's bytes. Returns `{ errors, jsBytes }`.
@@ -174,6 +215,8 @@ export function checkPage(path, page, ctx) {
 
   // Document basics
   if (!page.lang) add('<html> has no lang');
+  else if (page.lang !== expectedLang(path))
+    add(`<html lang="${page.lang}"> (expected ${expectedLang(path)})`);
   if (!page.title) add('empty <title>');
   const description = page.meta.description?.trim();
   if (!description) add('no meta description');
@@ -225,8 +268,9 @@ export function checkPage(path, page, ctx) {
     }
     if (page.property['og:url'] && page.property['og:url'] !== page.canonical)
       add('og:url differs from canonical');
-    if (page.property['og:locale'] && page.property['og:locale'] !== 'tr_TR')
-      add(`og:locale is ${page.property['og:locale']} (expected tr_TR)`);
+    const ogLocale = OG_LOCALES[page.lang];
+    if (page.property['og:locale'] && page.property['og:locale'] !== ogLocale)
+      add(`og:locale is ${page.property['og:locale']} (expected ${ogLocale})`);
     const image = page.property['og:image'];
     if (image) {
       if (!image.startsWith(`${new URL(ctx.site).origin}/`))
@@ -235,8 +279,10 @@ export function checkPage(path, page, ctx) {
     }
     if (page.meta['twitter:card'] !== 'summary_large_image')
       add('twitter:card is not summary_large_image');
-  } else if (page.canonical) {
-    add('noindex page has a canonical link');
+    checkAlternates(page, ctx, add);
+  } else {
+    if (page.canonical) add('noindex page has a canonical link');
+    if (page.alternates.length > 0) add('noindex page has hreflang alternates');
   }
 
   // JSON-LD: valid JSON, schema.org, public fields only
@@ -272,7 +318,8 @@ export function checkPage(path, page, ctx) {
 }
 
 /**
- * Cross-page checks: unique titles and descriptions, sitemap coverage and robots.txt.
+ * Cross-page checks: unique titles and descriptions, reciprocal hreflang, sitemap coverage
+ * and robots.txt.
  * `pages` = `{ path, page, indexable }[]`; `sitemapUrls` = absolute URLs from the sitemap.
  */
 export function checkSite({ pages, sitemapUrls, robots, site }) {
@@ -299,6 +346,25 @@ export function checkSite({ pages, sitemapUrls, robots, site }) {
     ),
   ))
     errors.push(`duplicate meta description "${value}" on ${paths.join(', ')}`);
+
+  // hreflang pairs are reciprocal: A → B (lang L) needs B with lang L and B → A.
+  const byUrl = new Map(pages.map((item) => [new URL(item.path, site).href, item]));
+  for (const { path, page, indexable } of pages) {
+    if (!indexable) continue;
+    const self = new URL(path, site).href;
+    for (const { hreflang, href } of page.alternates) {
+      if (hreflang === 'x-default' || href === self) continue;
+      const target = byUrl.get(href);
+      if (!target?.indexable) {
+        errors.push(`${path}: hreflang ${hreflang} → ${href} is not an indexable page`);
+        continue;
+      }
+      if (target.page.lang !== hreflang)
+        errors.push(`${path}: hreflang ${hreflang} → ${href}, whose lang is ${target.page.lang}`);
+      if (!target.page.alternates.some((a) => a.href === self && a.hreflang === page.lang))
+        errors.push(`${path}: hreflang ${hreflang} → ${href} is not reciprocal`);
+    }
+  }
 
   if (sitemapUrls === undefined) errors.push('sitemap-index.xml missing');
   else {

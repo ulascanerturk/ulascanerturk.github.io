@@ -67,13 +67,30 @@
 - **Sonuçlar:** `ulascanerturk.md` güncellendiğinde `profile.ts` elle
   senkronlanır (Faz 6 bakım rehberi).
 
-## ADR-006 — Dil: Türkçe birincil
+## ADR-006 — Dil: Türkçe birincil, İngilizce `/en/` altında
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (2026-10-17, Faz 6 planı onayı)
 - **Karar:** v1 yalnızca `tr-TR`. Arayüz metinleri veri dosyalarında tutulur ki
   İngilizce sürüm yapısal değişiklik gerektirmesin. URL'ler Türkçe ve ASCII
   (`/projeler/`). İngilizce sürüm `/en/` altında v1 sonrası yapılacak (S4,
   2026-10-17 onaylandı — Faz 6).
+- **Faz 6 uygulaması (lead onayı 2026-10-17):**
+  - Astro `i18n` (`defaultLocale: 'tr'`, `prefixDefaultLocale: false`); Türkçe URL'ler değişmez.
+    İngilizce rotalar: `/en/`, `/en/projects/`, `/en/projects/{slug}/`. Rota eşlemesi tek
+    yerde: `src/lib/i18n.ts` (sayfalar, layout'lar, sitemap ve testler bunu kullanır).
+  - Veri: `profile.tr.ts` / `profile.en.ts` (aynı `Profile` tipi), `siteText` ve
+    `projectsPage` `Record<Locale, …>` — eksik dil/alan tip hatasıdır; liste ve bağlantı
+    eşliği Vitest ile denetlenir.
+  - Projeler: Türkçe `src/content/projects/{slug}.md`, İngilizce
+    `src/content/projects/en/{slug}.md`; şema aynı, dil klasörden okunur. Yayımlanmış her
+    projenin iki dili de olmalı ve `kind/status/featured/order/period` aynı olmalı —
+    aksi halde derleme hata verir.
+  - SEO: `hreflang` (tr, en, `x-default` → tr), `og:locale` (`tr_TR` / `en_US`) +
+    `og:locale:alternate`; sitemap alternatifleri `serialize` ile (eklentinin `i18n`
+    seçeneği yalnızca aynı yolları eşleştirir: `/projeler/` ≠ `/en/projects/`).
+  - `/404.html` tektir (GitHub Pages): Türkçe sayfa + `lang="en"` kısa İngilizce bölüm.
+- **Maliyet:** her metin değişikliği iki dosyada yapılır; İngilizce metin de lead onayı
+  ister (Değişmez Kural 2 çeviride de geçerli).
 
 ## ADR-007 — Analitik yok (v1)
 

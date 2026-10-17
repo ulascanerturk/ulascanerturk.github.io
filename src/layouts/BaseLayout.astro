@@ -1,16 +1,27 @@
 ---
 // Shared page shell (faz-1 §2 task 5); head metadata via Seo (faz-4 §2 task 1).
+// Per-locale text, `lang`, hreflang alternates and the language link since faz-6 §2.1.
 import '@/styles/global.css';
 
 import Seo from '@/components/layout/Seo.astro';
 import SiteFooter from '@/components/layout/SiteFooter.astro';
 import SiteHeader from '@/components/layout/SiteHeader.astro';
 import SkipLink from '@/components/layout/SkipLink.astro';
-import { site } from '@/data/site';
+import { site, siteText } from '@/data/site';
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_META,
+  alternatePaths,
+  routePath,
+  translatePath,
+  type Locale,
+} from '@/lib/i18n';
 import { absoluteUrl, pageTitle, type JsonLd } from '@/lib/seo';
 import { themeScript } from '@/lib/theme';
 
 interface Props {
+  locale: Locale;
   /** Page name; rendered as "{title} · Ulaşcan Ertürk". Omit on the home page. */
   title?: string;
   description?: string;
@@ -18,27 +29,57 @@ interface Props {
   noindex?: boolean;
   /** Open Graph type: `article` for project pages. */
   ogType?: 'website' | 'article';
-  /** Share image (path or URL); defaults to `site.ogImage`. */
+  /** Share image (path or URL); defaults to the locale's `ogImage`. */
   image?: { src: string; width: number; height: number; alt: string };
   jsonLd?: JsonLd;
 }
 
+const { locale } = Astro.props;
+const text = siteText[locale];
 const {
   title,
-  description = site.description,
+  description = text.description,
   noindex = false,
   ogType = 'website',
-  image = { ...site.ogImage, src: site.ogImage.path },
+  image = { ...text.ogImage, src: text.ogImage.path },
   jsonLd,
 } = Astro.props;
 
 const siteUrl = Astro.site ?? site.url;
-const canonical = noindex ? undefined : absoluteUrl(Astro.url.pathname, siteUrl);
+const pathname = Astro.url.pathname;
+const canonical = noindex ? undefined : absoluteUrl(pathname, siteUrl);
 const mainId = 'icerik';
+
+// hreflang: every language version + x-default (Turkish); only on indexable localized pages.
+const versions = noindex ? [] : alternatePaths(pathname);
+const alternates =
+  versions.length === 0
+    ? []
+    : [
+        ...versions.map((version) => ({
+          hreflang: LOCALE_META[version.locale].lang,
+          href: absoluteUrl(version.path, siteUrl),
+        })),
+        {
+          hreflang: 'x-default',
+          href: absoluteUrl(translatePath(pathname, DEFAULT_LOCALE) ?? '/', siteUrl),
+        },
+      ];
+const alternateLocales = versions
+  .filter((version) => version.locale !== locale)
+  .map((version) => LOCALE_META[version.locale].ogLocale);
+
+// Language link: the same page in the other locale, or its home page when there is none (404).
+const other = LOCALES.find((candidate) => candidate !== locale) ?? DEFAULT_LOCALE;
+const languageLink = {
+  label: siteText[other].languageName,
+  href: translatePath(pathname, other) ?? routePath('home', other),
+  lang: LOCALE_META[other].lang,
+};
 ---
 
 <!doctype html>
-<html lang={site.lang}>
+<html lang={LOCALE_META[locale].lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,7 +89,9 @@ const mainId = 'icerik';
       canonical={canonical}
       noindex={noindex}
       siteName={site.name}
-      locale={site.locale}
+      locale={LOCALE_META[locale].ogLocale}
+      alternateLocales={alternateLocales}
+      alternates={alternates}
       type={ogType}
       image={{ ...image, url: absoluteUrl(image.src, siteUrl) }}
       jsonLd={jsonLd}
@@ -59,21 +102,23 @@ const mainId = 'icerik';
     <script is:inline set:html={themeScript} />
   </head>
   <body>
-    <SkipLink label={site.skipLink} target={mainId} />
+    <SkipLink label={text.skipLink} target={mainId} />
     <SiteHeader
       siteName={site.name}
-      navLabel={site.nav.label}
-      items={site.nav.items}
-      currentPath={Astro.url.pathname}
-      themeToggleLabel={site.themeToggleLabel}
+      homeHref={routePath('home', locale)}
+      navLabel={text.nav.label}
+      items={text.nav.items}
+      currentPath={pathname}
+      themeToggleLabel={text.themeToggleLabel}
+      languageLink={languageLink}
     />
     <main id={mainId} tabindex="-1" class="site-main">
       <slot />
     </main>
     <SiteFooter
-      label={site.footer.label}
-      copyrightHolder={site.footer.copyrightHolder}
-      links={site.footer.links}
+      label={text.footer.label}
+      copyrightHolder={text.footer.copyrightHolder}
+      links={text.footer.links}
     />
   </body>
 </html>

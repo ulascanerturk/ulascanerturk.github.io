@@ -1,4 +1,4 @@
-// Renders the static share image and touch icon (faz-4 §2 tasks 2 and 6) from the
+// Renders the static share images (Turkish + English, faz-6) and touch icon (faz-4 §2 tasks 2 and 6) from the
 // HTML sources in scripts/images/ and strips all metadata. Local tool only — needs
 // Google Chrome (or CHROME_PATH) and ImageMagick (`magick`); the PNGs are committed.
 //
@@ -15,6 +15,11 @@ const chrome =
 
 const images = [
   { source: 'scripts/images/og-default.html', output: 'public/og/default.png', size: [1200, 630] },
+  {
+    source: 'scripts/images/og-default-en.html',
+    output: 'public/og/default-en.png',
+    size: [1200, 630],
+  },
   {
     source: 'scripts/images/apple-touch-icon.html',
     output: 'public/apple-touch-icon.png',

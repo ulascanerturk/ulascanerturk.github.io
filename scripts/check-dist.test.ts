@@ -5,6 +5,7 @@ import {
   FORBIDDEN_JSON_LD_KEYS,
   checkPage,
   checkSite,
+  expectedLang,
   parsePage,
   tokenize,
   urlPath,
@@ -14,7 +15,7 @@ const site = 'https://example.github.io';
 
 const ctx = {
   site,
-  exists: (path: string) => ['/', '/projeler/', '/og/default.png'].includes(path),
+  exists: (path: string) => ['/', '/projeler/', '/en/projects/', '/og/default.png'].includes(path),
   readAsset: () => undefined,
 };
 
@@ -23,6 +24,9 @@ function html({ head = '', body = '<h1>Başlık</h1>' } = {}) {
     <title>Sayfa · Ada</title>
     <meta name="description" content="Kısa açıklama.">
     <link rel="canonical" href="${site}/projeler/">
+    <link rel="alternate" hreflang="tr" href="${site}/projeler/">
+    <link rel="alternate" hreflang="en" href="${site}/en/projects/">
+    <link rel="alternate" hreflang="x-default" href="${site}/projeler/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Sayfa · Ada">
     <meta property="og:description" content="Kısa açıklama.">
@@ -30,6 +34,7 @@ function html({ head = '', body = '<h1>Başlık</h1>' } = {}) {
     <meta property="og:image" content="${site}/og/default.png">
     <meta property="og:image:alt" content="Ada">
     <meta property="og:locale" content="tr_TR">
+    <meta property="og:locale:alternate" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta http-equiv="content-security-policy" content="default-src 'self'; script-src 'self'">
     ${head}</head><body>${body}</body></html>`;
@@ -118,9 +123,37 @@ describe('checkPage', () => {
     expect(errorsOf(source)).toContain('/projeler/: no Content-Security-Policy meta');
   });
 
-  it('skips sharing checks on noindex pages but rejects a canonical there', () => {
+  it('skips sharing checks on noindex pages but rejects a canonical and hreflang there', () => {
     const source = html({ head: '<meta name="robots" content="noindex">' });
-    expect(errorsOf(source)).toEqual(['/projeler/: noindex page has a canonical link']);
+    expect(errorsOf(source)).toEqual([
+      '/projeler/: noindex page has a canonical link',
+      '/projeler/: noindex page has hreflang alternates',
+    ]);
+  });
+
+  it('expects lang and og:locale to match the URL language', () => {
+    expect(expectedLang('/')).toBe('tr');
+    expect(expectedLang('/en/')).toBe('en');
+    expect(expectedLang('/en/projects/x/')).toBe('en');
+    const errors = errorsOf(html().replace('<html lang="tr">', '<html lang="en">'));
+    expect(errors).toContain('/projeler/: <html lang="en"> (expected tr)');
+    expect(errors).toContain('/projeler/: og:locale is tr_TR (expected en_US)');
+  });
+
+  it('requires complete hreflang alternates on indexable pages', () => {
+    const none = html().replace(/<link rel="alternate"[^>]+>/g, '');
+    expect(errorsOf(none)).toContain('/projeler/: no hreflang alternates');
+
+    const partial = html()
+      .replace(/<link rel="alternate" hreflang="(tr|x-default)"[^>]+>/g, '')
+      .replace(/<meta property="og:locale:alternate"[^>]+>/, '')
+      .replace(`${site}/en/projects/`, `${site}/en/yok/`);
+    expect(errorsOf(partial)).toEqual([
+      '/projeler/: hreflang alternates do not include the page itself',
+      '/projeler/: no hreflang x-default',
+      `/projeler/: hreflang en target missing in dist (${site}/en/yok/)`,
+      '/projeler/: missing og:locale:alternate',
+    ]);
   });
 
   it('enforces the JS budget', () => {
@@ -156,6 +189,36 @@ describe('checkSite', () => {
         `robots.txt has no "Sitemap: ${site}/sitemap-index.xml" line`,
       ]),
     );
+  });
+
+  it('requires reciprocal hreflang pairs with the right lang', () => {
+    const tr = { path: '/projeler/', indexable: true, page: parsePage(html()) };
+    const en = (source: string) => ({
+      path: '/en/projects/',
+      indexable: true,
+      page: { ...parsePage(source), title: 'Projects · Ada' },
+    });
+    const reciprocal = html()
+      .replace('<html lang="tr">', '<html lang="en">')
+      .replace(
+        `<link rel="canonical" href="${site}/projeler/">`,
+        `<link rel="canonical" href="${site}/en/projects/">`,
+      );
+    const pairErrors = (other: ReturnType<typeof en>) =>
+      checkSite({ pages: [tr, other], sitemapUrls: [], robots: undefined, site }).filter((error) =>
+        error.includes('hreflang'),
+      );
+
+    expect(pairErrors(en(reciprocal))).toEqual([]);
+    expect(
+      pairErrors(en(reciprocal.replace(/<link rel="alternate" hreflang="tr"[^>]+>/, ''))),
+    ).toEqual([`/projeler/: hreflang en → ${site}/en/projects/ is not reciprocal`]);
+    expect(pairErrors(en(html()))).toEqual(
+      expect.arrayContaining([`/projeler/: hreflang en → ${site}/en/projects/, whose lang is tr`]),
+    );
+    expect(pairErrors({ ...en(reciprocal), indexable: false })).toEqual([
+      `/projeler/: hreflang en → ${site}/en/projects/ is not an indexable page`,
+    ]);
   });
 
   it('reports a missing sitemap and robots.txt', () => {

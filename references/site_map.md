@@ -1,6 +1,6 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 5 — chore/faz-5-deploy-pipeline)
+> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -9,7 +9,8 @@ Faz 3 state: design tokens, global styles, theme (inline script + `src/lib/theme
 `/` is the profile page built from `src/data/profile.ts` with the profile components (Faz 2);
 the `projects` collection, `/projeler/`, `/projeler/{slug}/`, `ProjectLayout` and the project
 components exist (Faz 3); `Seo` (meta, OG, Twitter, JSON-LD), sitemap, robots.txt, share image,
-touch icon, meta CSP and `scripts/check-dist.mjs` (Faz 4).
+touch icon, meta CSP and `scripts/check-dist.mjs` (Faz 4). English version under `/en/` with
+hreflang alternates, per-locale data, `HomeLayout` / `ProjectListLayout` and `src/lib/i18n.ts` (Faz 6).
 
 ## Site Overview (`astro.config.mjs` ✅)
 
@@ -20,62 +21,100 @@ touch icon, meta CSP and `scripts/check-dist.mjs` (Faz 4).
 | `base` | not set (user site served at root) |
 | `trailingSlash` | `'always'` |
 | `build.format` | `'directory'` |
-| Integrations | `@astrojs/sitemap` ✅ (filter drops `/404`; ADR-012); `i18n` [PLANNED — Faz 6] |
+| Integrations | `@astrojs/sitemap` ✅ (filter drops `/404`; `serialize` adds `xhtml:link` hreflang alternates from `src/lib/i18n.ts` — ADR-012, ADR-006) |
+| `i18n` | ✅ `defaultLocale: 'tr'`, `locales: ['tr', 'en']`, `routing.prefixDefaultLocale: false` (values imported from `src/lib/i18n.ts`) |
 | `security.csp` | ✅ meta CSP: `default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'` + Astro-generated `script-src`/`style-src` sha256 hashes (ADR-011) |
 | `markdown.syntaxHighlight` | `false` — Shiki's inline styles break the CSP (`'prism'` if code blocks are needed) |
-| Language | `tr-TR`; `/en/` after v1 (S4) |
+| Language | `tr` (unprefixed URLs) + `en` under `/en/` (Faz 6, ADR-006 accepted 2026-10-17) |
 
 ## Routes
 
 | URL | File | Layout | Data source | Status |
 |---|---|---|---|---|
-| `/` | `src/pages/index.astro` | BaseLayout (`description` = `profilePage.description`, title = site name, `jsonLd` = `profilePageJsonLd`) | `profile`, `profilePage` (`src/data/profile.ts`); `getCollection('projects')` filtered by `featured` + `isPublished`, `sortProjects`; `projectsPage` labels; `formatDate` | ✅ profile page — ProfileHero (only h1) → Section × 8 (`#projeler`: ProjectCard h3 grid + "Tüm projeler" link) → footnote ("Son güncelleme" `<time>`); hero actions: `href` → internal link, `kind` → URL from `profile.links` (external) |
-| `/projeler/` | `src/pages/projeler/index.astro` | BaseLayout (title/description from `projectsPage.list`) | `getCollection('projects', isPublished)`, `sortProjects`, `groupByKind` | ✅ h1 + intro + auto-fit card grid (`minmax(min(100%, 18rem), 1fr)` — one card spans the width); with ≥ 2 kinds: Section per kind (`id` = kind, h2) and h3 cards, otherwise h2 cards |
-| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` (published, sorted; `adjacentProjects` → prev/next props) + `render()`; meta items built with `formatPeriod` + `statusLabels`; `projectJsonLd`; `ogImage` from the cover (`getImage`, 1200 px JPEG) or the site default; v1 slug: `lockbox-mobile` | ✅ |
-| `/404.html` | `src/pages/404.astro` | BaseLayout (`noindex`, no canonical) | `site.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at" |
-| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 3 URLs (`/`, `/projeler/`, `/projeler/lockbox-mobile/`) |
+| `/` | `src/pages/index.astro` (`locale = 'tr'`) | HomeLayout | `loadProjects('tr')` filtered by `featured` → `projectSummaries` (`src/pages/_shared/projects.ts`) | ✅ profile page (body in HomeLayout); title = site name |
+| `/en/` | `src/pages/en/index.astro` (`locale = 'en'`) | HomeLayout | same with `'en'` | ✅ English profile page; title "Software Developer · Ulaşcan Ertürk" (`profilePage.title`, unique titles — fix cycle 1, lead decision) |
+| `/projeler/` | `src/pages/projeler/index.astro` | ProjectListLayout | `loadProjects('tr')` → `projectSummaries` | ✅ |
+| `/en/projects/` | `src/pages/en/projects/index.astro` | ProjectListLayout | `loadProjects('en')` | ✅ |
+| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` = `projectPaths('tr')`; `render(project.entry)`; other props from `projectLayoutProps` (meta via `formatPeriod` + `statusLabels`, `projectJsonLd`, `ogImage` from the cover via `getImage` 1200 px JPEG or the locale default); slug: `lockbox-mobile` | ✅ |
+| `/en/projects/{slug}/` | `src/pages/en/projects/[slug].astro` | ProjectLayout | same with `'en'` (entries in `src/content/projects/en/`) | ✅ |
+| `/404.html` | `src/pages/404.astro` | BaseLayout (`locale="tr"`, `noindex`, no canonical, no hreflang) | `siteText.tr.notFound` + `siteText.en.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at"; then a `<div lang="en">` with "Page not found." + "Go to the English home page" (`/en/`) — GitHub Pages serves one 404 for every locale |
+| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 6 URLs, each with `xhtml:link` alternates for `tr` and `en` |
 | `/robots.txt` | `public/robots.txt` | — | static | ✅ `User-agent: *` `Allow: /` (AI crawlers included — lead decision) + `Sitemap:` line |
-| `/en/`, `/en/projects/`, `/en/projects/{slug}/` | i18n routes | — | `profile.en.ts`, English entries | [PLANNED — faz-6 §2.1] |
 
 Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
-`#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`.
+`#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`;
+English (`/en/`): `#about`, `#skills`, `#experience`, `#projects`, `#education`, `#entrepreneurship`,
+`#focus-areas`, `#links`.
 `#odak-alanlari` is an addition to plans/02-icerik-ve-tasarim.md §2 (lead approval 2026-10-17).
 `#projeler` (Faz 3 task 8) sits between `#deneyim` and `#egitim`; the hero's first action is
 "Projeleri gör" (`/projeler/`).
-Header nav (✅ `site.nav`): Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`, `aria-current="page"`
-only on `/projeler/` itself) · GitHub · LinkedIn · theme toggle.
+Header nav (✅ `siteText.{locale}.nav`): Hakkımda (`/#hakkimda`) · Projeler (`/projeler/`, `aria-current="page"`
+only on `/projeler/` itself) · GitHub · LinkedIn · language link · theme toggle. English: About
+(`/en/#about`) · Projects (`/en/projects/`) · GitHub · LinkedIn · "Türkçe".
+Language link (Faz 6): "English" / "Türkçe" with `lang` + `hreflang`; points to the same page in the
+other locale (`translatePath`), or to its home page when there is none (404).
 
 ## Layouts
 
 ### BaseLayout.astro ✅ (`src/layouts/BaseLayout.astro`)
-- Props: `title?` (page name; omitted on `/` → title is just the site name),
-  `description?` (default `site.description`), `noindex?` (adds `robots: noindex`, drops canonical
-  and `og:url`), `ogType?` (`website` default, `article` from ProjectLayout), `image?`
-  (`{ src, width, height, alt }`, default `site.ogImage`), `jsonLd?`.
+- Props: `locale: Locale` (required — `<html lang>`, text from `siteText[locale]`, `og:locale`),
+  `title?` (page name; omitted on `/` → title is just the site name),
+  `description?` (default `siteText[locale].description`), `noindex?` (adds `robots: noindex`, drops canonical,
+  `og:url` and hreflang), `ogType?` (`website` default, `article` from ProjectLayout), `image?`
+  (`{ src, width, height, alt }`, default `siteText[locale].ogImage`), `jsonLd?`.
+- Language versions (Faz 6): `alternatePaths(pathname)` → `<link rel="alternate" hreflang>` for `tr`,
+  `en` and `x-default` (= Turkish) plus `og:locale:alternate`; header language link via `translatePath`
+  (fallback: the other locale's home).
 - Head: charset, viewport, `Seo` (title via `pageTitle`, absolute canonical/image URLs via
   `absoluteUrl` on `Astro.site`), `color-scheme: light dark`, favicon (`/favicon.svg`),
   `apple-touch-icon` (`/apple-touch-icon.png`), inline theme script (`themeScript`, before the
   stylesheet → no FOUC). Astro appends the CSP `<meta>` and the styles at the end of `<head>`.
-- Body: SkipLink → SiteHeader → `<main id="icerik" tabindex="-1">` (slot) → SiteFooter.
+- Body: SkipLink → SiteHeader (`homeHref` = locale home, `languageLink`) → `<main id="icerik" tabindex="-1">` (slot) → SiteFooter.
 - Imports `src/styles/global.css`; main width `min(100% - 2rem, var(--container))`, `p` max `--measure`.
 
+### HomeLayout.astro ✅ (`src/layouts/HomeLayout.astro`, Faz 6)
+- Props: `locale`, `featured: { href, data: { title, summary, status, tech } }[]` (structural).
+- Reads `profiles[locale]` (`profile`, `page`), `projectsPage[locale]`, `siteText[locale].jsonLd`.
+- Body of `/` and `/en/` (moved from `src/pages/index.astro`): ProfileHero (only h1) → Section × 8
+  (`projects` section: ProjectCard h3 grid + "Tüm projeler"/"All projects" link to the locale list) →
+  footnote (`<time>` via `formatDate(…, LOCALE_META[locale].dateLocale)` — "17 Ekim 2026" / "October 17, 2026");
+  hero actions: `href` → internal link, `kind` → URL from `profile.links` (external).
+- JSON-LD `profilePageJsonLd`: page `@id` = locale home, `inLanguage` = locale; Person `url`/`@id` always
+  the root home (`/#person` — one person in both languages).
+- Passes `page.title` (EN only) to BaseLayout.
+
+### ProjectListLayout.astro ✅ (`src/layouts/ProjectListLayout.astro`, Faz 6)
+- Props: `locale`, `projects: { href, data: { title, summary, status, kind, tech } }[]` (sorted).
+- Body of `/projeler/` and `/en/projects/`: h1 + intro + auto-fit card grid
+  (`minmax(min(100%, 18rem), 1fr)`); with ≥ 2 kinds: Section per kind (`id` = kind, h2) and h3 cards,
+  otherwise h2 cards.
+
 ### ProjectLayout.astro ✅ (`src/layouts/ProjectLayout.astro`)
-- Props (structural — no `astro:content` import): `title`, `summary` (→ BaseLayout `description`),
+- Props (structural — no `astro:content` import): `locale`, `title`, `summary` (→ BaseLayout `description`),
   `meta: { term, value }[]`, `tech[]`, `cover?: { src: ImageMetadata; alt }`, `disclaimer?`,
   `links: { label, url }[]`, `previous?` / `next?: { title, href }`, `ogImage?`, `jsonLd?`
   (passed to BaseLayout with `ogType="article"`); default slot = rendered Markdown.
-- Reads labels from `projectsPage` (like BaseLayout reads `site`).
+- Reads labels from `projectsPage[locale]` (like BaseLayout reads `siteText`).
 - Structure: `<article>` → `<header>` (only `<h1>`, summary, ProjectMeta, tech Tag list with
   `aria-label`) → cover (`astro:assets` `<Picture>` AVIF/WebP, widths 480/768/1536 capped at the source, `sizes` 48rem, eager + `fetchpriority=high`) → content (body `##` = h2) → disclaimer
   Callout → ProjectLinks; then `<nav aria-label="Proje gezinmesi">` with `rel="prev"` / `rel="next"`
-  links (label + title, only when they exist) and "Tüm projeler" (`/projeler/`).
+  links (label + title, only when they exist) and "Tüm projeler" / "All projects" (`routePath('projects', locale)`).
+
+### Page helpers (`src/pages/_shared/projects.ts`, Faz 6)
+Not a route (`_` prefix); page layer, so it may use `astro:content` / `astro:assets`.
+- `loadProjects(locale)` — published entries (`isPublished`), throws when `translationProblems` finds a
+  missing translation or a differing `kind/status/featured/order/period` → **build fails**; filters by
+  `splitEntryId(id).locale`, `sortProjects`; returns `{ slug, href, entry }[]`.
+- `projectSummaries(list)` — plain card props for HomeLayout / ProjectListLayout.
+- `projectPaths(locale)` — `getStaticPaths` result with `adjacentProjects` prev/next.
+- `projectLayoutProps(props, locale, siteUrl)` — every ProjectLayout prop except the Markdown.
 
 ## Components
 
 | Component | File | Props | Used by | Status |
 |---|---|---|---|---|
 | SkipLink | `src/components/layout/SkipLink.astro` | `label`, `target` (main id) | BaseLayout | ✅ hidden until focused; first focusable element |
-| SiteHeader | `src/components/layout/SiteHeader.astro` | `siteName`, `navLabel`, `items: NavItem[]`, `currentPath`, `themeToggleLabel` | BaseLayout | ✅ brand link (decorative Monogram + name), nav, ThemeToggle; `aria-current="page"` only for exact non-anchor matches; wraps at 360 px |
+| SiteHeader | `src/components/layout/SiteHeader.astro` | `siteName`, `homeHref`, `navLabel`, `items: NavItem[]`, `currentPath`, `themeToggleLabel`, `languageLink: { label, href, lang }` | BaseLayout | ✅ brand link to `homeHref` (decorative Monogram + name), nav + language link (`lang`/`hreflang`, last item), ThemeToggle; `aria-current="page"` only for exact non-anchor matches; wraps at 360 px |
 | SiteFooter | `src/components/layout/SiteFooter.astro` | `label`, `copyrightHolder`, `links: FooterLink[]` | BaseLayout | ✅ © build year, GitHub, LinkedIn, Kaynak kodu |
 | ThemeToggle | `src/components/layout/ThemeToggle.astro` | `label` | SiteHeader | ✅ `<button data-theme-toggle aria-pressed>`, moon/sun icon by `data-theme`; hidden when `:root` has no `data-theme` (JS off) |
 | Section | `src/components/ui/Section.astro` | `id`, `title`, `level?: 2 \| 3` (default 2) | `/` (7 sections) | ✅ `<section id aria-labelledby>`; heading id `{id}-baslik` |
@@ -94,7 +133,7 @@ only on `/projeler/` itself) · GitHub · LinkedIn · theme toggle.
 | ProjectCard | `src/components/projects/ProjectCard.astro` | `title`, `href`, `summary`, `statusLabel`, `tech[]`, `techLabel`, `level?: 2 \| 3` (default 2) | `/projeler/` (h2, h3 when grouped), `/` `#projeler` (h3) | ✅ `<article>` surface card; only the title is a link (44 px); muted status; summary; tech Tag `<ul aria-label>` |
 | ProjectMeta | `src/components/projects/ProjectMeta.astro` | `items: { term, value }[]` | ProjectLayout | ✅ `<dl>` (`dt` muted, `dd` bold), wraps; Rol · Dönem (only with `period`) · Durum |
 | ProjectLinks | `src/components/projects/ProjectLinks.astro` | `title`, `links: { label, url }[]` | ProjectLayout | ✅ renders nothing when empty; `<section aria-labelledby>` + h2 + ExternalLink list (44 px) |
-| Seo | `src/components/layout/Seo.astro` | `title` (full), `description`, `canonical?`, `noindex?`, `siteName`, `locale`, `type`, `image: { url, width, height, alt }`, `jsonLd?` | BaseLayout | ✅ `<title>`, description, canonical, robots; `og:type/site_name/locale/title/description/url/image(+width/height/alt)`; `twitter:card` `summary_large_image` + title/description/image/alt; JSON-LD via `serializeJsonLd` |
+| Seo | `src/components/layout/Seo.astro` | `title` (full), `description`, `canonical?`, `noindex?`, `siteName`, `locale`, `alternateLocales?: string[]`, `alternates?: { hreflang, href }[]`, `type`, `image: { url, width, height, alt }`, `jsonLd?` | BaseLayout | ✅ `<title>`, description, canonical, robots, `<link rel="alternate" hreflang>` (Faz 6); `og:type/site_name/locale/locale:alternate/title/description/url/image(+width/height/alt)`; `twitter:card` `summary_large_image` + title/description/image/alt; JSON-LD via `serializeJsonLd` |
 
 ## Styles and Theme ✅ (faz-1 §2 tasks 1–3, plans/02-icerik-ve-tasarim.md §5)
 
@@ -151,9 +190,10 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `slugify` (`src/lib/slug.ts`) | `(input: string): string` — explicit Turkish map (ı İ ğ ş ç ö ü), NFKD accent strip, lowercase, non-alphanumerics → single `-`, trimmed | `src/lib/slug.test.ts` (5 tests) | ✅ |
 | `resolveTheme`, `isTheme`, `THEME_STORAGE_KEY`, `DEFAULT_THEME`, `THEMES`, `themeScript` (`src/lib/theme.ts`) | `resolveTheme(stored: string \| null \| undefined, systemPrefersDark: boolean): Theme` — stored > system > `'light'`; `themeScript`: inline script string mirroring it | `src/lib/theme.test.ts` (14 tests: precedence, script parity on a fake DOM, toggle/persist/aria-pressed, system change, blocked storage, ≤ 1 KB) | ✅ |
 | `sortProjects`, `isPublished`, `formatPeriod`, `adjacentProjects`, `groupByKind`, `PROJECT_KINDS`, `PROJECT_STATUSES` (`src/lib/projects.ts`) | `sortProjects<T>(list): T[]` — `order` asc (missing last) → status (active → completed → archived) → title (`localeCompare` `tr`), non-mutating; `isPublished(data, production): boolean` — drops `draft: true` only in production (pages pass `import.meta.env.PROD`); `formatPeriod({ start, end? }, ongoing)` → `2019 – 2021` · `2020` · `2019 – {ongoing}`; `adjacentProjects(sorted, id)` → `{ previous?, next? }`; `groupByKind(list)` → `{ kind, items }[]` in kind order, empty groups omitted. Enums shared with `src/content.config.ts` | `src/lib/projects.test.ts` (13 tests) | ✅ |
-| `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (4 tests) | ✅ |
+| `formatDate` (`src/lib/date.ts`) | `(iso: string, locale = 'tr-TR'): string` — `YYYY-MM-DD` → "17 Ekim 2026" / "October 17, 2026" (`en-US`) (Intl, UTC); throws `RangeError` on invalid input | `src/lib/date.test.ts` (5 tests) | ✅ |
+| `LOCALES`, `Locale`, `DEFAULT_LOCALE`, `LOCALE_META`, `isLocale`, `routePath`, `projectPath`, `localeFromPath`, `translatePath`, `alternatePaths`, `splitEntryId`, `translationProblems`, `TRANSLATION_INVARIANT_FIELDS` (`src/lib/i18n.ts`, Faz 6) | route map `home` (`/` ↔ `/en/`), `projects` (`/projeler/` ↔ `/en/projects/`), project `{projects}{slug}/`; `LOCALE_META` = `lang`, `ogLocale` (`tr_TR`/`en_US`), `dateLocale` (`tr-TR`/`en-US`); `translatePath(path, target)` → same page in `target` or `undefined` (not a localized route, e.g. `/404.html`); `alternatePaths(path)` → all locales or `[]`; `splitEntryId('en/x')` → `{ locale: 'en', slug: 'x' }` (root = `tr`; throws on other shapes); `translationProblems(entries)` → missing locale versions + differing `kind/status/featured/order/period`. Also imported by `astro.config.mjs` | `src/lib/i18n.test.ts` (9 tests) | ✅ |
 | `absoluteUrl`, `pageTitle`, `personId`, `personJsonLd`, `profilePageJsonLd`, `projectJsonLd`, `findForbiddenKeys`, `serializeJsonLd`, `FORBIDDEN_JSON_LD_KEYS` (`src/lib/seo.ts`) | `absoluteUrl(path, site: string \| URL)`; `pageTitle(title?, siteName, separator)`; JSON-LD builders (ProfilePage → Person, CreativeWork with `author` → `{home}#person`); `findForbiddenKeys(value)` deep scan; `serializeJsonLd` escapes `<` | `src/lib/seo.test.ts` (9 tests) | ✅ |
-| profile structural tests (data in `src/data/profile.ts`) | — | `src/lib/profile.test.ts` (11 tests: no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn (hero `kind` actions exist in `links`, `href` actions are internal paths), one degree = Uluslararası İlişkiler, Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda` and `projeler`, description ≤ 160, ISO `lastUpdated`) | ✅ |
+| profile structural tests (data in `src/data/profile.{tr,en}.ts`) | — | `src/lib/profile.test.ts` (24 tests: 11 per locale via `describe.each(LOCALES)` — no empty text/lists, https links, no e-mail/phone/mailto/tel, GitHub + LinkedIn (hero `kind` actions exist in `links`, `href` action = the locale's project list), one degree = Uluslararası İlişkiler / International Relations (also in the education note), Shifter context, `since` in hero/summary, unique ASCII anchors incl. `hakkimda` / `about`, description ≤ 160, ISO `lastUpdated`; + 2 translation parity tests: same name/since/lastUpdated, link URLs+kinds, organizations+URLs, education kinds, list lengths, hero action kinds) | ✅ |
 
 ## Public Assets
 
@@ -162,14 +202,15 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `public/favicon.svg` ✅ | "UE" monogram (same paths as `Monogram.astro`); colors switch with `prefers-color-scheme` inside the SVG | Faz 1 |
 | `public/apple-touch-icon.png` ✅ | 180×180 "UE" on accent square (source `scripts/images/apple-touch-icon.html`) | Faz 4 |
 | `public/og/default.png` ✅ | 1200×630 share image (source `scripts/images/og-default.html`, `npm run images`) | Faz 4 |
+| `public/og/default-en.png` ✅ | 1200×630 English share image ("Software Developer · Technology Entrepreneur"; source `scripts/images/og-default-en.html`) | Faz 6 |
 | `public/robots.txt` ✅ | allow all (AI crawlers included — lead decision 2026-10-17) + `Sitemap:` | Faz 4 |
 
 ## Config
 
 | File | Key settings |
 |---|---|
-| `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base`; `integrations: [sitemap({ filter })]`; `markdown.syntaxHighlight: false`; `security.csp.directives` (ADR-011) |
-| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 4 URLs, 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
+| `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base`; `i18n` (Faz 6); `integrations: [sitemap({ filter, serialize })]`; `markdown.syntaxHighlight: false`; `security.csp.directives` (ADR-011); imports `./src/lib/i18n.ts` (works — config is loaded through Vite) |
+| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 7 URLs (TR + EN pages + 404), 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
 | `tsconfig.json` ✅ | extends `astro/tsconfigs/strict`; `noUncheckedIndexedAccess`; `paths` `@/*` → `./src/*`; include `.astro/types.d.ts`, `**/*`; exclude `dist` |
 | `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
 | `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |
@@ -178,8 +219,8 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `vitest.config.ts` ✅ | `getViteConfig` from `astro/config`; include `src/**/*.test.ts`, `scripts/**/*.test.ts` |
 | `.nvmrc` ✅ / `package.json#engines` ✅ | `24` / `node >=22.22.0` |
 | `package.json` scripts ✅ | dev, build, preview, check, lint, format, format:check, test, `check:dist` (`node scripts/check-dist.mjs`), `lhci` (`lhci autorun`), `images` (`node scripts/render-images.mjs`) |
-| `scripts/check-dist.mjs` ✅ | dependency-free dist checks (see methodology → Testing); exports pure functions, tested in `scripts/check-dist.test.ts` (18 tests) |
-| `scripts/render-images.mjs` ✅ | local only: Chrome headless (`CHROME_PATH` or macOS default) + `magick -strip` → `public/og/default.png`, `public/apple-touch-icon.png` |
+| `scripts/check-dist.mjs` ✅ | dependency-free dist checks (see methodology → Testing); exports pure functions (+ `expectedLang`, `OG_LOCALES` mirror of `LOCALE_META` — Faz 6), tested in `scripts/check-dist.test.ts` (20 tests) |
+| `scripts/render-images.mjs` ✅ | local only: Chrome headless (`CHROME_PATH` or macOS default) + `magick -strip` → `public/og/default.png`, `public/og/default-en.png`, `public/apple-touch-icon.png` (output is byte-identical for unchanged sources) |
 | `.editorconfig` ✅ | utf-8, lf, 2 spaces, final newline; no trailing-space trim for `*.md` |
 | `.gitignore` | ✅ exists — node_modules, dist, .astro, coverage, .lighthouseci, logs, env files, keys, OS/editor noise, `.claude/settings.local.json` |
 

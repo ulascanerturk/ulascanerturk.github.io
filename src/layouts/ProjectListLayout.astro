@@ -1,0 +1,71 @@
+---
+// Project list body for `/projeler/` and `/en/projects/` (faz-3 §2 task 6; shared by
+// both locales since faz-6 §2.1 task 4). Grouped by `kind` only once a second kind
+// exists; with a single kind the cards are listed directly.
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import Section from '@/components/ui/Section.astro';
+import { projectsPage } from '@/data/projects';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { Locale } from '@/lib/i18n';
+import { groupByKind, type ProjectKind, type ProjectStatus } from '@/lib/projects';
+
+interface ProjectSummary {
+  href: string;
+  data: {
+    title: string;
+    summary: string;
+    status: ProjectStatus;
+    kind: ProjectKind;
+    tech: string[];
+  };
+}
+
+interface Props {
+  locale: Locale;
+  /** Already sorted. */
+  projects: ProjectSummary[];
+}
+
+const { locale, projects } = Astro.props;
+const { list, kindLabels, statusLabels, techLabel } = projectsPage[locale];
+const groups = groupByKind(projects);
+const grouped = groups.length > 1;
+---
+
+<BaseLayout locale={locale} title={list.title} description={list.description}>
+  <h1>{list.title}</h1>
+  <p>{list.intro}</p>
+
+  {groups.map((group) => {
+    const cards = (
+      <div class="project-grid">
+        {group.items.map((project) => (
+          <ProjectCard
+            title={project.data.title}
+            href={project.href}
+            summary={project.data.summary}
+            statusLabel={statusLabels[project.data.status]}
+            tech={project.data.tech}
+            techLabel={techLabel}
+            level={grouped ? 3 : 2}
+          />
+        ))}
+      </div>
+    );
+    return grouped ? (
+      <Section id={group.kind} title={kindLabels[group.kind]}>
+        {cards}
+      </Section>
+    ) : (
+      cards
+    );
+  })}
+</BaseLayout>
+
+<style>
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-m);
+  }
+</style>

@@ -1,0 +1,10 @@
+---
+// English project list (/en/projects/) (faz-3 §2 task 6, faz-6 §2.1 task 4). Body: ProjectListLayout.
+import ProjectListLayout from '@/layouts/ProjectListLayout.astro';
+import { loadProjects, projectSummaries } from '@/pages/_shared/projects';
+
+const locale = 'en';
+const projects = projectSummaries(await loadProjects(locale));
+---
+
+<ProjectListLayout locale={locale} projects={projects} />

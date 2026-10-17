@@ -14,17 +14,21 @@ v1 Türkçe yayınından sonra);
 
 ### 2.1 İngilizce sürüm (S4: onaylandı)
 
-1. **Astro i18n yapılandırması.** `i18n: { defaultLocale: 'tr', locales: ['tr', 'en'],
+1. ✅ **Astro i18n yapılandırması.** `i18n: { defaultLocale: 'tr', locales: ['tr', 'en'],
    routing: { prefixDefaultLocale: false } }` — Türkçe URL'ler değişmez.
-2. **Çeviri edilebilir veri.** `src/data/profile.ts` → `profile.tr.ts` /
+2. ✅ **Çeviri edilebilir veri.** `src/data/profile.ts` → `profile.tr.ts` /
    `profile.en.ts` (aynı `Profile` tipi); `site.ts` nav ve arayüz metinleri dil
    anahtarlı. Eksik çeviri derlemede hata verecek şekilde tiplenir.
-3. **Projeler.** `src/content/projects/{slug}.md` + `src/content/projects/en/{slug}.md`
-   veya `lang` alanı; şema kararı plan aşamasında.
-4. **Sayfalar.** `/en/`, `/en/projects/`, `/en/projects/{slug}/`.
-5. **Dil geçişi ve SEO.** Header'da dil bağlantısı; `hreflang` alternates,
-   `og:locale:alternate`, sitemap i18n seçeneği.
-6. **Çeviri onayı.** İngilizce metinler lead onayı olmadan yayınlanmaz;
+3. ✅ **Projeler.** `src/content/projects/{slug}.md` + `src/content/projects/en/{slug}.md`
+   veya `lang` alanı; şema kararı plan aşamasında. *Karar: `en/` klasörü, şema aynı; eksik
+   çeviri derlemede hata verir (ADR-006).*
+4. ✅ **Sayfalar.** `/en/`, `/en/projects/`, `/en/projects/{slug}/`. *`/404.html` tektir:
+   Türkçe sayfa + kısa İngilizce bölüm.*
+5. ✅ **Dil geçişi ve SEO.** Header'da dil bağlantısı; `hreflang` alternates,
+   `og:locale:alternate`, sitemap i18n seçeneği. *Sapma (onaylı): sitemap alternatifleri
+   eklentinin `i18n` seçeneği yerine `serialize` ile — seçenek yalnızca aynı yolları eşleştirir
+   (`/projeler/` ≠ `/en/projects/`).*
+6. ✅ **Çeviri onayı.** *(2026-10-17)* İngilizce metinler lead onayı olmadan yayınlanmaz;
    Değişmez Kural 2 çeviride de geçerlidir (ör. "training program", not "degree").
 
 ### 2.2 Bakım
@@ -45,7 +49,7 @@ v1 Türkçe yayınından sonra);
 ## 4. Kabul Kriterleri
 
 - [ ] İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var.
-- [ ] Çeviriler lead tarafından onaylandı.
+- [x] Çeviriler lead tarafından onaylandı. *(2026-10-17)*
 - [ ] Dependabot etkin.
 - [ ] Bakım rehberi `references/` içinde.
 - [ ] Kalite kapısı `all` kapsamında PASS.

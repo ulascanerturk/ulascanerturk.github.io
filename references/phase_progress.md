@@ -1,6 +1,6 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (Faz 5 — chore/faz-5-deploy-pipeline)
+> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -9,8 +9,10 @@
 **Faz 5 — Yayın ve Dağıtım: acceptance criteria met** (2026-10-17) — site live at `https://ulascanerturk.github.io/`;
 task 7 partly open (OG preview — lead); optional tasks 8–9 with the lead.
 Faz 4: acceptance criteria met; task 9 VoiceOver still open (lead approved starting Faz 5 with it open, 2026-10-17).
-Next phase: **Faz 6 — İngilizce Sürüm ve Bakım**.
-Overall: tasks 55/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 and Faz 5 task 7 partial) · acceptance 42/47.
+**Faz 6 — İngilizce Sürüm ve Bakım: in progress** — part (a) English version done on
+`feat/faz-6-english-version` (tasks 1–6; live check after the lead's push); part (b) maintenance
+(tasks 7–9) next on `chore/faz-6-maintenance` (lead decision 2026-10-17: two branches, (a) first).
+Overall: tasks 61/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Faz 4 task 9 and Faz 5 task 7 partial) · acceptance 43/47.
 
 ## Open Questions
 
@@ -184,23 +186,30 @@ Status: acceptance criteria met (2026-10-17; branch `chore/faz-5-deploy-pipeline
   invariants a–j 0 hits, docs links OK, actionlint skipped (not installed).
 
 ## Faz 6 — İngilizce Sürüm ve Bakım   (plans/fazlar/faz-6-ingilizce-surum-ve-bakim.md)
-Status: not started (blocked by Faz 5) — English version confirmed (S4)
+Status: in progress — (a) English version implemented (branch `feat/faz-6-english-version`, 2026-10-17);
+(b) maintenance next. Started with Faz 4 task 9 and Faz 5 task 7 open (lead decision 2026-10-17);
+ADR-006 accepted with the plan.
 ### Tasks
-- [ ] 1. Astro i18n config
-- [ ] 2. Translatable data (`profile.tr.ts` / `profile.en.ts`)
-- [ ] 3. English project entries (schema decision in plan)
-- [ ] 4. `/en/` pages
-- [ ] 5. Language switch + hreflang + sitemap i18n
-- [ ] 6. Translation approval (lead)
-- [ ] 7. Dependabot
-- [ ] 8. Content update guide
-- [ ] 9. Quarterly maintenance checklist
+- [x] 1. Astro i18n config — `astro.config.mjs` `i18n` (`defaultLocale: 'tr'`, `locales: ['tr', 'en']`, `prefixDefaultLocale: false`); Turkish URLs unchanged
+- [x] 2. Translatable data — `profile.ts` (types + `profiles: Record<Locale, …>`), `profile.tr.ts` (moved, `git mv`), `profile.en.ts`; `siteText` / `projectsPage` keyed by `Locale` (missing locale/field = type error); parity tests in `profile.test.ts`
+- [x] 3. English project entries — schema decision: `src/content/projects/en/{slug}.md`, same schema, locale from the id; `translationProblems` fails the build on a missing translation or differing `kind/status/featured/order/period`; `en/lockbox-mobile.md`
+- [x] 4. `/en/` pages — `/en/`, `/en/projects/`, `/en/projects/{slug}/` via `HomeLayout`, `ProjectListLayout`, `ProjectLayout` + `src/pages/_shared/projects.ts`; `/404.html` gets an English part (`lang="en"`)
+- [x] 5. Language switch + hreflang + sitemap — header link "English"/"Türkçe" (`lang`, `hreflang`, same page in the other locale); `<link rel="alternate" hreflang>` tr/en/x-default, `og:locale` + `og:locale:alternate`; sitemap `xhtml:link` via `serialize` (plan deviation: the integration's `i18n` option only pairs identical paths); English share image `public/og/default-en.png`
+- [x] 6. Translation approval (lead) — glossary approved with the plan, full English text approved 2026-10-17 (incl. EN home title "Software Developer · Ulaşcan Ertürk", fix cycle 1)
+- [ ] 7. Dependabot — `chore/faz-6-maintenance`
+- [ ] 8. Content update guide — `chore/faz-6-maintenance`
+- [ ] 9. Quarterly maintenance checklist — `chore/faz-6-maintenance`
 ### Acceptance Criteria
-- [ ] English version live; every Turkish page has a counterpart
-- [ ] Translations approved by lead
-- [ ] Dependabot enabled
-- [ ] Maintenance guide in `references/`
-- [ ] Quality gate PASS (`all`)
+- [ ] English version live; every Turkish page has a counterpart — built and verified locally: 3 TR ↔ 3 EN pages, every pair reciprocal (`check:dist`), 404 bilingual; **open: live check after the lead's push**
+- [x] Translations approved by lead — 2026-10-17
+- [ ] Dependabot enabled — maintenance branch + lead (GitHub Insights → Dependency graph)
+- [ ] Maintenance guide in `references/` — maintenance branch
+- [ ] Quality gate PASS (`all`) — PASS on the English branch 2026-10-17 (2nd run); re-run on the maintenance branch to close
+### Notes
+- Plan deviations approved 2026-10-17: sitemap alternates via `serialize` instead of the integration's `i18n` option; bilingual `/404.html` (GitHub Pages serves one 404); page helpers in `src/pages/_shared/` (plans/01-mimari.md §2–§3 updated); English home page title "Software Developer · Ulaşcan Ertürk" (`profilePage.title`) so titles stay unique site-wide (fix cycle 1, lead chose a separate title over per-language uniqueness).
+- Quality gate 2026-10-17: 1st run FAIL (`check:dist`: duplicate `<title>` "Ulaşcan Ertürk" on `/` and `/en/`); 2nd run PASS — check 0/0/0, lint 0, format OK, 100 tests, build 7 pages, dist 0 errors (478 B gzip JS), invariants a–j 0 hits, content review OK (§3/§7 wording in English), audit 0, docs links OK.
+- Browser (astro preview, 2026-10-17): language links, brand/home and "All projects" links per locale, dates ("October 17, 2026"); 360 px `scrollWidth = 360` on all 7 pages, no target < 24 px; fresh-tab console without CSP errors.
+- Turkish share image and touch icon re-rendered byte-identical; `default-en.png` chunks IHDR/IDAT/IEND only.
 
 ## Audits
 
@@ -211,11 +220,15 @@ Status: not started (blocked by Faz 5) — English version confirmed (S4)
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 2 dist check: 2 pages, 0 errors, 0 warnings; `/` has 1 h1, 27 headings without skips, all section anchors; 360 px `scrollWidth = 360` (browser) |
 | 2026-10-17 | 100/100/100/100 (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1, local Chrome 155 | 0 violations (axe-core 4.14.0, 4 pages × 2 themes) | 478 B gzip (theme script only) | Faz 4 `check:dist`: 4 pages, 0 errors; CSP enforced, no console violations |
 | 2026-10-17 | 100/100/100/100 live (`/`, `/projeler/`, `/projeler/lockbox-mobile/`); 404: 100/100/100 — median of 3, LHCI 0.15.1 / Lighthouse 12.6.1 against `https://ulascanerturk.github.io` | not run (unchanged since Faz 4) | 478 B gzip | Faz 5 live verification: all sitemap URLs 200, custom 404, HTTPS redirect, JSON-LD valid |
+| 2026-10-17 | 100/100/100/100 on `/`, `/en/`, `/projeler/`, `/en/projects/`, `/projeler/lockbox-mobile/`, `/en/projects/lockbox-mobile/`; 404: 100/100/100 (SEO n/a) — median of 3, LHCI 0.15.1, local | 0 violations (axe-core 4.14.0, 7 pages × 2 themes) | 478 B gzip | Faz 6 (a) `check:dist`: 7 pages, 0 errors; hreflang pairs reciprocal; sitemap 6 URLs with alternates |
 | 2026-10-17 | not run | not run | 480 B gzip (theme script only) | Faz 3 dist check: 4 pages, 0 errors, 0 warnings; one h1 per page; all internal links resolve; 360 px `scrollWidth = 360` on `/`, `/projeler/`, `/projeler/lockbox-mobile/`, `/404.html` (browser, dark theme) |
 
 ## Follow-ups
 
-- Confirm ADR-006 and ADR-007 ("Önerildi") with the lead when their phases start — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2).
+- Confirm ADR-007 ("Önerildi") with the lead when analytics comes up — init-references (ADR-008, ADR-010 accepted in Faz 0; ADR-003, ADR-004, ADR-009 in Faz 1; ADR-005 in Faz 2; ADR-006 in Faz 6).
+- After the lead's push: live check of `/en/`, `/en/projects/`, `/en/projects/lockbox-mobile/` (200, hreflang, sitemap 6 URLs) and the LinkedIn Post Inspector for the English share image — Faz 6 acceptance "English version live".
+- Lockbox store links (when published) must be added to both `lockbox-mobile.md` and `en/lockbox-mobile.md` — Faz 6.
+- `ulascanerturk.md` stays Turkish-only; English site text is maintained as a translation in `profile.en.ts` — revisit if an English source document is wanted — Faz 6.
 - Optional for the lead: install Node 24 locally to match CI; run `npx astro telemetry disable` once — Faz 0.
 - `NODE_ENV=production` in the lead's environment makes npm skip devDependencies; use `npm install --include=dev` (documented in ADR-008, AGENTS.md) — Faz 0.
 - Faz 0 task 2 text says "DOCS-ONLY"; mode name is "PLANS-ONLY" — cosmetic plan fix — init-references.
