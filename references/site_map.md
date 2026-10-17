@@ -1,6 +1,6 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
+> Last updated: 2026-10-17 (Faz 6 — chore/faz-6-maintenance)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -230,6 +230,8 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 |---|---|---|---|---|
 | `.github/workflows/ci.yml` ✅ | `pull_request`; push with `branches-ignore: main`; `workflow_call` (called by deploy.yml on `main`) | `contents: read`; env `ASTRO_TELEMETRY_DISABLED=1`; concurrency per ref (cancel in progress) | `quality-gate`: npm ci → check → lint `--max-warnings 0` → format:check → test → build → `check:dist` (Faz 4); Lighthouse CI not in CI (lead decision, ADR-013) | `actions/checkout@v7`, `actions/setup-node@v7` (`node-version-file: .nvmrc`, npm cache) |
 | `.github/workflows/deploy.yml` ✅ | push to `main` (Faz 5 task 2) + `workflow_dispatch` | top level `contents: read`; `quality-gate` job `contents: read`; `deploy` job `pages: write`, `id-token: write`; env `ASTRO_TELEMETRY_DISABLED=1`; `concurrency: pages` (no cancel) | `quality-gate` (`uses: ./.github/workflows/ci.yml`) → `build` (withastro/action, Node 24) → `deploy` (environment `github-pages`) — no deploy if the gate fails | `actions/checkout@v7`, `withastro/action@v6`, `actions/deploy-pages@v5` |
+
+| `.github/dependabot.yml` ✅ (Faz 6) | monthly, 7-day cooldown | — (Dependabot opens PRs; they run `ci.yml`) | `npm` (minor+patch grouped as `npm-minor-patch`, majors separate; `typescript` minor/major ignored — ADR-010) and `github-actions` (one group); commits `chore(deps…)` | handling: `references/methodology.md` → Maintenance; recognized by GitHub after the push [REVIEW NEEDED — Insights → Dependency graph → Dependabot] |
 
 Workflow syntax verified by the first GitHub run (deploy run 38984069624, 2026-10-17: quality-gate → build → deploy
 green); actionlint still not installed locally. Repo `ulascanerturk/ulascanerturk.github.io` (public), Pages source

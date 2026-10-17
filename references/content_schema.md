@@ -1,6 +1,6 @@
 # references/content_schema.md — Content Schema
 
-> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
+> Last updated: 2026-10-17 (Faz 6 — chore/faz-6-maintenance)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -260,12 +260,38 @@ previous/next links and — with `featured: true` — the home page card are gen
 No code change is needed for a new entry. A second `kind` automatically switches `/projeler/`
 to grouped sections (`kindLabels`).
 
-## How to Update the Profile [PLANNED — plans/fazlar/faz-6-ingilizce-surum-ve-bakim.md §2.2 task 8]
+## How to Update the Profile ✅ (plans/fazlar/faz-6-ingilizce-surum-ve-bakim.md §2.2 task 8)
 
-Expected outline: edit `ulascanerturk.md` (bump `last_updated`) → sync `src/data/profile.tr.ts`
-and `src/data/profile.en.ts` (keep the `// kaynak` comments; update `lastUpdated` in both — the
-parity test fails otherwise) → lead wording approval (both languages) → update the mapping above →
-`test-lint all`. Written out in Faz 6 task 8 (maintenance branch).
+The profile is edited in the source first, then in both languages; the lead approves the facts and
+both wordings. Branch: `content/profile/{desc}` via `dev-workflow` (type `content` when only data
+changes).
+
+1. **Source.** Edit `ulascanerturk.md` (Turkish, the single content source): the affected section
+   (§1–§8, §10), `last_updated` in the front matter and the closing "Son güncelleme" line. Nothing
+   from §9 or the §11 exclusions may move into a published section.
+2. **Approval of the facts.** The lead approves the new or changed claim (Değişmez Kural 2) —
+   titles as listed publicly (§5), degree vs training program (§3), programs in the Shifter context
+   (§7), work areas not presented as products (§6).
+3. **Turkish data.** Update `src/data/profile.tr.ts` field by field using the mapping tables above;
+   keep or add the `// kaynak: ulascanerturk.md §N` comment; set `profile.lastUpdated` to the new
+   `last_updated`. Page text (section titles, notes, meta description ≤ 160) lives in `profilePage`
+   in the same file.
+4. **English data.** Make the same change in `src/data/profile.en.ts` at the same position (lists
+   are compared by length and order) with the same `lastUpdated`; follow the translation rules
+   (Content Sources → Translations). Shell text (nav, footer, 404) → both entries of `siteText` in
+   `src/data/site.ts`; project labels → `projectsPage` in `src/data/projects.ts`.
+5. **Approval of the wording.** The lead approves the Turkish and the English text (record the date
+   in the commit body and in `references/phase_progress.md` if it belongs to a phase).
+6. **Derived output.** If the headline/title line changes: `scripts/images/og-default.html` and
+   `og-default-en.html` → `npm run images` (local Chrome + ImageMagick), plus `siteText.*.ogImage.alt`
+   and `siteText.*.jsonLd.jobTitle`. New `focusAreas` change JSON-LD `knowsAbout` automatically.
+7. **Check.** `test-lint all` — the profile tests cover both languages (degree, Shifter context,
+   anchors, description length, no e-mail/phone) and the translation parity; `check:dist` covers
+   titles, descriptions, hreflang. Then update the mapping tables in this file.
+8. **After the lead's push.** Live check of `/` and `/en/` (Release and Rollback in
+   `references/methodology.md`).
+
+Projects: How to Add a Project (above) — the same rules; both `{slug}.md` and `en/{slug}.md`.
 
 ## Known Issues / Gotchas
 

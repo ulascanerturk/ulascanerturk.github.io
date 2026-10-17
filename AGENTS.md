@@ -100,7 +100,7 @@ Skills live in `.agents/skills/` (Codex, invoke as `$skill-name`) and
 
 | File | Holds |
 |---|---|
-| `methodology.md` | Standards, layering, invariants + documented exceptions, content rules, versions, git/test conventions |
+| `methodology.md` | Standards, layering, invariants + documented exceptions, content rules, versions, git/test conventions, maintenance (Dependabot, quarterly checklist) |
 | `site_map.md` | Routes, layouts, components, tokens + contrast, client JS, `src/lib`, config, CI/CD |
 | `content_schema.md` | Profile ↔ `ulascanerturk.md` mapping, collection schemas, project entries, images |
 | `phase_progress.md` | Faz 0–6 task and acceptance-criteria status, S1–S6 answers, audits |

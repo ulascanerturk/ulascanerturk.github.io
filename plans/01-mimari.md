@@ -30,9 +30,11 @@ React bileşeni "island" olarak eklenebilir. Alternatifler ve maliyetler ADR-001
 
 ```
 ulascanerturk.github.io/
-├── .github/workflows/
-│   ├── ci.yml                  # PR / push: check + lint + test + build + dist denetimi
-│   └── deploy.yml              # main → GitHub Pages
+├── .github/
+│   ├── dependabot.yml          # Aylık npm + GitHub Actions güncellemeleri (Faz 6)
+│   └── workflows/
+│       ├── ci.yml              # PR / push: check + lint + test + build + dist denetimi
+│       └── deploy.yml          # main → GitHub Pages
 ├── .agents/skills/             # Codex skill'leri ($skill-name)
 ├── .claude/skills/             # Claude Code skill'leri (/skill-name)
 ├── plans/                      # Spesifikasyon (bu klasör)

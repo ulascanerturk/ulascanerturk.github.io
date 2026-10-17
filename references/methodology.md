@@ -1,6 +1,6 @@
 # references/methodology.md — Methodology and Conventions
 
-> Last updated: 2026-10-17 (Faz 6 — feat/faz-6-english-version)
+> Last updated: 2026-10-17 (Faz 6 — chore/faz-6-maintenance)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -251,10 +251,69 @@ every route in `sitemap-0.xml` → `200`; `/olmayan-sayfa/` → `404` with the c
 4. Afterwards: live check, then record the incident and the fix in `references/phase_progress.md`
    → Follow-ups.
 
+## Maintenance (Faz 6 §2.2 tasks 7 and 9)
+
+Content updates (profile, projects, translations): `references/content_schema.md` → How to Update
+the Profile / How to Add a Project. Everything below runs through the normal `dev-workflow` unless
+noted.
+
+### Dependabot (`.github/dependabot.yml`)
+
+- **What it does:** monthly, for `npm` and `github-actions`, after a 7-day cooldown (fresh releases
+  are not picked up at once). npm minor + patch updates arrive as one grouped pull request
+  (`npm-minor-patch`), majors one by one; GitHub Actions updates as one group. Commit messages are
+  `chore(deps): …` / `chore(deps-dev): …`. `typescript` minor/major updates are ignored (ADR-010:
+  `typescript-eslint` needs `< 6.1`) — remove the `ignore` entry once it supports a newer TypeScript.
+- **Pull requests run `ci.yml`** (`pull_request` trigger; read-only token, no secrets needed).
+- **Merging (lead, on GitHub):** CI green → read the release notes/changelog of each bump (breaking
+  changes, Astro/integration notes, Node requirement) → *Squash and merge*. Merging pushes `main`
+  and deploys after the `deploy.yml` quality gate; do the live check afterwards
+  (Release and Rollback above).
+- **Local sync afterwards:** `git checkout main && git pull --ff-only origin main` before the next
+  branch. If local `main` has unpushed commits, push them first (or `git pull --rebase origin main`
+  — never force-push; the ruleset blocks it).
+- **Majors** (Astro, ESLint, Vitest, TypeScript, actions): not merged straight from the PR — plan
+  them as a `chore/deps/{name}-{major}` task (migration guide, `test-lint all`, Lighthouse), update
+  the Versions table above and the ADR that names the tool. Close the Dependabot PR afterwards.
+- **Repository settings (lead):** Dependabot status under *Insights → Dependency graph → Dependabot*
+  (shows config errors). Dependabot alerts / security updates are a repository security setting
+  (*Settings → Code security*) — the lead's decision; security updates were **disabled** on 2026-10-17.
+
+### Quarterly Checklist (January, April, July, October)
+
+Run on `main` after `git pull --ff-only`; record the results as a row in
+`references/phase_progress.md` → Audits and new problems under Follow-ups.
+
+1. **Links** — internal links/anchors and external links in the built site:
+   ```bash
+   npm run build
+   lychee --no-progress --root-dir "$PWD/dist" --index-files index.html --include-fragments \
+     --exclude '^https://ulascanerturk\.github\.io/' --max-concurrency 4 \
+     --accept '200..=299,999' 'dist/**/*.html'
+   ```
+   lychee is a local tool (`brew install lychee`; 0.24.2 verified 2026-10-17), not a project
+   dependency. The site's own absolute URLs (canonical, hreflang, `og:url`) are excluded — they are
+   covered by `check:dist` and the live check (before a deploy they would 404). LinkedIn answers bots
+   with `999` (accepted): open `https://www.linkedin.com/in/ulascanerturk` in a browser instead.
+   A dead external link is a content change (lead approval), not a code fix.
+2. **Lighthouse and axe** — `npm run lhci` (local, all 7 URLs) and once against the live URLs
+   (Faz 5 method); axe per Testing Conventions. Thresholds: ≥ 0.95 every category, 0 violations.
+3. **Dependencies** — merge or plan the open Dependabot PRs; `npm outdated`;
+   `npm audit --omit=dev --audit-level=high`; Node: is `.nvmrc` still the Active LTS
+   (nodejs.org release schedule) and does Astro still accept `engines.node`?; TypeScript pin
+   (ADR-010) still needed?; GitHub Actions on current major tags. Version changes → Versions table.
+4. **Content consistency** — `ulascanerturk.md` `last_updated` vs `profile.lastUpdated` in
+   `profile.tr.ts` and `profile.en.ts`; read the sections mapped in `references/content_schema.md`
+   against the site (titles, roles, links, Lockbox status — store links once published); English
+   text still a faithful translation; nothing from §9/§11 (`test-lint` §6 scan).
+5. **Live check** — every sitemap URL `200`, custom 404, `http` → `https`; Google Rich Results Test
+   and a share preview (LinkedIn Post Inspector) for `/` and `/en/`.
+6. **Record** — Audits row (date, Lighthouse, axe, max JS, links result) + Follow-ups.
+
 ## Known Gaps / Review Needed
 
 - `@axe-core/cli` 4.14's ChromeDriver supports Chrome 152; local Chrome is 155 — see Testing Conventions for the axe fallback.
-- `actionlint` and `exiftool` are not installed locally: workflow changes are verified by their first GitHub run (first deploy run green, Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
+- `actionlint` and `exiftool` are not installed locally (`lychee` is, since Faz 6 — Homebrew): workflow changes are verified by their first GitHub run (first deploy run green, Faz 5); image metadata checks need `exiftool` (or `mdls` on macOS) once images are added.
 - [REVIEW NEEDED] ADR-007 is "Önerildi"; confirm with the lead when analytics is discussed (ADR-003, ADR-004, ADR-009 accepted 2026-10-17 with the Faz 1 plan; ADR-005 with the Faz 2 plan; ADR-006 with the Faz 6 plan).
 - The browser pane's screenshot tool injects inline styles that the CSP blocks — "Applying inline style violates…" console errors after a screenshot are not from the site. Check the console in a fresh tab without screenshots (Faz 6).
 - `localhost:4321` may be taken by another local project (IPv4) while `astro preview` binds IPv6 — use `npx astro preview --port 4329` for browser checks (Faz 6).

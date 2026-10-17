@@ -33,23 +33,24 @@ v1 Türkçe yayınından sonra);
 
 ### 2.2 Bakım
 
-7. **Dependabot.** `.github/dependabot.yml` — `npm` ve `github-actions`, aylık.
-8. **İçerik güncelleme rehberi.** `references/content_schema.md`: profil
+7. ✅ **Dependabot.** `.github/dependabot.yml` — `npm` ve `github-actions`, aylık. *(Ek: 7 gün
+   cooldown, minor+patch gruplama, `typescript` minor/major yok sayılır — ADR-010.)*
+8. ✅ **İçerik güncelleme rehberi.** `references/content_schema.md`: profil
    güncelleme akışı (`ulascanerturk.md` → `profile.ts` → onay), yeni proje ekleme.
-9. **Periyodik kontrol listesi.** Üç ayda bir: bağlantı denetimi (dış
+9. ✅ **Periyodik kontrol listesi.** *(`references/methodology.md` → Maintenance)* Üç ayda bir: bağlantı denetimi (dış
    bağlantılar dahil, ör. `lychee`), Lighthouse, bağımlılık güncellemeleri,
    `ulascanerturk.md` ile site tutarlılığı.
 
 ## 3. Testler
 
-- `check:dist` her iki dil için; `lang="en"` İngilizce sayfalarda.
-- Tüm `hreflang` çiftleri karşılıklı ve geçerli.
-- Dependabot yapılandırması GitHub'da tanındı (Insights → Dependency graph).
+- ✅ `check:dist` her iki dil için; `lang="en"` İngilizce sayfalarda.
+- ✅ Tüm `hreflang` çiftleri karşılıklı ve geçerli (`check:dist` + testler).
+- ⏳ Dependabot yapılandırması GitHub'da tanındı (Insights → Dependency graph) — push sonrası lead.
 
 ## 4. Kabul Kriterleri
 
 - [ ] İngilizce sürüm yayında; tüm Türkçe sayfaların karşılığı var.
 - [x] Çeviriler lead tarafından onaylandı. *(2026-10-17)*
 - [ ] Dependabot etkin.
-- [ ] Bakım rehberi `references/` içinde.
-- [ ] Kalite kapısı `all` kapsamında PASS.
+- [x] Bakım rehberi `references/` içinde. *(2026-10-17)*
+- [x] Kalite kapısı `all` kapsamında PASS. *(2026-10-17, iki dalda)*

@@ -1,0 +1,38 @@
+# Dependency updates (faz-6 §2.2 task 7). Monthly, grouped, after a 7-day cooldown so
+# freshly published releases are not picked up at once. Pull requests run ci.yml; merging
+# one on GitHub pushes `main` and deploys after the quality gate. Handling:
+# references/methodology.md → Maintenance.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # One pull request for all minor and patch updates; majors arrive one by one
+      # (they need a plan, and the versions table in references/methodology.md).
+      npm-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # ADR-010: typescript-eslint supports TypeScript < 6.1, hence `~6.0.3`. Lift this
+      # once typescript-eslint supports a newer TypeScript.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-minor', 'version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      github-actions:
+        patterns: ['*']
