@@ -22,8 +22,8 @@ Lockbox stores the following **only on your device**:
 
 - **Your vault:** the service names, passwords, password history (the last 5 passwords of an
   entry), creation dates, password rules and app settings you create. The vault is encrypted with
-  XChaCha20-Poly1305. The key is derived from your six-digit PIN or optional master password (Argon2id), combined
-  with a random secret that never leaves this device.
+  XChaCha20-Poly1305. The key is derived from your six-digit PIN or optional master password (Argon2id),
+  combined with a random secret that never leaves this device.
 - **Security keys and preferences:** a random device secret; if you turn on biometric unlock, the
   vault key, protected by your device's biometrics; and non-secret preferences (biometric unlock
   on/off, auto-lock time, the wrong-attempt counter and backup reminder state). These are kept in
@@ -96,8 +96,8 @@ Lockbox is not directed at children and does not collect data from anyone, inclu
 
 ## Security
 
-Lockbox is designed so that only someone with your chosen PIN or master password (or your enrolled biometrics, if you turned
-that on) can open your vault on your device. No method of storage is perfectly secure. Choose a
+Lockbox is designed so that only someone with your chosen PIN or master password (or your enrolled biometrics, if you
+turned that on) can open your vault on your device. No method of storage is perfectly secure. Choose a
 PIN that is hard to guess or a strong master password, keep your device's operating system up to
 date and keep encrypted backups. To report a security issue, see the
 [Security page](/en/projects/lockbox-mobile/security/).
