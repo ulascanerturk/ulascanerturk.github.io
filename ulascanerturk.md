@@ -122,6 +122,15 @@ Ulaşcan Ertürk'ün bireysel proje olarak geliştirdiği; parolaları yalnızca
 - Teknoloji: Expo, React Native, TypeScript; Argon2id ile anahtar türetme, AEAD şifreleme, iOS Keychain / Android Keystore.
 - Durum: Geliştirme aşamasında; App Store ve Google Play yayını hazırlanıyor. Kaynak kodu kamuya açık değildir.
 
+### Hoppala — Tuzak Quiz Oyunu
+
+Ulaşcan Ertürk'ün bireysel proje olarak geliştirdiği; yönergelerin oyuncuyu kandırmaya çalıştığı, kategori tabanlı ve şaşırtmacalı bir refleks ve bilgi oyunudur (mağaza adı: "Hoppala: Tuzak Quiz" / "Hoppala: Trick Quiz"). iOS ve Android için; üyelik gerektirmez. Mobil uygulama, içerik API'si ve yönetim panelinden oluşur.
+
+- Altı gömülü kategori (Buton Tuzağı, Kelime Tuzağı, Genel Kültür, Hızlı Matematik, Renk Tuzağı, Hafıza); Kampanya, Sonsuz ve Günlük modlar; gömülü kategoriler çevrimdışı oynanır; yeni bölümler uygulama güncellemesi gerektirmeden yönetim panelinden yayımlanabilir; Türkçe ve İngilizce arayüz.
+- Teknoloji: Expo, React Native, TypeScript (mobil); Laravel ve PostgreSQL (API); React ve Vite (yönetim paneli).
+- 1v1 Meydan Okuma ve liderlik tablosu altyapısı geliştirildi; ilk sürümde kapalıdır. Gelir modeli Google AdMob ile uygulama içi reklamdır.
+- Durum: Geliştirme aşamasında; App Store ve Google Play yayını hazırlanıyor. Kaynak kodu kamuya açık değildir.
+
 ### Diğer yazılım çalışma alanları
 
 - Rezervasyon ve randevu yönetimi uygulamaları.
@@ -188,4 +197,4 @@ Bu profil, hassas veya özel bilgilerin başka kaynaklardan tamamlanması için 
 
 ---
 
-*Son güncelleme: 17 Ekim 2026. Kapsam: Kamuya açık profesyonel profil ve yapay zekâ ajanı için genel çalışma bağlamı.*
+*Son güncelleme: 1 Kasım 2026. Kapsam: Kamuya açık profesyonel profil ve yapay zekâ ajanı için genel çalışma bağlamı.*

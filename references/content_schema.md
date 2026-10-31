@@ -1,6 +1,6 @@
 # references/content_schema.md — Content Schema
 
-> Last updated: 2026-10-17 (Faz 6 — chore/faz-6-maintenance)
+> Last updated: 2026-11-01 (content — Hoppala project page and store documents, ADR-014 addendum, content/projects/hoppala-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -17,7 +17,7 @@ ulascanerturk.md (source, repo root, never published directly; Turkish)
   │      └──► src/data/profile.en.ts  English translation       ✅ (same facts; approved 2026-10-17)
   ├──► src/data/site.ts               site meta + `siteText.tr|en` (nav, UI text)  ✅ (title, §1, §10)
   ├──► src/data/projects.ts           project page UI text `tr|en` ✅ (labels only, no facts)
-  ├──► src/content/projects/*.md      Turkish project pages     ✅ (§6 "Lockbox")
+  ├──► src/content/projects/*.md      Turkish project pages     ✅ (§6 "Lockbox", "Hoppala")
   └──► src/content/projects/en/*.md   English project pages     ✅ (translation, same slug)
 ```
 
@@ -194,12 +194,26 @@ body — `ProjectDocLayout` renders "İletişim" / "Contact" from `src/data/proj
 | `lockbox-mobile/privacy` · `en/lockbox-mobile/privacy` | `/projeler/lockbox-mobile/gizlilik/` · `/en/projects/lockbox-mobile/privacy/` | lockbox-mobile `docs/yayin/ortak-hazirlik.md` §2 (claims checked against the app 2026-10-17: Settings → Security → Reset vault; clipboard clearing can be turned off; the only outgoing link is the policy itself) + "This website" section (GitHub Pages, no cookies, theme in `localStorage`) | ✅ 2026-10-17 |
 | `lockbox-mobile/support` · `en/lockbox-mobile/support` | `/projeler/lockbox-mobile/destek/` · `/en/projects/lockbox-mobile/support/` | `ortak-hazirlik.md` §3 (FAQ) | ✅ 2026-10-17 |
 | `lockbox-mobile/security` · `en/lockbox-mobile/security` | `/projeler/lockbox-mobile/guvenlik/` · `/en/projects/lockbox-mobile/security/` | `ortak-hazirlik.md` §4 + lockbox-mobile `SECURITY.md` | ✅ 2026-10-17 |
+| `hoppala/privacy` · `en/hoppala/privacy` | `/projeler/hoppala/gizlilik/` · `/en/projects/hoppala/privacy/` | tuzak-root `docs/yayina-hazirlik.md` §1.4 (retention), §5 (data inventory), §7.4; `docs/reklam-gelir-modeli.md` §1.3, §1.5 (AdMob consent, NPA for TR, rating T); tuzak-quiz `src/telemetry/runtime.ts`, `src/services/api.ts`, `src/app/settings.tsx`, `src/i18n/strings.ts` (menu names) — checked against the code 2026-11-01. Anchors `#veri-silme` / `#data-deletion` (Play data-deletion URL) | ✅ 2026-11-01 |
+| `hoppala/support` · `en/hoppala/support` | `/projeler/hoppala/destek/` · `/en/projects/hoppala/support/` | `docs/pazarlama/urun-ozeti.md` §2–§5 + settings screen (FAQ) | ✅ 2026-11-01 |
+| `hoppala/security` · `en/hoppala/security` | `/projeler/hoppala/guvenlik/` · `/en/projects/hoppala/security/` | `yayina-hazirlik.md` §1.5, §5 + app transport/credential code; same 7/90-day process as Lockbox | ✅ 2026-11-01 |
 
 These URLs are entered in App Store Connect / Play Console and hard-coded in the app
-(`PRIVACY_POLICY_URLS`) — never rename the slug or the segments. The documents name the
+(Lockbox `PRIVACY_POLICY_URLS`, Hoppala `tuzak-quiz/src/config/links.ts`) — never rename the slug
+or the segments. The documents name the
 algorithms (XChaCha20-Poly1305, Argon2id) like the store listing does; that is wider than the
 project page's "plan-level security" limit and is limited to these documents (lead, ADR-014).
 A change in the app's data handling updates these pages first, then the store privacy answers.
+
+Hoppala documents (lead, 2026-11-01): the privacy policy covers **every** feature of the app —
+content download (always), installation ID, answer analytics, Challenge and Google AdMob — each
+"when enabled and used", because production 1.0 ships with analytics, Challenge and ads turned off
+(`tuzak-quiz/eas.json`) while the AdMob SDK is in the binary and the AdMob consent message already
+links to the policy. Retention periods follow decision K10 (2 years for access/error logs; legal
+review pending in tuzak-root). Challenge wording assumes server-generated nicknames (K9), which are
+**not implemented yet** in the backend — K9 must land before Challenge is enabled, otherwise the
+policy and the security page must change first. Hosting is named as Microsoft Azure; no server
+IP, region or admin host is published.
 
 ## Project Entries
 
@@ -207,6 +221,8 @@ A change in the app's data handling updates these pages first, then the store pr
 |---|---|---|---|---|---|---|---|
 | `lockbox-mobile` | Lockbox — Çevrimdışı Parola Kasası | `product` | `active` ("Aktif geliştirmede"; body: geliştirme aşamasında, mağaza yayını hazırlanıyor) | ✅ (`order: 1`) | — | `ulascanerturk.md` §6 "Lockbox"; `lockbox-mobile/docs/00-genel-bakis.md` + repo state (iOS build on App Store Connect/TestFlight 2026-10-16, not published) | ✅ 2026-10-17 |
 | `en/lockbox-mobile` | Lockbox — Offline Password Vault | `product` | `active` ("In active development") | ✅ (`order: 1`) | — | translation of `lockbox-mobile.md` (sections Problem · Solution · Technologies · My Role · Status) | ✅ 2026-10-17 (Faz 6) |
+| `hoppala` | Hoppala — Tuzak Quiz Oyunu | `product` | `active` (body: geliştirme aşamasında, mağaza yayını hazırlanıyor) | ✅ (`order: 2`) | — | `ulascanerturk.md` §6 "Hoppala"; tuzak-root `docs/pazarlama/urun-ozeti.md`, `docs/yayina-hazirlik.md` (public parts) | ✅ 2026-11-01 |
+| `en/hoppala` | Hoppala — Trick Quiz Game | `product` | `active` | ✅ (`order: 2`) | — | translation of `hoppala.md` | ✅ 2026-11-01 |
 
 Lockbox decisions (lead, 2026-10-17): title uses the store name "Lockbox" (store: "Lockbox -
 Password Vault"), slug stays `lockbox-mobile`; status wording "geliştirme aşamasında; App Store
@@ -217,6 +233,12 @@ no `links` (not published, no public repo); no cover.
 Left out on purpose: performance/coverage targets from the app docs, macOS version and
 migration, TestFlight/console details. When the app is published: add store `links`, update the
 "Durum" section, `summary` and `ulascanerturk.md` §6 together.
+
+Hoppala decisions (lead, 2026-11-01): slug `hoppala` (fixed by the app's links); cover = the
+design-system share image (`src/assets/projects/hoppala.png`, English `hoppala-en.png` with the
+English slogan); 1v1 Challenge and leaderboard mentioned as "ready, turned off in the first
+release"; AdMob named as the revenue model; no store `links` until published. When the app is
+published: add store `links`, update "Durum", `summary` and `ulascanerturk.md` §6 together.
 
 Out of scope (S1, 2026-10-17): Shifter Pro / Shifter Lite pages (covered in profile
 experience), "Diğer çalışma alanları" page (short list on profile), LockBox macOS.
@@ -230,6 +252,7 @@ gaps; no store link unless published; no repository link (no public remote).
 | File | Used by | Metadata stripped | Rights | alt |
 |---|---|---|---|---|
 | `public/og/default.png`, `public/apple-touch-icon.png` | share image, touch icon (see Share Images) | ✅ generated with `-strip`; chunks checked | own work (monogram + name) | `site.ogImage.alt` / decorative icon |
+| `src/assets/projects/hoppala.png`, `hoppala-en.png` (1200×630) | Hoppala cover + `og:image` (TR / EN) | ✅ `magick -strip`; chunks IHDR/IDAT/IEND only | own work (tuzak-root `design-system/web_assets/L2 og image`) | `coverAlt` in each entry (logo + slogan) |
 
 ## Never Published
 
@@ -237,8 +260,8 @@ gaps; no store link unless published; no repository link (no public remote).
   private e-mail and phone, address detail, full birth date, family, political ties,
   health, finance, ID/account numbers, server IP/SSH details, credentials, client
   contracts, commercial/technical information without sharing permission.
-- One approved exception: the public Lockbox support address on the project documents only
-  (ADR-014; `references/methodology.md` → Documented Exceptions).
+- One approved exception: the public app-support address on the Lockbox and Hoppala project
+  documents only (ADR-014 + addendum; `references/methodology.md` → Documented Exceptions).
 
 ## How to Add a Project ✅ (plans/fazlar/faz-3-proje-sayfalari.md §2 task 9)
 

@@ -1,6 +1,6 @@
 # references/site_map.md — Site Map
 
-> Last updated: 2026-10-17 (ADR-014 project documents — content/projects/lockbox-legal-pages)
+> Last updated: 2026-11-01 (Hoppala project page + documents, app-ads.txt — content/projects/hoppala-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -35,13 +35,14 @@ hreflang alternates, per-locale data, `HomeLayout` / `ProjectListLayout` and `sr
 | `/en/` | `src/pages/en/index.astro` (`locale = 'en'`) | HomeLayout | same with `'en'` | ✅ English profile page; title "Software Developer · Ulaşcan Ertürk" (`profilePage.title`, unique titles — fix cycle 1, lead decision) |
 | `/projeler/` | `src/pages/projeler/index.astro` | ProjectListLayout | `loadProjects('tr')` → `projectSummaries` | ✅ |
 | `/en/projects/` | `src/pages/en/projects/index.astro` | ProjectListLayout | `loadProjects('en')` | ✅ |
-| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` = `projectPaths('tr')`; `render(project.entry)`; other props from `projectLayoutProps` (meta via `formatPeriod` + `statusLabels`, `projectJsonLd`, `ogImage` from the cover via `getImage` 1200 px JPEG or the locale default); slug: `lockbox-mobile` | ✅ |
+| `/projeler/{slug}/` | `src/pages/projeler/[slug].astro` | ProjectLayout | `getStaticPaths` = `projectPaths('tr')`; `render(project.entry)`; other props from `projectLayoutProps` (meta via `formatPeriod` + `statusLabels`, `projectJsonLd`, `ogImage` from the cover via `getImage` 1200 px JPEG or the locale default); slugs: `lockbox-mobile`, `hoppala` (with cover) | ✅ |
 | `/en/projects/{slug}/` | `src/pages/en/projects/[slug].astro` | ProjectLayout | same with `'en'` (entries in `src/content/projects/en/`) | ✅ |
-| `/projeler/{slug}/{gizlilik\|destek\|guvenlik}/` | `src/pages/projeler/[slug]/[doc].astro` | ProjectDocLayout | `getStaticPaths` = `projectDocPaths('tr')` (`src/pages/_shared/projectDocs.ts`); `render(entry)`; props from `projectDocLayoutProps`; Lockbox: `gizlilik`, `destek`, `guvenlik` (ADR-014) | ✅ store URLs — never rename |
+| `/projeler/{slug}/{gizlilik\|destek\|guvenlik}/` | `src/pages/projeler/[slug]/[doc].astro` | ProjectDocLayout | `getStaticPaths` = `projectDocPaths('tr')` (`src/pages/_shared/projectDocs.ts`); `render(entry)`; props from `projectDocLayoutProps`; Lockbox and Hoppala: `gizlilik`, `destek`, `guvenlik` (ADR-014 + addendum) | ✅ store URLs — never rename |
 | `/en/projects/{slug}/{privacy\|support\|security}/` | `src/pages/en/projects/[slug]/[doc].astro` | ProjectDocLayout | same with `'en'` (entries in `src/content/project-docs/en/`) | ✅ store URLs — never rename |
 | `/404.html` | `src/pages/404.astro` | BaseLayout (`locale="tr"`, `noindex`, no canonical, no hreflang) | `siteText.tr.notFound` + `siteText.en.notFound` | ✅ h1, message, "Ana sayfaya dön", "Projelere göz at"; then a `<div lang="en">` with "Page not found." + "Go to the English home page" (`/en/`) — GitHub Pages serves one 404 for every locale |
-| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 12 URLs, each with `xhtml:link` alternates for `tr` and `en` |
+| `/sitemap-index.xml` → `/sitemap-0.xml` | `@astrojs/sitemap` | — | all pages except 404/drafts | ✅ 20 URLs, each with `xhtml:link` alternates for `tr` and `en` |
 | `/robots.txt` | `public/robots.txt` | — | static | ✅ `User-agent: *` `Allow: /` (AI crawlers included — lead decision) + `Sitemap:` line |
+| `/app-ads.txt` | `public/app-ads.txt` | — | static | ✅ AdMob publisher line for Hoppala (`google.com, pub-5277643659405884, DIRECT, f08c47fec0942fa0`); AdMob looks for it at the root of the developer website (ADR-014 addendum) |
 
 Home page anchors ✅ (order on the page; ids from `profilePage.*.id`): `#hakkimda`,
 `#yetkinlikler`, `#deneyim`, `#projeler`, `#egitim`, `#girisimcilik`, `#odak-alanlari`, `#baglantilar`;
@@ -228,13 +229,14 @@ The script is a static string (no interpolation) so a CSP hash stays valid (Faz 
 | `public/og/default.png` ✅ | 1200×630 share image (source `scripts/images/og-default.html`, `npm run images`) | Faz 4 |
 | `public/og/default-en.png` ✅ | 1200×630 English share image ("Software Developer · Technology Entrepreneur"; source `scripts/images/og-default-en.html`) | Faz 6 |
 | `public/robots.txt` ✅ | allow all (AI crawlers included — lead decision 2026-10-17) + `Sitemap:` | Faz 4 |
+| `public/app-ads.txt` ✅ | AdMob authorized-seller line (Hoppala); must stay at the site root | 2026-11-01 |
 
 ## Config
 
 | File | Key settings |
 |---|---|
 | `astro.config.mjs` ✅ | `site`, `trailingSlash: 'always'`, `build.format: 'directory'`; no `base`; `i18n` (Faz 6); `integrations: [sitemap({ filter, serialize })]`; `markdown.syntaxHighlight: false`; `security.csp.directives` (ADR-011); imports `./src/lib/i18n.ts` (works — config is loaded through Vite) |
-| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 9 URLs (TR + EN pages incl. the Lockbox privacy pages + 404), 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
+| `lighthouserc.json` ✅ | `staticDistDir: ./dist`, 13 URLs (TR + EN pages incl. the Lockbox and Hoppala project/privacy pages + 404), 3 runs, `median-run` assertions ≥ 0.95 for performance/accessibility/best-practices/seo (404: no SEO), upload `filesystem` → `.lighthouseci/` (ADR-013) |
 | `tsconfig.json` ✅ | extends `astro/tsconfigs/strict`; `noUncheckedIndexedAccess`; `paths` `@/*` → `./src/*`; include `.astro/types.d.ts`, `**/*`; exclude `dist` |
 | `eslint.config.js` ✅ | `defineConfig` (eslint/config): `@eslint/js` recommended, `typescript-eslint` recommended, astro `flat/recommended` + `flat/jsx-a11y-recommended` (jsx-a11y-x); browser globals; node globals for `scripts/**` and `*.config.*`; `no-console: error` except `scripts/**`; ignores dist, .astro, node_modules, coverage, .lighthouseci |
 | `.prettierrc.json` ✅ | `singleQuote`, `printWidth: 100`, `prettier-plugin-astro` |

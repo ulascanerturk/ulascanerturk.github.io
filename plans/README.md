@@ -103,7 +103,7 @@ Tüm sorular 2026-10-17'de lead tarafından yanıtlandı. Ayrıntı:
 
 | # | Soru | Karar | Etkilenen faz |
 |---|---|---|---|
-| S1 | Hangi projeler proje sayfası olarak yayınlanacak? | **Yalnızca LockBox Mobile** (macOS sürümü kapsam dışı). Shifter Pro/Lite proje sayfası olmaz; profilde "Deneyim" altında anlatılır | Faz 2, Faz 3 |
+| S1 | Hangi projeler proje sayfası olarak yayınlanacak? | **LockBox Mobile** (macOS sürümü kapsam dışı); **Hoppala** 2026-11-01 eklendi (ADR-014 eki). Shifter Pro/Lite proje sayfası olmaz; profilde "Deneyim" altında anlatılır | Faz 2, Faz 3 |
 | S2 | GitHub dışında iletişim kanalı? | **GitHub + LinkedIn.** E-posta/telefon yok. LinkedIn URL'si Faz 2'de lead tarafından verilecek (⏳ bekleniyor) | Faz 2 |
 | S3 | Profil görseli? | **Monogram (UE) SVG**; fotoğraf yok | Faz 1 |
 | S4 | İngilizce sürüm? | **Evet, v1 yayınından sonra** (Faz 6, `/en/`) | Faz 6 |

@@ -244,3 +244,13 @@
   listesidir; uygulamanın veri davranışı değişirse önce bu sayfalar, sonra mağaza beyanları
   güncellenir. Herkese açık e-posta adresi spam alabilir; adres değişirse yalnızca
   `projectContacts` ve mağaza konsolları güncellenir.
+- **Ek (2026-11-01, lead — "hoppala-pages" planı onayı):** Kalıp Hoppala'ya (`hoppala`) aynen
+  uygulandı: proje sayfası + `/projeler/hoppala/{gizlilik,destek,guvenlik}/` ↔
+  `/en/projects/hoppala/{privacy,support,security}/` (URL'ler uygulamanın `src/config/links.ts`
+  dosyasına yazılı). S2 istisnası aynı adresle (`ulascanerturk@gmail.com`) bu altı sayfayı da
+  kapsar. Metnin kaynağı `tuzak-root` deposundaki `docs/yayina-hazirlik.md` §1.4/§5/§7.4,
+  `docs/reklam-gelir-modeli.md` ve uygulama kodudur; gizlilik politikası henüz her sürümde açık
+  olmayan özellikleri (cevap analizi, Meydan Okuma, AdMob) "açık olduğunda" koşuluyla anlatır.
+  Ayrıca `public/app-ads.txt` (AdMob yayıncı satırı) eklendi: AdMob bu dosyayı mağaza kaydındaki
+  geliştirici sitesinin kökünde arar. Statik metin dosyasıdır; çalışma anı betiği, çerez veya
+  izleme getirmez (Kural 3 etkilenmez).

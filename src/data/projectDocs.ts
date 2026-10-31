@@ -1,7 +1,8 @@
 // UI text and contact details for the project documents (ADR-014): privacy policy, support and
 // security pages that the App Store and Google Play listings link to. The documents themselves
 // live in src/content/project-docs/. Wording and the public support address approved by the
-// lead on 2026-10-17 (exception to S2 for these pages only).
+// lead on 2026-10-17 (exception to S2 for these pages only); Hoppala added on 2026-11-01 with the
+// same address.
 import type { Locale, ProjectDocKey } from '@/lib/i18n';
 
 export interface ProjectContact {
@@ -27,6 +28,7 @@ export interface ProjectDocsText {
 /** Contact per project slug; a project with documents must have an entry. */
 export const projectContacts: Record<string, ProjectContact> = {
   'lockbox-mobile': { developer: 'Ulaşcan Ertürk', email: 'ulascanerturk@gmail.com' },
+  hoppala: { developer: 'Ulaşcan Ertürk', email: 'ulascanerturk@gmail.com' },
 };
 
 export const projectDocsText: Record<Locale, ProjectDocsText> = {

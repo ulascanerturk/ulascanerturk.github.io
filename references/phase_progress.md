@@ -1,6 +1,6 @@
 # references/phase_progress.md — Phase Progress
 
-> Last updated: 2026-10-17 (content — Lockbox store documents, ADR-014, content/projects/lockbox-legal-pages)
+> Last updated: 2026-11-01 (content — Hoppala project page and store documents, ADR-014 addendum, content/projects/hoppala-pages)
 > Source of truth for design: plans/. Content source: ulascanerturk.md. This file maps the CURRENT state.
 > Legend: [PLANNED — plan §] not implemented yet · [REVIEW NEEDED] unverified · [PLAN DRIFT] code ≠ plans
 
@@ -20,7 +20,7 @@ Overall: tasks 64/70 (+1 optional skipped; Faz 2 task 5 done in Faz 3 task 8; Fa
 
 | # | Question | Answer | Date | Decided by |
 |---|---|---|---|---|
-| S1 | Which projects get pages? | LockBox Mobile only (no macOS); Shifter Pro/Lite in profile experience. Faz 3: page title "Lockbox" (store name), status "geliştirme aşamasında", security at plan level | 2026-10-17 | lead |
+| S1 | Which projects get pages? | LockBox Mobile (no macOS); Shifter Pro/Lite in profile experience. Faz 3: page title "Lockbox" (store name), status "geliştirme aşamasında", security at plan level. **Hoppala** added 2026-11-01 (`hoppala`, ADR-014 addendum) | 2026-10-17, 2026-11-01 | lead |
 | S2 | Contact channels besides GitHub? | GitHub + LinkedIn; no e-mail/phone — LinkedIn URL in `ulascanerturk.md` §10 (commit 578d8e0), used in header/footer | 2026-10-17 | lead |
 | S3 | Profile image? | Monogram (UE) SVG; no photo | 2026-10-17 | lead |
 | S4 | English version? | Yes, after v1 (Faz 6, `/en/`) | 2026-10-17 | lead |
@@ -34,8 +34,19 @@ support and security pages in TR + EN below the project page (`/projeler/lockbox
 `/en/projects/lockbox-mobile/{privacy,support,security}/`) for the App Store / Google Play listings; S2 exception —
 public support address on these pages only (lead). Gate: check 0, lint 0, Vitest 104, build 13 pages,
 `check:dist` 0 errors. Not a phase task.
-Pending lead inputs: VoiceOver check (Faz 4 task 9); Lockbox store links once the app is published
-(content update, not a phase task).
+Content update (2026-11-01, ADR-014 addendum, `content/projects/hoppala-pages`): Hoppala project page
+(`/projeler/hoppala/`, `/en/projects/hoppala/`, cover from the app's design system) and privacy, support and
+security pages in TR + EN (`/projeler/hoppala/{gizlilik,destek,guvenlik}/`, `/en/projects/hoppala/{privacy,support,security}/`,
+URLs fixed by the app's `src/config/links.ts`); same public support address (S2 exception); `public/app-ads.txt`
+for AdMob; `ulascanerturk.md` §6 "Hoppala" added. Lead decisions: e-mail `ulascanerturk@gmail.com`, policy covers
+all features conditionally, app-ads.txt now. Gate: check 0, lint 0, Prettier clean, Vitest 104, build 21 pages,
+`check:dist` 0 errors (max JS 478 B), invariant scan only the documented e-mail exception, LHCI (13 URLs) all
+assertions passed — Hoppala pages 100/100/100/100. Not a phase task.
+Pending lead inputs: VoiceOver check (Faz 4 task 9); Lockbox and Hoppala store links once the apps are published
+(content update, not a phase task); Hoppala: legal review of retention (K10), TR non-personalized ads and the
+13–15 consent question (tuzak-root decisions); K9 (server-generated nicknames) must be implemented before Challenge
+is enabled, otherwise the privacy and security pages change first; the tuzak-root review note (`magaza-yayin-hazirligi.md`
+§8) says answer analytics can be enabled in Settings although production sets `EXPO_PUBLIC_TELEMETRY=false`.
 
 ## Faz 0 — Proje Kurulumu   (plans/fazlar/faz-0-proje-kurulumu.md)
 Status: closed (2026-10-17)
